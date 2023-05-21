@@ -1,8 +1,8 @@
 const outletController = require('../controllers/outletController');
 const express          = require('express');
-const outlet = require('../models/outlet');
+const checkAuth        = require('../middlewares/check-auth');
 const router           = express.Router();
 
-router.post('/addOutlet', outletController.addOutlet);
+router.post('/addOutlet', checkAuth, outletController.addOutlet);
 
 module.exports = router;

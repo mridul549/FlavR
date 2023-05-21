@@ -1,3 +1,5 @@
+// TODO- Change the secret key
+
 const mongoose = require('mongoose');
 const Owner    = require('../models/owner');
 const bcrypt   = require('bcrypt');
