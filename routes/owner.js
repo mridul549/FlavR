@@ -1,7 +1,8 @@
-const express = require('express');
-const router = express.Router();
-const productController = require('../controllers/productController');
+const express         = require('express');
+const router          = express.Router();
+const ownerController = require('../controllers/ownerController');
 
-router.get('/', productController.getAllProducts);
+router.post('/signup', ownerController.signup);
+router.post('/login', ownerController.login);
 
 module.exports = router;
