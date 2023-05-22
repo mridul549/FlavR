@@ -3,9 +3,10 @@ const Product               = require('../models/product');
 const Owner                 = require('../models/owner');
 const Outlet                = require('../models/outlet');
 
-module.exports.getAllProducts = (req,res) => {
-    Product.find()
-    .select('_id productName description price outlet productImage')
+module.exports.getAllProductsOfOutlet = (req,res) => {
+    Product.find({ outlet: req.body.outletid })
+    .select('_id category productName description price outlet productImage')
+    .populate('outlet', '_id outletName address owner')
     .exec()
     .then(result => {
         const response = {
@@ -13,6 +14,7 @@ module.exports.getAllProducts = (req,res) => {
             products: result.map(doc => {
                 return {
                     id: doc._id,
+                    category: doc.category,
                     name: doc.productName,
                     description: doc.description,
                     price: doc.price,
