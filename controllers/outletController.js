@@ -61,4 +61,3 @@ module.exports.addOutlet = (req,res) => {
     })
 }
 
-// new ObjectId("646a62620f0d7d27479c5de4")

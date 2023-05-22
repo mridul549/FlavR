@@ -71,8 +71,7 @@ module.exports.login = (req,res) => {
                 const token = jwt.sign({
                     email: user[0].email,
                     ownerid: user[0]._id,
-                    ownername: user[0].ownerName,
-                    outlets: user[0].outlets
+                    ownername: user[0].ownerName
                 }, "nescafeAppSecretKey", {
                     expiresIn: "30 days"
                 })
