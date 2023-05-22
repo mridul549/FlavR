@@ -23,6 +23,10 @@ const ownerSchema = mongoose.Schema({
     orders: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Order'
+    }],
+    products: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product'
     }]
 })
 

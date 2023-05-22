@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 
 const productSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
+    category: {
+        type: String,
+        required: true
+    },
     productName: {
         type: String,
         required: true
@@ -11,7 +15,11 @@ const productSchema = mongoose.Schema({
         required: true,
     },
     price: {
-        type: String,
+        type: Number,
+        required: true
+    },
+    owner: {
+        type: mongoose.Schema.Types.ObjectId,
         required: true
     },
     outlet: {
