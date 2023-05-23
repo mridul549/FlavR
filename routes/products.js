@@ -6,9 +6,9 @@ const checkAuth = require('../middlewares/check-auth');
 router.get('/getProductsOfOutlet', productController.getProductsOfOutlet);
 router.get('/getProductsByCategory', productController.getProductsByCategory);
 router.get('/getSingleProduct', productController.getSingleProduct);
-router.get('/getAllCategories', productController.getAllCategories)
+router.get('/getAllCategories', productController.getAllCategories);
 
-router.post('/addProduct', checkAuth, productController.addProduct)
+router.post('/addProduct', checkAuth, productController.addProduct);
 
-
+router.patch('/updateProduct/:productid', checkAuth, productController.updateProduct);
 module.exports = router;

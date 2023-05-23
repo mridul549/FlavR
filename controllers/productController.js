@@ -186,11 +186,13 @@ module.exports.getAllCategories = (req,res) => {
 }
 
 module.exports.updateProduct = (req,res) => {
-    const productid = req.body.productid
-    const ownerid = req.body.ownerid
+    const productid = req.params.productid
+    // not using the ownerid here, but accessing just to make sure
+    // that only an owner can access this route and no regular user
+    const ownerid = req.userData.ownerid
 
     const updateOps = {};
-    for(const ops of req.body) {
+    for(const ops of req.body.updates) {
         updateOps[ops.propName] = ops.value
     }
     Product.updateOne({ _id: productid }, {
