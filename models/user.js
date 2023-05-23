@@ -33,6 +33,8 @@ const userSchema = mongoose.Schema({
     userProfilePic: {
         type: String
     }
+}, {
+    timestamps: true
 })
 
 module.exports = mongoose.model('User', userSchema);

@@ -31,6 +31,8 @@ const ownerSchema = mongoose.Schema({
     ownerProfilePic: {
         type: String
     }
+}, {
+    timestamps: true
 })
 
 module.exports = mongoose.model('Owner', ownerSchema);

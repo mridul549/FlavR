@@ -22,6 +22,8 @@ const outletSchema = mongoose.Schema({
     outletImage: {
         type: String
     }
+}, {
+    timestamps: true
 })
 
 module.exports = mongoose.model('Outlet', outletSchema);
