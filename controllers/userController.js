@@ -194,29 +194,52 @@ module.exports.getCartSize = (req,res) => {
 }
 
 // update a cart element quantity
+// if quantity is 0 it is removed
+// else it is updated to the obtained value
 module.exports.updateQuantity = (req,res) => {
     const quantity = req.body.quantity
     const userid = req.userData.userid
     const cartElementID = req.body.cartEleid
 
-    User.updateOne({ _id: userid, "cart._id": cartElementID }, {
-        $set: {
-            "cart.$.quantity": quantity
-        }
-    })
-    .exec()
-    .then(result => {
-        return res.status(201).json({
-            message: "Updated successfully",
-            ACK: result
+    if(quantity==0) {
+        User.updateOne({ _id: userid, "cart._id": cartElementID }, {
+            $pull: {
+                "cart": {
+                    _id: cartElementID
+                }
+            }
         })
-    })
-    .catch(err => {
-        console.log(err);
-        res.status(500).json({
-            error: err
+        .exec()
+        .then(result => {
+            return res.status(201).json({
+                message: "Product removed from cart"
+            })
         })
-    })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            })
+        })
+    } else {
+        User.updateOne({ _id: userid, "cart._id": cartElementID }, {
+            $set: {
+                "cart.$.quantity": quantity
+            }
+        })
+        .exec()
+        .then(result => {
+            return res.status(201).json({
+                message: "Quantity Updated successfully"
+            })
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            })
+        })
+    }
 }
 
 module.exports.clearCart = (req,res) => {
