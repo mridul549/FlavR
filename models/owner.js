@@ -27,7 +27,10 @@ const ownerSchema = mongoose.Schema({
     products: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
-    }]
+    }],
+    ownerProfilePic: {
+        type: String
+    }
 })
 
 module.exports = mongoose.model('Owner', ownerSchema);

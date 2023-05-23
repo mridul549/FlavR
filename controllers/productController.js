@@ -3,7 +3,7 @@ const Product               = require('../models/product');
 const Owner                 = require('../models/owner');
 const Outlet                = require('../models/outlet');
 
-module.exports.getAllProductsOfOutlet = (req,res) => {
+module.exports.getProductsOfOutlet = (req,res) => {
     Product.find({ outlet: req.body.outletid })
     .select('_id category productName description price outlet productImage')
     .populate('outlet', '_id outletName address owner')

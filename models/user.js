@@ -17,13 +17,22 @@ const userSchema = mongoose.Schema({
         required: true
     },
     cart: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product'
+        product: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Product'
+        },
+        quantity: {
+            type: Number,
+            default: 1
+        }
     }],
     orders: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Order'
-    }]
+    }],
+    userProfilePic: {
+        type: String
+    }
 })
 
 module.exports = mongoose.model('User', userSchema);

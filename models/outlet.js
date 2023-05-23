@@ -18,7 +18,10 @@ const outletSchema = mongoose.Schema({
     menu: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
-    }]
+    }],
+    outletImage: {
+        type: String
+    }
 })
 
 module.exports = mongoose.model('Outlet', outletSchema);
