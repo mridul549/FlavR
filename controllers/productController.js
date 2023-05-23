@@ -184,3 +184,28 @@ module.exports.getAllCategories = (req,res) => {
         })
     })
 }
+
+module.exports.updateProduct = (req,res) => {
+    const productid = req.body.productid
+    const ownerid = req.body.ownerid
+
+    const updateOps = {};
+    for(const ops of req.body) {
+        updateOps[ops.propName] = ops.value
+    }
+    Product.updateOne({ _id: productid }, {
+        $set: updateOps
+    })
+    .exec()
+    .then(result => {
+        return res.status(201).json({
+            result
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({
+            error: err
+        })
+    })
+}

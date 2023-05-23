@@ -10,4 +10,5 @@ router.get('/getAllCategories', productController.getAllCategories)
 
 router.post('/addProduct', checkAuth, productController.addProduct)
 
+
 module.exports = router;
