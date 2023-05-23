@@ -1,4 +1,4 @@
-const { default: mongoose } = require('mongoose');
+const { default: mongoose, model } = require('mongoose');
 const Product               = require('../models/product');
 const Owner                 = require('../models/owner');
 const Outlet                = require('../models/outlet');
@@ -98,3 +98,89 @@ module.exports.addProduct = (req,res) => {
     })
 }
 
+// To avoid case sensitive search we use the $regex operator
+module.exports.getProductsByCategory = (req,res) => {
+    const category = req.body.categoryName
+    const outletid = req.body.outletid
+
+    Product.find({
+        $and: [
+            { 
+                category: { 
+                    $regex: new RegExp(category, 'i') 
+                } 
+            },
+            { outlet: outletid }
+        ]
+    })
+    .exec()
+    .then(result => {
+        return res.status(201).json({
+            products: result
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.getSingleProduct = (req,res) => {
+    const productID = req.body.productid
+
+    Product.find({ _id: productID })
+    .exec()
+    .then(result => {
+        return res.status(201).json({
+            product: result
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({
+            error: err
+        })
+    })
+}
+
+// Search all the products corresponding to an outlet
+// keeping a count of a category in a map
+// converting the map to an array of objects and returning it
+module.exports.getAllCategories = (req,res) => {
+    const outletid = req.body.outletid
+
+    Product.find({ outlet: outletid })
+    .select('category')
+    .exec()
+    .then(result => {
+        var categoryMap = new Map()
+        for (let i = 0; i < result.length; i++) {
+            const element = result[i];
+            if(categoryMap.has(element.category)) {
+                categoryMap.set(element.category, categoryMap.get(element.category)+1);
+            } else {
+                categoryMap.set(element.category, 1);
+            }
+        }
+
+        var categoryArray = []
+        categoryMap.forEach((value,key) => {
+            categoryArray.push({
+                category: key,
+                count: value
+            })
+        })
+
+        return res.status(201).json({
+            categories: categoryArray
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({
+            error: err
+        })
+    })
+}
