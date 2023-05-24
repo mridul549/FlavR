@@ -24,10 +24,18 @@ const ownerSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Order'
     }],
-    products: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product'
-    }],
+    products: [
+        {
+            product: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Product'
+            },
+            outlet: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Outlet'
+            }
+        }
+    ],
     ownerProfilePic: {
         type: String
     }

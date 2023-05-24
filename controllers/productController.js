@@ -75,7 +75,10 @@ module.exports.addProduct = (req,res) => {
     .then(result => {
         return Owner.updateOne({_id: req.userData.ownerid}, {
             $push: {
-                products: result._id
+                products: {
+                    product: result._id,
+                    outlet: req.body.outletid
+                }
             }
         })
         .exec()

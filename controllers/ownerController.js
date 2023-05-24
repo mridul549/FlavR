@@ -140,3 +140,7 @@ module.exports.getOutlets = (req,res) => {
         })
     })
 }
+
+module.exports.updateOwner = (req,res) => {
+    
+}
