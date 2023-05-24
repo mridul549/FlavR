@@ -176,7 +176,7 @@ module.exports.getAllCategories = (req,res) => {
     .select('category')
     .exec()
     .then(result => {
-        if(result) {
+        if(result.length>0) {
             var categoryMap = new Map()
             for (let i = 0; i < result.length; i++) {
                 const element = result[i];
