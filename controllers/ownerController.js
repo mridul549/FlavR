@@ -73,7 +73,7 @@ module.exports.login = (req,res) => {
                     ownerid: user[0]._id,
                     ownername: user[0].ownerName
                 }, "nescafeAppSecretKey", {
-                    expiresIn: "30 days"
+                    expiresIn: "1 day"
                 })
                 return res.status(200).json({
                     message: "Auth successful",
@@ -83,6 +83,48 @@ module.exports.login = (req,res) => {
             return res.status(401).json({
                 message: "Auth failed"
             })
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.addOutlet = (req,res) => {
+    const ownerid = req.userData.ownerid
+    const outletid = req.body.outletid
+
+    Owner.updateOne({ _id: ownerid }, {
+        $push: {
+            outlets: outletid
+        }
+    })
+    .exec()
+    .then(result => {
+        return res.status(201).json({
+            message: "Outlet added successfully"
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.getOutlets = (req,res) => {
+    const ownerid = req.userData.ownerid
+
+    Owner.find({ _id: ownerid })
+    .populate('outlets')
+    .exec()
+    .then(result => {
+        return res.status(201).json({
+            outlets: result[0].outlets
         })
     })
     .catch(err => {
