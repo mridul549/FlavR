@@ -123,9 +123,15 @@ module.exports.getOutlets = (req,res) => {
     .populate('outlets')
     .exec()
     .then(result => {
-        return res.status(201).json({
-            outlets: result[0].outlets
-        })
+        if(result){
+            return res.status(201).json({
+                outlets: result[0].outlets
+            })
+        } else {
+            return res.status(404).json({
+                error: "No outlets found"
+            })
+        }
     })
     .catch(err => {
         console.log(err);

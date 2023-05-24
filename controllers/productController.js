@@ -9,20 +9,26 @@ module.exports.getProductsOfOutlet = (req,res) => {
     .populate('outlet', '_id outletName address owner')
     .exec()
     .then(result => {
-        const response = {
-            count: result.length,
-            products: result.map(doc => {
-                return {
-                    id: doc._id,
-                    category: doc.category,
-                    name: doc.productName,
-                    description: doc.description,
-                    price: doc.price,
-                    outlet: doc.outlet
-                }
+        if(result) {
+            const response = {
+                count: result.length,
+                products: result.map(doc => {
+                    return {
+                        id: doc._id,
+                        category: doc.category,
+                        name: doc.productName,
+                        description: doc.description,
+                        price: doc.price,
+                        outlet: doc.outlet
+                    }
+                })
+            }
+            res.status(201).json(response);
+        } else {
+            return res.status(404).json({
+                error: "No products found"
             })
         }
-        res.status(201).json(response);
     })
     .catch(err => {
         console.log(err);
@@ -115,9 +121,15 @@ module.exports.getProductsByCategory = (req,res) => {
     })
     .exec()
     .then(result => {
-        return res.status(201).json({
-            products: result
-        })
+        if(result) {
+            return res.status(201).json({
+                products: result
+            })
+        } else {
+            return res.status(404).json({
+                error: "No categories found"
+            })
+        }
     })
     .catch(err => {
         console.log(err);
@@ -133,9 +145,15 @@ module.exports.getSingleProduct = (req,res) => {
     Product.find({ _id: productID })
     .exec()
     .then(result => {
-        return res.status(201).json({
-            product: result
-        })
+        if(result) {
+            return res.status(201).json({
+                product: result
+            })
+        } else {
+            return res.status(201).json({
+                error: "No product found"
+            })
+        }
     })
     .catch(err => {
         console.log(err);
@@ -155,27 +173,33 @@ module.exports.getAllCategories = (req,res) => {
     .select('category')
     .exec()
     .then(result => {
-        var categoryMap = new Map()
-        for (let i = 0; i < result.length; i++) {
-            const element = result[i];
-            if(categoryMap.has(element.category)) {
-                categoryMap.set(element.category, categoryMap.get(element.category)+1);
-            } else {
-                categoryMap.set(element.category, 1);
+        if(result) {
+            var categoryMap = new Map()
+            for (let i = 0; i < result.length; i++) {
+                const element = result[i];
+                if(categoryMap.has(element.category)) {
+                    categoryMap.set(element.category, categoryMap.get(element.category)+1);
+                } else {
+                    categoryMap.set(element.category, 1);
+                }
             }
-        }
-
-        var categoryArray = []
-        categoryMap.forEach((value,key) => {
-            categoryArray.push({
-                category: key,
-                count: value
+    
+            var categoryArray = []
+            categoryMap.forEach((value,key) => {
+                categoryArray.push({
+                    category: key,
+                    count: value
+                })
             })
-        })
-
-        return res.status(201).json({
-            categories: categoryArray
-        })
+    
+            return res.status(201).json({
+                categories: categoryArray
+            })
+        } else {
+            return res.status(404).json({
+                error: "No categories found"
+            })
+        }
     })
     .catch(err => {
         console.log(err);

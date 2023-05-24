@@ -60,3 +60,46 @@ module.exports.addOutlet = (req,res) => {
         })
     })
 }
+
+module.exports.updateOutlet = (req,res) => {
+    const outletid = req.params.productid
+    // not using the ownerid here, but accessing just to make sure
+    // that only an owner can access this route and no regular user
+    const ownerid = req.userData.ownerid
+
+    Outlet.find({ _id: outletid })
+    .exec()
+    .then(result => {
+        if(result) {
+            const updateOps = {};
+            for(const ops of req.body.updates) {
+                updateOps[ops.propName] = ops.value
+            }
+            Outlet.updateOne({ _id: outletid }, {
+                $set: updateOps
+            })
+            .exec()
+            .then(result => {
+                return res.status(201).json({
+                    message: "Outlet Updated successfully",
+                })
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    error: err
+                })
+            })
+        } else {
+            return res.status(404).json({
+                error: "You don't have access to this route"
+            })
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({
+            error: err
+        })
+    })
+}
