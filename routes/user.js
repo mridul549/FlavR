@@ -13,7 +13,7 @@ router.get('/getCartSize', checkAuth, userController.getCartSize);
 
 // POST methods
 router.post('/addOneProductToCart', checkAuth, userController.addOneProductToCart);
-router.post('/addManyProductsToCart', checkAuth, userController.addProductsToCart);
+router.post('/addProductsToCart', checkAuth, userController.addProductsToCart);
 
 // PATCH methods
 router.patch('/updateQuantity', checkAuth, userController.updateQuantity);

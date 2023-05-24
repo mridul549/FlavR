@@ -5,7 +5,7 @@ const Outlet                = require('../models/outlet');
 
 module.exports.getProductsOfOutlet = (req,res) => {
     Product.find({ outlet: req.body.outletid })
-    .select('_id category productName description price outlet productImage')
+    .select('_id category productName description price outlet veg productImage')
     .populate('outlet', '_id outletName address owner')
     .exec()
     .then(result => {
@@ -66,6 +66,7 @@ module.exports.addProduct = (req,res) => {
             productName: req.body.productName,
             description: req.body.description,
             price: req.body.price,
+            veg: req.body.veg,
             owner: req.userData.ownerid,
             outlet: req.body.outletid
         })

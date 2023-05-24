@@ -6,7 +6,6 @@ const bcrypt   = require('bcrypt');
 const jwt      = require('jsonwebtoken');
 const Product  = require('../models/product')
 
-
 module.exports.signup = (req,res) => {
     User.find({email: req.body.email})
     .exec()
@@ -265,4 +264,11 @@ module.exports.clearCart = (req,res) => {
             error: err
         })
     })
+}
+
+module.exports.removeProductCart = (req,res) => {
+    const userid = req.userData.userid
+    const productid = req.body.productid
+
+    Us
 }

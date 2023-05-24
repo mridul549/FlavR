@@ -18,6 +18,10 @@ const productSchema = mongoose.Schema({
         type: Number,
         required: true
     },
+    veg: {
+        type: Boolean,
+        default: true
+    },
     owner: {
         type: mongoose.Schema.Types.ObjectId,
         required: true
