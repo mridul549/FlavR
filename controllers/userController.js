@@ -136,19 +136,35 @@ module.exports.addProductsToCart = (req,res) => {
     const items = req.body.items
     const userid = req.userData.userid
 
-    User.updateOne({ _id: userid }, {
-        $push: {
-            cart: {
-                $each: items
-            }
-        }
-    })
+    User.find({ _id: userid })
     .exec()
     .then(result => {
-        return res.status(201).json({
-            message: "Cart updated successfully",
-            itemsAdded: items
-        })
+        if(result.length>0) {
+            User.updateOne({ _id: userid }, {
+                $push: {
+                    cart: {
+                        $each: items
+                    }
+                }
+            })
+            .exec()
+            .then(result => {
+                return res.status(201).json({
+                    message: "Cart updated successfully",
+                    itemsAdded: items
+                })
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    error: err
+                })
+            })
+        } else {
+            return res.status(404).json({
+                error: "User not found"
+            })
+        }
     })
     .catch(err => {
         console.log(err);
@@ -270,5 +286,23 @@ module.exports.removeProductCart = (req,res) => {
     const userid = req.userData.userid
     const productid = req.body.productid
 
-    Us
+    User.updateOne({ _id: userid }, {
+        $pull: {
+            "cart": {
+                "product": productid
+            }
+        }
+    })
+    .exec()
+    .then(result => {
+        return res.status(201).json({
+            message: "Product removed from cart"
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({
+            error: err
+        })
+    })
 }

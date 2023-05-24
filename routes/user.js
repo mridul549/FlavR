@@ -17,8 +17,9 @@ router.post('/addProductsToCart', checkAuth, userController.addProductsToCart);
 
 // PATCH methods
 router.patch('/updateQuantity', checkAuth, userController.updateQuantity);
+router.patch('/clearCart', checkAuth, userController.clearCart);
+router.patch('/removeProductCart', checkAuth, userController.removeProductCart);
 
 // DELETE methods
-router.patch('/clearCart', checkAuth, userController.clearCart);
 
 module.exports = router;

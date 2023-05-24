@@ -219,6 +219,8 @@ module.exports.updateProduct = (req,res) => {
     // that only an owner can access this route and no regular user
     const ownerid = req.userData.ownerid
 
+    Owner.find
+
     const updateOps = {};
     for(const ops of req.body.updates) {
         updateOps[ops.propName] = ops.value
