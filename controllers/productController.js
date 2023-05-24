@@ -215,24 +215,36 @@ module.exports.getAllCategories = (req,res) => {
 
 module.exports.updateProduct = (req,res) => {
     const productid = req.params.productid
-    // not using the ownerid here, but accessing just to make sure
-    // that only an owner can access this route and no regular user
     const ownerid = req.userData.ownerid
 
-    Owner.find
-
-    const updateOps = {};
-    for(const ops of req.body.updates) {
-        updateOps[ops.propName] = ops.value
-    }
-    Product.updateOne({ _id: productid }, {
-        $set: updateOps
-    })
+    Owner.find({ _id: ownerid })
     .exec()
     .then(result => {
-        return res.status(201).json({
-            result
-        })
+        if(result.length>0) {
+            const updateOps = {};
+            for(const ops of req.body.updates) {
+                updateOps[ops.propName] = ops.value
+            }
+            Product.updateOne({ _id: productid }, {
+                $set: updateOps
+            })
+            .exec()
+            .then(result => {
+                return res.status(201).json({
+                    result
+                })
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    error: err
+                })
+            })
+        } else {
+            return res.status(404).json({
+                error: "Owner not found"
+            })
+        }
     })
     .catch(err => {
         console.log(err);
