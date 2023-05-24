@@ -195,7 +195,7 @@ module.exports.getCartSize = (req,res) => {
 
 // update a cart element quantity
 // if quantity is 0 it is removed
-// else it is updated to the obtained value
+// else it is updated to the obtained
 module.exports.updateQuantity = (req,res) => {
     const quantity = req.body.quantity
     const userid = req.userData.userid

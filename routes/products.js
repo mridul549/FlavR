@@ -11,4 +11,7 @@ router.get('/getAllCategories', productController.getAllCategories);
 router.post('/addProduct', checkAuth, productController.addProduct);
 
 router.patch('/updateProduct/:productid', checkAuth, productController.updateProduct);
+
+router.delete('/deleteProduct', checkAuth, productController.deleteProduct);
+
 module.exports = router;

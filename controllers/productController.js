@@ -211,3 +211,56 @@ module.exports.updateProduct = (req,res) => {
         })
     })
 }
+
+// 1. delete product from DB
+// 2. delete product from owner's product array
+// 3. delete product from outlets menu
+module.exports.deleteProduct = (req,res) => {
+    const productid = req.body.productid
+    const ownerid = req.userData.ownerid
+    const outletid = req.body.outletid
+
+    Product.deleteOne({ _id: productid })
+    .exec()
+    .then(result => {
+        return Owner.updateOne({ _id: ownerid, "products": productid }, {
+            $pull: {
+                "products": productid
+            }
+        })
+        .exec()
+        .then(() => result)
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            })
+        })
+    })
+    .then(result => {
+        return Outlet.updateOne({ _id: outletid, "menu": productid }, {
+            $pull: {
+                "menu": productid
+            }
+        })
+        .exec()
+        .then(() => result)
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            })
+        })
+    })
+    .then(result => {
+        return res.status(201).json({
+            message: "Product deleled successfully"
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({
+            error: err
+        })
+    })
+}
