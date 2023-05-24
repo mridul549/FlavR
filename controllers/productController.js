@@ -72,8 +72,8 @@ module.exports.addProduct = (req,res) => {
 
         return product.save();
     })
-    .then(result => {
-        return Owner.updateOne({_id: req.userData.ownerid}, {
+    .then(async result => {
+        await Owner.updateOne({ _id: req.userData.ownerid }, {
             $push: {
                 products: {
                     product: result._id,
@@ -81,17 +81,17 @@ module.exports.addProduct = (req,res) => {
                 }
             }
         })
-        .exec()
-        .then(() => result)
+            .exec();
+        return result;
     })
-    .then(result => {
-        return Outlet.updateOne({_id: req.body.outletid}, {
+    .then(async result => {
+        await Outlet.updateOne({ _id: req.body.outletid }, {
             $push: {
                 menu: result._id
             }
         })
-        .exec()
-        .then(() => result)
+            .exec();
+        return result;
     })
     .then(result => {
         return res.status(201).json({
@@ -171,7 +171,7 @@ module.exports.getSingleProduct = (req,res) => {
 // converting the map to an array of objects and returning it
 module.exports.getAllCategories = (req,res) => {
     const outletid = req.body.outletid
-
+    console.log(outletid);
     Product.find({ outlet: outletid })
     .select('category')
     .exec()
@@ -249,35 +249,39 @@ module.exports.deleteProduct = (req,res) => {
 
     Product.deleteOne({ _id: productid })
     .exec()
-    .then(result => {
-        return Owner.updateOne({ _id: ownerid, "products": productid }, {
-            $pull: {
-                "products": productid
-            }
-        })
-        .exec()
-        .then(() => result)
-        .catch(err => {
+    .then(async result => {
+        try {
+            await Owner.updateOne({ _id: ownerid }, {
+                $pull: {
+                    "products": {
+                        "product": productid
+                    }
+                }
+            })
+            .exec();
+            return result
+        } catch (err) {
             console.log(err);
             res.status(500).json({
                 error: err
-            })
-        })
+            });
+        }
     })
-    .then(result => {
-        return Outlet.updateOne({ _id: outletid, "menu": productid }, {
-            $pull: {
-                "menu": productid
-            }
-        })
-        .exec()
-        .then(() => result)
-        .catch(err => {
+    .then(async result => {
+        try {
+            await Outlet.updateOne({ _id: outletid, "menu": productid }, {
+                $pull: {
+                    "menu": productid
+                }
+            })
+                .exec();
+            return result;
+        } catch (err) {
             console.log(err);
             res.status(500).json({
                 error: err
-            })
-        })
+            });
+        }
     })
     .then(result => {
         return res.status(201).json({
