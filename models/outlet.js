@@ -20,7 +20,20 @@ const outletSchema = mongoose.Schema({
         ref: 'Product'
     }],
     outletImage: {
-        type: String
+        url: {
+            type: String
+        }, 
+        imageid: {
+            type: String
+        }
+    },
+    ouletqr: {
+        url: {
+            type: String
+        }, 
+        qrid: {
+            type: String
+        }
     }
 }, {
     timestamps: true
