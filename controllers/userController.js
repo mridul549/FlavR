@@ -5,15 +5,6 @@ const User     = require('../models/user');
 const bcrypt   = require('bcrypt');
 const jwt      = require('jsonwebtoken');
 const Product  = require('../models/product')
-const client   = require('twilio')('ACba1e76922a2edca140aee5defed46e55','')
-
-client.messages
-  .create({
-    body: 'Hello from twilio-node',
-    to: '+12345678901', // Text your number
-    from: '+12345678901', // From a valid Twilio number
-  })
-.then((message) => console.log(message.sid));
 
 module.exports.signup = (req,res) => {
     User.find({email: req.body.email})
