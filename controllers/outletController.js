@@ -1,7 +1,16 @@
 const { default: mongoose } = require('mongoose');
-const Outlet = require('../models/outlet');
-const Owner = require('../models/owner');
-const Product = require('../models/product')
+const Outlet                = require('../models/outlet');
+const Owner                 = require('../models/owner');
+const Product               = require('../models/product')
+const qrcode                = require('qrcode');
+const cloudinary            = require('cloudinary').v2;
+
+cloudinary.config({ 
+    cloud_name: 'dokgv4lff', 
+    api_key: '687314849365117', 
+    api_secret: '69qpxc0ho_-nT76tegOQEau711I',
+    secure: true
+});
 
 // in this we first search the database to check for an
 // already existing outlet, if one is found we throw an error
@@ -33,6 +42,24 @@ module.exports.addOutlet = (req,res) => {
         })
         
         return outlet.save()
+    })
+    .then(result => {
+
+        cloudinary.uploader.
+
+
+
+        qrcode.toFile('tmp/ex3.png', 'Mridul Verma', {
+            errorCorrectionLevel: 'H',
+            color: {
+              dark: '#fff',  // white dots
+              light: '#0000' // Transparent background
+            }
+        }, function (err) {
+            if (err) throw err
+            console.log('done')
+        })
+
     })
     .then(result => {
         Owner.updateOne({_id: ownerID}, {
