@@ -46,9 +46,49 @@ module.exports.getProductsOfOutlet = (req,res) => {
     })
 }
 
+function saveProduct (product, req, res) {
+    product.save()
+    .then(async result => {
+        await Owner.updateOne({ _id: req.userData.ownerid }, {
+            $push: {
+                products: {
+                    product: result._id,
+                    outlet: req.body.outletid
+                }
+            }
+        })
+            .exec();
+        return result;
+    })
+    .then(async result => {
+        await Outlet.updateOne({ _id: req.body.outletid }, {
+            $push: {
+                menu: result._id
+            }
+        })
+            .exec();
+        return result;
+    })
+    .then(result => {
+        return res.status(201).json({
+            message: "Product added successfully",
+            createdProduct: result
+        })
+    })
+    .catch(error => {
+        console.log(error);
+        return res.status(500).json({
+            error: "Failed to save product"
+        });
+    });
+}
+
 // we first check the DB for an existing produc if not found, 
 // first we add it to the DB, then we add it to the outlet
 // menu array and owner products array
+// image handling is done the following way:
+// if a file is passed in the form, it is accepted and uploaded
+// else image id and url is passed as null
 module.exports.addProduct = (req,res) => {
     Product.find({
         $and: [
@@ -68,66 +108,53 @@ module.exports.addProduct = (req,res) => {
             })
         }
         
-        const file = req.files.productImage
-        cloudinary.uploader.upload(file.tempFilePath, (err, image) => {
-            if(err) {
-                return res.status(201).json({
-                    error: "image upload failed"
-                })
-            }
+        var imageProp = {
+            url: "null",
+            imageid: "null"
+        }
 
-            const imageProp = {
-                url: image.url,
-                imageid: image.public_id
-            }
-
-            const product = Product({
-                _id: new mongoose.Types.ObjectId(),
-                category: req.body.category,
-                productName: req.body.productName,
-                description: req.body.description,
-                price: req.body.price,
-                veg: req.body.veg,
-                owner: req.userData.ownerid,
-                outlet: req.body.outletid,
-                productImage: imageProp
-            })
-
-            product.save()
-            .then(async result => {
-                await Owner.updateOne({ _id: req.userData.ownerid }, {
-                    $push: {
-                        products: {
-                            product: result._id,
-                            outlet: req.body.outletid
-                        }
-                    }
-                })
-                    .exec();
-                return result;
-            })
-            .then(async result => {
-                await Outlet.updateOne({ _id: req.body.outletid }, {
-                    $push: {
-                        menu: result._id
-                    }
-                })
-                    .exec();
-                return result;
-            })
-            .then(result => {
-                return res.status(201).json({
-                    message: "Product added successfully",
-                    createdProduct: result
-                })
-            })
-            .catch(error => {
-                console.log(error);
-                return res.status(500).json({
-                    error: "Failed to save product"
-                });
-            });
+        const productwofile = new Product({
+            _id: new mongoose.Types.ObjectId(),
+            category: req.body.category,
+            productName: req.body.productName,
+            description: req.body.description,
+            price: req.body.price,
+            veg: req.body.veg,
+            owner: req.userData.ownerid,
+            outlet: req.body.outletid,
+            productImage: imageProp
         })
+
+        if(req.files && req.files.productImage) {
+            const file = req.files.productImage
+            cloudinary.uploader.upload(file.tempFilePath, (err, image) => {
+                if(err) {
+                    return res.status(201).json({
+                        error: "image upload failed"
+                    })
+                }
+    
+                imageProp = {
+                    url: image.url,
+                    imageid: image.public_id
+                }
+
+                const productwfile = new Product({
+                    _id: new mongoose.Types.ObjectId(),
+                    category: req.body.category,
+                    productName: req.body.productName,
+                    description: req.body.description,
+                    price: req.body.price,
+                    veg: req.body.veg,
+                    owner: req.userData.ownerid,
+                    outlet: req.body.outletid,
+                    productImage: imageProp
+                })
+                saveProduct(productwfile, req, res)
+            })
+        } else {
+            saveProduct(productwofile, req, res)
+        }
     })
     .catch(err => {
         console.log(err);
