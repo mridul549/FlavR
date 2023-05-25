@@ -76,6 +76,11 @@ module.exports.addProduct = (req,res) => {
                 })
             }
 
+            const imageProp = {
+                url: image.url,
+                imageid: image.public_id
+            }
+
             const product = Product({
                 _id: new mongoose.Types.ObjectId(),
                 category: req.body.category,
@@ -85,7 +90,7 @@ module.exports.addProduct = (req,res) => {
                 veg: req.body.veg,
                 owner: req.userData.ownerid,
                 outlet: req.body.outletid,
-                productImage: image.url
+                productImage: imageProp
             })
 
             product.save()
@@ -333,4 +338,8 @@ module.exports.deleteProduct = (req,res) => {
             error: err
         })
     })
+}
+
+module.exports.updateProductImage = (req,res) => {
+
 }

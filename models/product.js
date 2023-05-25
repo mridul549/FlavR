@@ -32,7 +32,12 @@ const productSchema = mongoose.Schema({
         required: true
     },
     productImage: {
-        type: String
+        url: {
+            type: String
+        },
+        imageid: {
+            type: String
+        }
     }
 }, {
     timestamps: true
