@@ -2,6 +2,14 @@ const { default: mongoose, model } = require('mongoose');
 const Product               = require('../models/product');
 const Owner                 = require('../models/owner');
 const Outlet                = require('../models/outlet');
+const cloudinary            = require('cloudinary').v2;
+
+cloudinary.config({ 
+    cloud_name: 'dokgv4lff', 
+    api_key: '687314849365117', 
+    api_secret: '69qpxc0ho_-nT76tegOQEau711I',
+    secure: true
+});
 
 module.exports.getProductsOfOutlet = (req,res) => {
     Product.find({ outlet: req.body.outletid })
@@ -59,45 +67,61 @@ module.exports.addProduct = (req,res) => {
                 message: "Product already exists"
             })
         }
-    
-        const product = new Product({
-            _id: new mongoose.Types.ObjectId(),
-            category: req.body.category,
-            productName: req.body.productName,
-            description: req.body.description,
-            price: req.body.price,
-            veg: req.body.veg,
-            owner: req.userData.ownerid,
-            outlet: req.body.outletid
-        })
+        
+        const file = req.files.productImage
+        cloudinary.uploader.upload(file.tempFilePath, (err, image) => {
+            if(err) {
+                return res.status(201).json({
+                    error: "image upload failed"
+                })
+            }
 
-        return product.save();
-    })
-    .then(async result => {
-        await Owner.updateOne({ _id: req.userData.ownerid }, {
-            $push: {
-                products: {
-                    product: result._id,
-                    outlet: req.body.outletid
-                }
-            }
-        })
-            .exec();
-        return result;
-    })
-    .then(async result => {
-        await Outlet.updateOne({ _id: req.body.outletid }, {
-            $push: {
-                menu: result._id
-            }
-        })
-            .exec();
-        return result;
-    })
-    .then(result => {
-        return res.status(201).json({
-            message: "Product added successfully",
-            createdProduct: result
+            const product = Product({
+                _id: new mongoose.Types.ObjectId(),
+                category: req.body.category,
+                productName: req.body.productName,
+                description: req.body.description,
+                price: req.body.price,
+                veg: req.body.veg,
+                owner: req.userData.ownerid,
+                outlet: req.body.outletid,
+                productImage: image.url
+            })
+
+            product.save()
+            .then(async result => {
+                await Owner.updateOne({ _id: req.userData.ownerid }, {
+                    $push: {
+                        products: {
+                            product: result._id,
+                            outlet: req.body.outletid
+                        }
+                    }
+                })
+                    .exec();
+                return result;
+            })
+            .then(async result => {
+                await Outlet.updateOne({ _id: req.body.outletid }, {
+                    $push: {
+                        menu: result._id
+                    }
+                })
+                    .exec();
+                return result;
+            })
+            .then(result => {
+                return res.status(201).json({
+                    message: "Product added successfully",
+                    createdProduct: result
+                })
+            })
+            .catch(error => {
+                console.log(error);
+                return res.status(500).json({
+                    error: "Failed to save product"
+                });
+            });
         })
     })
     .catch(err => {

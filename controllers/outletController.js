@@ -31,7 +31,6 @@ module.exports.addOutlet = (req,res) => {
             address: req.body.address,
             owner: req.userData.ownerid,
         })
-        
         return outlet.save()
     })
     .then(result => {

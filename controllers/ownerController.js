@@ -93,6 +93,7 @@ module.exports.login = (req,res) => {
     })
 }
 
+// to be used to transfer ownership of an outlet
 module.exports.addOutlet = (req,res) => {
     const ownerid = req.userData.ownerid
     const outletid = req.body.outletid
