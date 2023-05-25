@@ -284,53 +284,82 @@ module.exports.updateProduct = (req,res) => {
 }
 
 // 1. delete product from DB
-// 2. delete product from owner's product array
-// 3. delete product from outlets menu
+// 2. delete product image
+// 3. delete product from owner's product array
+// 4. delete product from outlets menu
 module.exports.deleteProduct = (req,res) => {
     const productid = req.body.productid
     const ownerid = req.userData.ownerid
     const outletid = req.body.outletid
 
-    Product.deleteOne({ _id: productid })
+    Product.find({ _id: productid })
     .exec()
-    .then(async result => {
-        try {
-            await Owner.updateOne({ _id: ownerid }, {
-                $pull: {
-                    "products": {
-                        "product": productid
-                    }
-                }
-            })
-            .exec();
-            return result
-        } catch (err) {
-            console.log(err);
-            res.status(500).json({
-                error: err
-            });
-        }
-    })
-    .then(async result => {
-        try {
-            await Outlet.updateOne({ _id: outletid, "menu": productid }, {
-                $pull: {
-                    "menu": productid
-                }
-            })
-                .exec();
-            return result;
-        } catch (err) {
-            console.log(err);
-            res.status(500).json({
-                error: err
-            });
-        }
-    })
     .then(result => {
-        return res.status(201).json({
-            message: "Product deleled successfully"
-        })
+        if(result.length>0) {
+            const imageidOld = result[0].productImage.imageid
+
+            if(imageidOld!=="null") {
+                cloudinary.uploader.destroy(imageidOld, (err,result) => {
+                    if(err) {
+                        return res.status(500).json({
+                            error: "error in deleting the old image"
+                        })
+                    }
+                })
+            }
+
+            Product.deleteOne({ _id: productid })
+            .exec()
+            .then(async result => {
+                try {
+                    await Owner.updateOne({ _id: ownerid }, {
+                        $pull: {
+                            "products": {
+                                "product": productid
+                            }
+                        }
+                    })
+                    .exec();
+                    return result
+                } catch (err) {
+                    console.log(err);
+                    res.status(500).json({
+                        error: err
+                    });
+                }
+            })
+            .then(async result => {
+                try {
+                    await Outlet.updateOne({ _id: outletid, "menu": productid }, {
+                        $pull: {
+                            "menu": productid
+                        }
+                    })
+                        .exec();
+                    return result;
+                } catch (err) {
+                    console.log(err);
+                    res.status(500).json({
+                        error: err
+                    });
+                }
+            })
+            .then(result => {
+                return res.status(201).json({
+                    message: "Product deleled successfully"
+                })
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    error: err
+                })
+            })
+        } else {
+            return res.status(404).json({
+                error: "Product not found"
+            })
+        }
     })
     .catch(err => {
         console.log(err);
@@ -338,6 +367,7 @@ module.exports.deleteProduct = (req,res) => {
             error: err
         })
     })
+
 }
 
 // 1. Delete old image
