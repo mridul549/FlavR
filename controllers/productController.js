@@ -340,6 +340,63 @@ module.exports.deleteProduct = (req,res) => {
     })
 }
 
+// 1. Delete old image
+// 2. Upload new image
+// 3. Update the product
 module.exports.updateProductImage = (req,res) => {
+    const productid = req.body.productid
 
+    Product.find({ _id: productid })
+    .exec()
+    .then(result => {
+        if(result.length>0) {
+            const imageidOld = result[0].productImage.imageid
+
+            cloudinary.uploader.destroy(imageidOld, (err,result) => {
+                if(err) {
+                    return res.status(500).json({
+                        error: "error in deleting the old image"
+                    })
+                }
+            })
+
+            const file = req.files.newProductImage
+
+            cloudinary.uploader.upload(file.tempFilePath, (err, image) => {
+                if(err) {
+                    return res.status(500).json({
+                        error: "image upload failed"
+                    })
+                }
+                Product.updateOne({ _id: productid }, {
+                    $set: { productImage: {
+                        url: image.url,
+                        imageid: image.public_id
+                    }}
+                })
+                .exec()
+                .then(docs => {
+                    return res.status(201).json({
+                        message: "Image updated successfully"
+                    })
+                })
+                .catch(err => {
+                    console.log(err);
+                    res.status(500).json({
+                        error: err
+                    })
+                })
+            })
+        } else {
+            return res.status(404).json({
+                error: "Product not found"
+            })
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({
+            error: err
+        })
+    })
 }

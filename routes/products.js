@@ -11,6 +11,7 @@ router.get('/getAllCategories', productController.getAllCategories);
 router.post('/addProduct', checkAuth, productController.addProduct);
 
 router.patch('/updateProduct/:productid', checkAuth, productController.updateProduct);
+router.patch('/updateImage', checkAuth, productController.updateProductImage);
 
 router.delete('/deleteProduct', checkAuth, productController.deleteProduct);
 
