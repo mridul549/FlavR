@@ -1,12 +1,23 @@
 const { default: mongoose } = require('mongoose');
-const Outlet = require('../models/outlet');
-const Owner = require('../models/owner');
-const Product = require('../models/product')
+const Outlet                = require('../models/outlet');
+const Owner                 = require('../models/owner');
+const Product               = require('../models/product')
+const qrcode                = require('qrcode');
+const cloudinary            = require('cloudinary').v2;
+
+cloudinary.config({ 
+    cloud_name: 'dokgv4lff', 
+    api_key: '687314849365117', 
+    api_secret: '69qpxc0ho_-nT76tegOQEau711I',
+    secure: true
+});
 
 // in this we first search the database to check for an
 // already existing outlet, if one is found we throw an error
 // if not then we create one, add it to DB
 // update the owner accordingly and exit
+// while creating, we generate its qr code and upload it to database also
+// also we can upload an image of outlet on creation itself (depends on owner)
 module.exports.addOutlet = (req,res) => {
     const ownerID = req.userData.ownerid
 
@@ -25,37 +36,125 @@ module.exports.addOutlet = (req,res) => {
             })
         } 
         
-        const outlet = new Outlet({
-            _id: new mongoose.Types.ObjectId,
-            outletName: req.body.outletName,
-            address: req.body.address,
-            owner: req.userData.ownerid,
-        })
-        return outlet.save()
+        let outletPromise;
+
+        if (req.files && req.files.outletImage) {
+            const file = req.files.outletImage;
+
+            outletPromise = new Promise((resolve, reject) => {
+                cloudinary.uploader.upload(file.tempFilePath, (err, image) => {
+                    if (err) {
+                        return reject(err);
+                    }
+
+                    const outlet = new Outlet({
+                        _id: new mongoose.Types.ObjectId(),
+                        outletName: req.body.outletName,
+                        address: req.body.address,
+                        owner: req.userData.ownerid,
+                        outletImage: {
+                            url: image.url,
+                            imageid: image.public_id,
+                        },
+                    });
+
+                    resolve(outlet.save());
+                });
+            });
+        } else {
+            const outlet = new Outlet({
+                _id: new mongoose.Types.ObjectId(),
+                outletName: req.body.outletName,
+                address: req.body.address,
+                owner: req.userData.ownerid,
+                outletImage: {
+                    url: "null",
+                    imageid: "null",
+                },
+            });
+
+            outletPromise = outlet.save();
+        }
+
+        return outletPromise;
     })
     .then(result => {
-        Owner.updateOne({_id: ownerID}, {
-            $push: {
-                outlets: result._id
-            }
-        })
-        .exec()
-        .then()
-        .catch(err => {
-            console.log(err);
-            res.status(500).json({
-                error: err
+        // generates a qr code data url
+        const qrCodePromise = new Promise((resolve, reject) => {
+            qrcode.toDataURL(`${result._id}`, {
+                errorCorrectionLevel: 'H',
+                color: {
+                    dark: '#000',  // black dots
+                    light: '#fff' // white background
+                }
+            }, (err, qrdata) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(qrdata);
+                }
+            });
+        });
+        // passing the outlet created and the data url to next promise
+        return Promise.all([result, qrCodePromise]);
+    })
+    .then(([result, qrdata]) => {
+        // uploading the genrated qr code to cloud
+        return new Promise((resolve, reject) => {
+            cloudinary.uploader.upload(qrdata, (err, image) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve({ result, image });
+                }
+            });
+        });
+    })
+    .then(async ({ result, image }) => {
+        // updating the created outled with the cloud link just created
+        try {
+            await Outlet.updateOne({ _id: result._id }, {
+                $set: {
+                    "outletqr": {
+                        url: image.url,
+                        qrid: image.public_id
+                    }
+                }
             })
-        })
-        
-        res.status(201).json({
+            .exec();
+            return result;
+        } catch (err) {
+            console.log(err);
+            return res.status(500).json({
+                error: err
+            });
+        }
+    })
+    .then(async result => {
+        // createQRAndUpload(result, req, res)
+        try {
+            await Owner.updateOne({ _id: ownerID }, {
+                $push: {
+                    outlets: result._id
+                }
+            })
+            .exec();
+            return result;
+        } catch (err) {
+            return res.status(500).json({
+                error: err
+            });
+        }
+    })
+    .then(result => {
+        return res.status(201).json({
             message: "Outlet added successfully",
             createdOutlet: result
         })
     })
     .catch(err => {
         console.log(err);
-        res.status(500).json({
+        return res.status(500).json({
             error: err
         })
     })
