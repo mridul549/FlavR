@@ -136,22 +136,25 @@ module.exports.addOutlet = (req,res) => {
         //         outletName: req.body.outletName,
         //         address: req.body.address,
         //         owner: req.userData.ownerid,
-        //         outletqr: imageProp
+        //         outletImage: imageProp
         //     })
         //     return outlet.save()
 
         // } else {
-            const imageProp = {
-                url: "null",
-                qrid: "null"
-            }
+            // const imageProp = {
+            //     url: "null",
+            //     qrid: "null"
+            // }
     
             const outlet = new Outlet({
                 _id: new mongoose.Types.ObjectId,
                 outletName: req.body.outletName,
                 address: req.body.address,
                 owner: req.userData.ownerid,
-                outletqr: imageProp
+                outletImage: {
+                    url: "null",
+                    imageid: "null"
+                }
             })
 
             return outlet.save()
