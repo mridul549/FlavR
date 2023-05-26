@@ -4,6 +4,7 @@ const checkAuth        = require('../middlewares/check-auth');
 const router           = express.Router();
 
 router.get('/getMenuSize', checkAuth, outletController.getMenuSize)
+router.get('/getOutlet', checkAuth, outletController.getOutlet)
 
 router.post('/addOutlet', checkAuth, outletController.addOutlet);
 

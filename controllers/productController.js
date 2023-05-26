@@ -310,8 +310,8 @@ module.exports.updateProduct = (req,res) => {
     })
 }
 
-// 1. delete product from DB
-// 2. delete product image
+// 1. delete product image if exits
+// 2. delete product from DB
 // 3. delete product from owner's product array
 // 4. delete product from outlets menu
 module.exports.deleteProduct = (req,res) => {
@@ -397,7 +397,7 @@ module.exports.deleteProduct = (req,res) => {
 
 }
 
-// 1. Delete old image
+// 1. Delete old image if exits
 // 2. Upload new image
 // 3. Update the product
 module.exports.updateProductImage = (req,res) => {
@@ -409,16 +409,17 @@ module.exports.updateProductImage = (req,res) => {
         if(result.length>0) {
             const imageidOld = result[0].productImage.imageid
 
-            cloudinary.uploader.destroy(imageidOld, (err,result) => {
-                if(err) {
-                    return res.status(500).json({
-                        error: "error in deleting the old image"
-                    })
-                }
-            })
+            if(imageidOld !== "null") {
+                cloudinary.uploader.destroy(imageidOld, (err,result) => {
+                    if(err) {
+                        return res.status(500).json({
+                            error: "error in deleting the old image"
+                        })
+                    }
+                })
+            }
 
             const file = req.files.newProductImage
-
             cloudinary.uploader.upload(file.tempFilePath, (err, image) => {
                 if(err) {
                     return res.status(500).json({

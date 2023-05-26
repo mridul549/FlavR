@@ -320,13 +320,15 @@ module.exports.updateImage = (req,res) => {
         if(result.length>0) {
             const imageidOld = result[0].outletImage.imageid
 
-            cloudinary.uploader.destroy(imageidOld, (err,result) => {
-                if(err) {
-                    return res.status(500).json({
-                        error: "error in deleting the old image"
-                    })
-                }
-            })
+            if(imageidOld !== "null") {
+                cloudinary.uploader.destroy(imageidOld, (err,result) => {
+                    if(err) {
+                        return res.status(500).json({
+                            error: "error in deleting the old image"
+                        })
+                    }
+                })
+            }
 
             const file = req.files.newOutletImage
 
@@ -358,6 +360,42 @@ module.exports.updateImage = (req,res) => {
         } else {
             return res.status(404).json({
                 error: "Outlet not found"
+            })
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.getOutlet = (req,res) => {
+    const ownerid  = req.userData.ownerid
+    const outletid = req.body.outletid
+
+    Owner.find({ _id: ownerid })
+    .exec()
+    .then(result => {
+        if(result.length>0) {
+            Outlet.find({ _id: outletid })
+            .select('_id outletName address owner outletImage outletqr createdAt updatedAt')
+            .exec()
+            .then(result => {
+                return res.status(201).json({
+                    result
+                })
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    error: err
+                })
+            })
+        } else {
+            return res.status(404).json({
+                error: "No owner found"
             })
         }
     })
