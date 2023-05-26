@@ -5,9 +5,9 @@ const Outlet                = require('../models/outlet');
 const cloudinary            = require('cloudinary').v2;
 
 cloudinary.config({ 
-    cloud_name: 'dokgv4lff', 
-    api_key: '687314849365117', 
-    api_secret: '69qpxc0ho_-nT76tegOQEau711I',
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+    api_key: process.env.CLOUDINARY_API_KEY, 
+    api_secret: process.env.CLOUDINARY_API_SECRET,
     secure: true
 });
 

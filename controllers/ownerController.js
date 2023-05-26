@@ -7,9 +7,9 @@ const jwt        = require('jsonwebtoken');
 const cloudinary = require('cloudinary').v2;
 
 cloudinary.config({ 
-    cloud_name: 'dokgv4lff', 
-    api_key: '687314849365117', 
-    api_secret: '69qpxc0ho_-nT76tegOQEau711I',
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+    api_key: process.env.CLOUDINARY_API_KEY, 
+    api_secret: process.env.CLOUDINARY_API_SECRET,
     secure: true
 });
 
@@ -17,7 +17,7 @@ module.exports.getNewToken = (req,res) => {
     const oldToken = req.headers.authorization.split(" ")[1];
     const decodedPayload = jwt.decode(oldToken);
     delete decodedPayload.exp;
-    const newToken = jwt.sign(decodedPayload, 'nescafeAppSecretKey', {
+    const newToken = jwt.sign(decodedPayload, process.env.TOKEN_SECRET, {
         expiresIn: "30 days"
     })
     return res.status(201).json({
@@ -92,7 +92,7 @@ module.exports.login = (req,res) => {
                     email: user[0].email,
                     ownerid: user[0]._id,
                     ownername: user[0].ownerName
-                }, "nescafeAppSecretKey", {
+                }, process.env.TOKEN_SECRET, {
                     expiresIn: "30 days"
                 })
                 return res.status(200).json({
