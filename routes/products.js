@@ -3,7 +3,7 @@ const router = express.Router();
 const productController = require('../controllers/productController');
 const checkAuth = require('../middlewares/check-auth');
 
-router.post('/getProductsOfOutlet', productController.getProductsOfOutlet);
+router.get('/getProductsOfOutlet', productController.getProductsOfOutlet); // U
 router.get('/getProductsByCategory', productController.getProductsByCategory);
 router.get('/getSingleProduct', productController.getSingleProduct);
 router.get('/getAllCategories', productController.getAllCategories);
