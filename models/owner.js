@@ -37,7 +37,14 @@ const ownerSchema = mongoose.Schema({
         }
     ],
     ownerProfilePic: {
-        type: String
+        url: {
+            type: String,
+            default: "null"
+        },
+        id: {
+            type: String,
+            default: "null"
+        }
     }
 }, {
     timestamps: true

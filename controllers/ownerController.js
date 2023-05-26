@@ -1,9 +1,17 @@
 // TODO- Change the secret key
 
-const mongoose = require('mongoose');
-const Owner    = require('../models/owner');
-const bcrypt   = require('bcrypt');
-const jwt      = require('jsonwebtoken');
+const mongoose   = require('mongoose');
+const Owner      = require('../models/owner');
+const bcrypt     = require('bcrypt');
+const jwt        = require('jsonwebtoken');
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({ 
+    cloud_name: 'dokgv4lff', 
+    api_key: '687314849365117', 
+    api_secret: '69qpxc0ho_-nT76tegOQEau711I',
+    secure: true
+});
 
 module.exports.signup = (req,res) => {
     Owner.find({email: req.body.email})
@@ -73,7 +81,7 @@ module.exports.login = (req,res) => {
                     ownerid: user[0]._id,
                     ownername: user[0].ownerName
                 }, "nescafeAppSecretKey", {
-                    expiresIn: "1 day"
+                    expiresIn: "7 days"
                 })
                 return res.status(200).json({
                     message: "Auth successful",
@@ -142,6 +150,120 @@ module.exports.getOutlets = (req,res) => {
     })
 }
 
+/*
+    * TO BE DEALT WITH LATER
+    Updation keys:
+    1. Name
+    2. Email (redirect to another route in that case on clicking button on app)
+
+    Possibilities in future:
+    1. Mobile (add in DB)
+    2. DOB
+    3. Gender
+*/
 module.exports.updateOwner = (req,res) => {
-    
+    const ownerid = req.userData.ownerid
+
+    Owner.find({ _id: ownerid })
+    .exec()
+    .then(result => {
+        if(result.length>0) {
+            const updateOps = {};
+            for(const ops of req.body.updates) {
+                updateOps[ops.propName] = ops.value
+            }
+            Owner.updateOne({ _id: productid }, {
+                $set: updateOps
+            })
+            .exec()
+            .then(result => {
+                return res.status(201).json({
+                    message: "Owner updated successfully"
+                })
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    error: err
+                })
+            })
+        } else {
+            return res.status(404).json({
+                error: "Owner not found"
+            })
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.updateImage = (req,res) => {
+    const ownerid = req.userData.ownerid
+
+    Owner.find({ _id: ownerid })
+    .exec()
+    .then(result => {
+        if(result.length>0) {
+            const imageidOld = result[0].ownerProfilePic.id
+
+            if(imageidOld !== "null") {
+                cloudinary.uploader.destroy(imageidOld, (err,result) => {
+                    if(err) {
+                        return res.status(500).json({
+                            error: "error in deleting the old image"
+                        })
+                    }
+                })
+            }
+
+            const file = req.files.newOwnerImage
+
+            cloudinary.uploader.upload(file.tempFilePath, (err, image) => {
+                if(err) {
+                    return res.status(500).json({
+                        error: "image upload failed"
+                    })
+                }
+                Owner.updateOne({ _id: ownerid }, {
+                    $set: { ownerProfilePic: {
+                        url: image.url,
+                        id: image.public_id
+                    }}
+                })
+                .exec()
+                .then(docs => {
+                    return res.status(201).json({
+                        message: "Image updated successfully"
+                    })
+                })
+                .catch(err => {
+                    console.log(err);
+                    res.status(500).json({
+                        error: err
+                    })
+                })
+            })
+        } else {
+            return res.status(404).json({
+                error: "Owner not found"
+            })
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
+/*
+    1. Delete owner
+*/
+module.exports.deleteOwner = (req,res) => {
+
 }
