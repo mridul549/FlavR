@@ -12,42 +12,8 @@ cloudinary.config({
     secure: true
 });
 
-function uploadOutletImage (result, req, res) {
-    
-}
-
-// in this we first search the database to check for an
-// already existing outlet, if one is found we throw an error
-// if not then we create one, add it to DB
-// update the owner accordingly and exit
-// while creating, we generate its qr code and upload it to database also
-module.exports.addOutlet = (req,res) => {
-    const ownerID = req.userData.ownerid
-
-    Outlet.find({
-        // using the $and operator to search the DB with multiple conditions
-        $and: [
-            { outletName: req.body.outletName },
-            { address: req.body.address },
-            { owner: req.userData.ownerid }
-        ]
-    })
-    .then(result => {
-        if(result.length>0) {
-            return res.status(404).json({
-                message: "Outlet already exists"
-            })
-        } 
-        
-        const outlet = new Outlet({
-            _id: new mongoose.Types.ObjectId,
-            outletName: req.body.outletName,
-            address: req.body.address,
-            owner: req.userData.ownerid,
-        })
-        
-        return outlet.save()
-    })
+function uploadOutletImage (outlet, req, res) {
+    outlet.save()
     .then(result => {
         // generates a qr code data url
         const qrCodePromise = new Promise((resolve, reject) => {
@@ -121,6 +87,71 @@ module.exports.addOutlet = (req,res) => {
             message: "Outlet added successfully",
             createdOutlet: result
         })
+    })
+}
+
+// in this we first search the database to check for an
+// already existing outlet, if one is found we throw an error
+// if not then we create one, add it to DB
+// update the owner accordingly and exit
+// while creating, we generate its qr code and upload it to database also
+module.exports.addOutlet = (req,res) => {
+    const ownerID = req.userData.ownerid
+
+    Outlet.find({
+        // using the $and operator to search the DB with multiple conditions
+        $and: [
+            { outletName: req.body.outletName },
+            { address: req.body.address },
+            { owner: req.userData.ownerid }
+        ]
+    })
+    .then(result => {
+        if(result.length>0) {
+            return res.status(404).json({
+                message: "Outlet already exists"
+            })
+        } 
+        
+        var imageProp = {
+            url: "null",
+            qrid: "null"
+        }
+
+        const outletwofile = new Outlet({
+            _id: new mongoose.Types.ObjectId,
+            outletName: req.body.outletName,
+            address: req.body.address,
+            owner: req.userData.ownerid,
+            outletqr: imageProp
+        })
+        
+        if(req.files && req.files.outletImage) {
+            const file = req.files.outletImage
+            cloudinary.uploader.upload(file.tempFilePath, (err, image) => {
+                if(err) {
+                    return res.status(500).json({
+                        error: "image upload failed"
+                    })
+                }
+    
+                imageProp = {
+                    url: image.url,
+                    imageid: image.public_id
+                }
+
+                const outletwfile = new Product({
+                    _id: new mongoose.Types.ObjectId,
+                    outletName: req.body.outletName,
+                    address: req.body.address,
+                    owner: req.userData.ownerid,
+                    outletqr: imageProp
+                })
+                uploadOutletImage(outletwfile, req, res)
+            })
+        } else {
+            uploadOutletImage(outletwofile, req, res)
+        }
     })
     .catch(err => {
         console.log(err);
