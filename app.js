@@ -10,6 +10,9 @@ mongoose.connect("mongodb+srv://mridul549:xTKgkDyitxpKcOY7@cluster0.iuoe1mb.mong
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
+app.use(fileUpload({
+    useTempFiles: true
+}))
 
 // implementing CORS security mechanism
 app.use((req,res,next) => {
