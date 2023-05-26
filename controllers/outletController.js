@@ -289,7 +289,7 @@ module.exports.deleteOutlet = (req,res) => {
 }
 
 module.exports.getMenuSize = (req,res) => {
-    const outletid = req.body.outletid
+    const outletid = req.query.outletid
     Outlet.find({ _id: outletid })
     .exec()
     .then(result => {
@@ -373,7 +373,7 @@ module.exports.updateImage = (req,res) => {
 
 module.exports.getOutlet = (req,res) => {
     const ownerid  = req.userData.ownerid
-    const outletid = req.body.outletid
+    const outletid = req.query.outletid
 
     Owner.find({ _id: ownerid })
     .exec()

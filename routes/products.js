@@ -4,9 +4,9 @@ const productController = require('../controllers/productController');
 const checkAuth = require('../middlewares/check-auth');
 
 router.get('/getProductsOfOutlet', productController.getProductsOfOutlet); // U
-router.get('/getProductsByCategory', productController.getProductsByCategory);
-router.get('/getSingleProduct', productController.getSingleProduct);
-router.get('/getAllCategories', productController.getAllCategories);
+router.get('/getProductsByCategory', productController.getProductsByCategory); // U- error also
+router.get('/getSingleProduct', productController.getSingleProduct); // U
+router.get('/getAllCategories', productController.getAllCategories); // U
 
 router.post('/addProduct', checkAuth, productController.addProduct);
 
