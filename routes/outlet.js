@@ -10,5 +10,6 @@ router.post('/addOutlet', checkAuth, outletController.addOutlet);
 router.delete('/deleteOutlet', checkAuth, outletController.deleteOutlet);
 
 router.patch('/updateOutlet/:outletid', checkAuth, outletController.updateOutlet);
+router.patch('/updateImage/:outletid', checkAuth, outletController.updateImage)
 
 module.exports = router;

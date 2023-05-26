@@ -223,7 +223,7 @@ module.exports.deleteOutlet = (req,res) => {
             const qrid       = result[0].outletqr.qrid
 
             if(imageidOld!=="null") {
-                // deleting outlet image from cloud
+                // deleting outlet image from cloud if exits
                 cloudinary.uploader.destroy(imageidOld, (err,result) => {
                     if(err) {
                         return res.status(500).json({
@@ -311,3 +311,60 @@ module.exports.getMenuSize = (req,res) => {
     })
 }
 
+module.exports.updateImage = (req,res) => {
+    const outletid = req.params.outletid
+
+    Outlet.find({ _id: outletid })
+    .exec()
+    .then(result => {
+        if(result.length>0) {
+            const imageidOld = result[0].outletImage.imageid
+
+            cloudinary.uploader.destroy(imageidOld, (err,result) => {
+                if(err) {
+                    return res.status(500).json({
+                        error: "error in deleting the old image"
+                    })
+                }
+            })
+
+            const file = req.files.newOutletImage
+
+            cloudinary.uploader.upload(file.tempFilePath, (err, image) => {
+                if(err) {
+                    return res.status(500).json({
+                        error: "image upload failed"
+                    })
+                }
+                Outlet.updateOne({ _id: outletid }, {
+                    $set: { outletImage: {
+                        url: image.url,
+                        imageid: image.public_id
+                    }}
+                })
+                .exec()
+                .then(docs => {
+                    return res.status(201).json({
+                        message: "Image updated successfully"
+                    })
+                })
+                .catch(err => {
+                    console.log(err);
+                    res.status(500).json({
+                        error: err
+                    })
+                })
+            })
+        } else {
+            return res.status(404).json({
+                error: "Outlet not found"
+            })
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
