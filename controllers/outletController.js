@@ -12,10 +12,50 @@ cloudinary.config({
     secure: true
 });
 
+function createQRAndUpload (result, req, res) {
+    qrcode.toDataURL(`${result._id}`, {
+        errorCorrectionLevel: 'H',
+        color: {
+          dark: '#000',  // black dots
+          light: '#fff' // white background
+        }
+    }, function (err, qrurl) {
+        if (err) {
+            return res.status(201).json({
+                error: "QR Generation failed"
+            })
+        }
+        cloudinary.uploader.upload(qrurl, (err, image) => {
+            if(err) {
+                return res.status(201).json({
+                    error: "image upload failed"
+                })
+            }
+            Outlet.updateOne({ _id: result._id }, {
+                $set: {
+                    "outletqr": {
+                        url: image.url,
+                        qrid: image.public_id
+                    }
+                }
+            })
+            .exec()
+            .then()
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    error: err
+                })
+            })
+        })
+    })
+}
+
 // in this we first search the database to check for an
 // already existing outlet, if one is found we throw an error
 // if not then we create one, add it to DB
 // update the owner accordingly and exit
+// while creating, we generate its qr code and upload it to database also
 module.exports.addOutlet = (req,res) => {
     const ownerID = req.userData.ownerid
 
@@ -44,38 +84,71 @@ module.exports.addOutlet = (req,res) => {
         return outlet.save()
     })
     .then(result => {
+        const qrCodePromise = new Promise((resolve, reject) => {
+            qrcode.toDataURL(`${result._id}`, {
+                errorCorrectionLevel: 'H',
+                color: {
+                    dark: '#000',  // black dots
+                    light: '#fff' // white background
+                }
+            }, (err, qrdata) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(qrdata);
+                }
+            });
+        });
 
-        cloudinary.uploader.
-
-
-
-        qrcode.toFile('tmp/ex3.png', 'Mridul Verma', {
-            errorCorrectionLevel: 'H',
-            color: {
-              dark: '#fff',  // white dots
-              light: '#0000' // Transparent background
-            }
-        }, function (err) {
-            if (err) throw err
-            console.log('done')
-        })
-
+        return Promise.all([result, qrCodePromise]);
+    })
+    .then(([result, qrdata]) => {
+        return new Promise((resolve, reject) => {
+            cloudinary.uploader.upload(qrdata, (err, image) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve({ result, image });
+                }
+            });
+        });
+    })
+    .then(async ({ result, image }) => {
+        try {
+            await Outlet.updateOne({ _id: result._id }, {
+                $set: {
+                    "outletqr": {
+                        url: image.url,
+                        qrid: image.public_id
+                    }
+                }
+            })
+            .exec();
+            return result;
+        } catch (err) {
+            console.log(err);
+            return res.status(500).json({
+                error: err
+            });
+        }
+    })
+    .then(async result => {
+        // createQRAndUpload(result, req, res)
+        try {
+            await Owner.updateOne({ _id: ownerID }, {
+                $push: {
+                    outlets: result._id
+                }
+            })
+            .exec();
+            return result;
+        } catch (err) {
+            return res.status(500).json({
+                error: err
+            });
+        }
     })
     .then(result => {
-        Owner.updateOne({_id: ownerID}, {
-            $push: {
-                outlets: result._id
-            }
-        })
-        .exec()
-        .then()
-        .catch(err => {
-            console.log(err);
-            res.status(500).json({
-                error: err
-            })
-        })
-        
         res.status(201).json({
             message: "Outlet added successfully",
             createdOutlet: result
@@ -83,7 +156,7 @@ module.exports.addOutlet = (req,res) => {
     })
     .catch(err => {
         console.log(err);
-        res.status(500).json({
+        return res.status(500).json({
             error: err
         })
     })

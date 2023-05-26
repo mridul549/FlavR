@@ -27,7 +27,7 @@ const outletSchema = mongoose.Schema({
             type: String
         }
     },
-    ouletqr: {
+    outletqr: {
         url: {
             type: String
         }, 
