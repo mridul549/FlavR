@@ -13,6 +13,18 @@ cloudinary.config({
     secure: true
 });
 
+module.exports.getNewToken = (req,res) => {
+    const oldToken = req.headers.authorization.split(" ")[1];
+    const decodedPayload = jwt.decode(oldToken);
+    delete decodedPayload.exp;
+    const newToken = jwt.sign(decodedPayload, 'nescafeAppSecretKey', {
+        expiresIn: "30 days"
+    })
+    return res.status(201).json({
+        newToken: newToken
+    })
+}
+
 module.exports.signup = (req,res) => {
     Owner.find({email: req.body.email})
     .exec()
@@ -81,7 +93,7 @@ module.exports.login = (req,res) => {
                     ownerid: user[0]._id,
                     ownername: user[0].ownerName
                 }, "nescafeAppSecretKey", {
-                    expiresIn: "7 days"
+                    expiresIn: "30 days"
                 })
                 return res.status(200).json({
                     message: "Auth successful",
