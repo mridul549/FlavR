@@ -2,6 +2,7 @@ const express    = require('express');
 const mongoose   = require('mongoose');
 const bodyParser = require('body-parser');
 const morgan     = require('morgan');
+const fileUpload = require('express-fileupload');
 
 const app = express();
 mongoose.connect("mongodb+srv://mridul549:xTKgkDyitxpKcOY7@cluster0.iuoe1mb.mongodb.net/?retryWrites=true&w=majority")
@@ -9,7 +10,11 @@ mongoose.connect("mongodb+srv://mridul549:xTKgkDyitxpKcOY7@cluster0.iuoe1mb.mong
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
+app.use(fileUpload({
+    useTempFiles: true
+}))
 
+ 
 // implementing CORS security mechanism
 app.use((req,res,next) => {
     res.header("Access-Control-Allow-Origin", "*");

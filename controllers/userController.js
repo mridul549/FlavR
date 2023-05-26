@@ -1,10 +1,18 @@
 // TODO- Change the secret key
 
-const mongoose = require('mongoose');
-const User     = require('../models/user');
-const bcrypt   = require('bcrypt');
-const jwt      = require('jsonwebtoken');
-const Product  = require('../models/product')
+const mongoose   = require('mongoose');
+const User       = require('../models/user');
+const bcrypt     = require('bcrypt');
+const jwt        = require('jsonwebtoken');
+const Product    = require('../models/product')
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({ 
+    cloud_name: 'dokgv4lff', 
+    api_key: '687314849365117', 
+    api_secret: '69qpxc0ho_-nT76tegOQEau711I',
+    secure: true
+});
 
 module.exports.signup = (req,res) => {
     User.find({email: req.body.email})
@@ -302,6 +310,66 @@ module.exports.removeProductCart = (req,res) => {
     .catch(err => {
         console.log(err);
         res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.updateImage = (req,res) => {
+    const userid = req.userData.userid
+
+    User.find({ _id: userid })
+    .exec()
+    .then(result => {
+        if(result.length>0) {
+            const imageidOld = result[0].userProfilePic.id
+
+            if(imageidOld !== "null") {
+                cloudinary.uploader.destroy(imageidOld, (err,result) => {
+                    if(err) {
+                        return res.status(500).json({
+                            error: "error in deleting the old image"
+                        })
+                    }
+                })
+            }
+
+            const file = req.files.newUserImage
+
+            cloudinary.uploader.upload(file.tempFilePath, (err, image) => {
+                if(err) {
+                    return res.status(500).json({
+                        error: "image upload failed"
+                    })
+                }
+                User.updateOne({ _id: userid }, {
+                    $set: { userProfilePic: {
+                        url: image.url,
+                        id: image.public_id
+                    }}
+                })
+                .exec()
+                .then(docs => {
+                    return res.status(201).json({
+                        message: "Image updated successfully"
+                    })
+                })
+                .catch(err => {
+                    console.log(err);
+                    return res.status(500).json({
+                        error: err
+                    })
+                })
+            })
+        } else {
+            return res.status(404).json({
+                error: "Owner not found"
+            })
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
             error: err
         })
     })

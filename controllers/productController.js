@@ -2,6 +2,14 @@ const { default: mongoose, model } = require('mongoose');
 const Product               = require('../models/product');
 const Owner                 = require('../models/owner');
 const Outlet                = require('../models/outlet');
+const cloudinary            = require('cloudinary').v2;
+
+cloudinary.config({ 
+    cloud_name: 'dokgv4lff', 
+    api_key: '687314849365117', 
+    api_secret: '69qpxc0ho_-nT76tegOQEau711I',
+    secure: true
+});
 
 module.exports.getProductsOfOutlet = (req,res) => {
     Product.find({ outlet: req.body.outletid })
@@ -38,41 +46,8 @@ module.exports.getProductsOfOutlet = (req,res) => {
     })
 }
 
-// we first check the DB for an existing produc if not found, 
-// first we add it to the DB, then we add it to the outlet
-// menu array and owner products array
-module.exports.addProduct = (req,res) => {
-    Product.find({
-        $and: [
-            { category: req.body.category },
-            { productName: req.body.productName },
-            { description: req.body.description },
-            { price: req.body.price },
-            { outlet: req.body.outletid },
-            { owner: req.userData.ownerid }
-        ]
-    })
-    .exec()
-    .then(result => {
-        if(result.length>0){
-            return res.status(404).json({
-                message: "Product already exists"
-            })
-        }
-    
-        const product = new Product({
-            _id: new mongoose.Types.ObjectId(),
-            category: req.body.category,
-            productName: req.body.productName,
-            description: req.body.description,
-            price: req.body.price,
-            veg: req.body.veg,
-            owner: req.userData.ownerid,
-            outlet: req.body.outletid
-        })
-
-        return product.save();
-    })
+function saveProduct (product, req, res) {
+    product.save()
     .then(async result => {
         await Owner.updateOne({ _id: req.userData.ownerid }, {
             $push: {
@@ -99,6 +74,87 @@ module.exports.addProduct = (req,res) => {
             message: "Product added successfully",
             createdProduct: result
         })
+    })
+    .catch(error => {
+        console.log(error);
+        return res.status(500).json({
+            error: "Failed to save product"
+        });
+    });
+}
+
+// we first check the DB for an existing produc if not found, 
+// first we add it to the DB, then we add it to the outlet
+// menu array and owner products array
+// image handling is done the following way:
+// if a file is passed in the form, it is accepted and uploaded
+// else image id and url is passed as null
+module.exports.addProduct = (req,res) => {
+    Product.find({
+        $and: [
+            { category: req.body.category },
+            { productName: req.body.productName },
+            { description: req.body.description },
+            { price: req.body.price },
+            { outlet: req.body.outletid },
+            { owner: req.userData.ownerid }
+        ]
+    })
+    .exec()
+    .then(result => {
+        if(result.length>0){
+            return res.status(404).json({
+                message: "Product already exists"
+            })
+        }
+        
+        var imageProp = {
+            url: "null",
+            imageid: "null"
+        }
+
+        const productwofile = new Product({
+            _id: new mongoose.Types.ObjectId(),
+            category: req.body.category,
+            productName: req.body.productName,
+            description: req.body.description,
+            price: req.body.price,
+            veg: req.body.veg,
+            owner: req.userData.ownerid,
+            outlet: req.body.outletid,
+            productImage: imageProp
+        })
+
+        if(req.files && req.files.productImage) {
+            const file = req.files.productImage
+            cloudinary.uploader.upload(file.tempFilePath, (err, image) => {
+                if(err) {
+                    return res.status(201).json({
+                        error: "image upload failed"
+                    })
+                }
+    
+                imageProp = {
+                    url: image.url,
+                    imageid: image.public_id
+                }
+
+                const productwfile = new Product({
+                    _id: new mongoose.Types.ObjectId(),
+                    category: req.body.category,
+                    productName: req.body.productName,
+                    description: req.body.description,
+                    price: req.body.price,
+                    veg: req.body.veg,
+                    owner: req.userData.ownerid,
+                    outlet: req.body.outletid,
+                    productImage: imageProp
+                })
+                saveProduct(productwfile, req, res)
+            })
+        } else {
+            saveProduct(productwofile, req, res)
+        }
     })
     .catch(err => {
         console.log(err);
@@ -254,54 +310,146 @@ module.exports.updateProduct = (req,res) => {
     })
 }
 
-// 1. delete product from DB
-// 2. delete product from owner's product array
-// 3. delete product from outlets menu
+// 1. delete product image if exits
+// 2. delete product from DB
+// 3. delete product from owner's product array
+// 4. delete product from outlets menu
 module.exports.deleteProduct = (req,res) => {
     const productid = req.body.productid
     const ownerid = req.userData.ownerid
     const outletid = req.body.outletid
 
-    Product.deleteOne({ _id: productid })
+    Product.find({ _id: productid })
     .exec()
-    .then(async result => {
-        try {
-            await Owner.updateOne({ _id: ownerid }, {
-                $pull: {
-                    "products": {
-                        "product": productid
-                    }
-                }
-            })
-            .exec();
-            return result
-        } catch (err) {
-            console.log(err);
-            res.status(500).json({
-                error: err
-            });
-        }
-    })
-    .then(async result => {
-        try {
-            await Outlet.updateOne({ _id: outletid, "menu": productid }, {
-                $pull: {
-                    "menu": productid
-                }
-            })
-                .exec();
-            return result;
-        } catch (err) {
-            console.log(err);
-            res.status(500).json({
-                error: err
-            });
-        }
-    })
     .then(result => {
-        return res.status(201).json({
-            message: "Product deleled successfully"
+        if(result.length>0) {
+            const imageidOld = result[0].productImage.imageid
+
+            if(imageidOld!=="null") {
+                cloudinary.uploader.destroy(imageidOld, (err,result) => {
+                    if(err) {
+                        return res.status(500).json({
+                            error: "error in deleting the old image"
+                        })
+                    }
+                })
+            }
+
+            Product.deleteOne({ _id: productid })
+            .exec()
+            .then(async result => {
+                try {
+                    await Owner.updateOne({ _id: ownerid }, {
+                        $pull: {
+                            "products": {
+                                "product": productid
+                            }
+                        }
+                    })
+                    .exec();
+                    return result
+                } catch (err) {
+                    console.log(err);
+                    res.status(500).json({
+                        error: err
+                    });
+                }
+            })
+            .then(async result => {
+                try {
+                    await Outlet.updateOne({ _id: outletid, "menu": productid }, {
+                        $pull: {
+                            "menu": productid
+                        }
+                    })
+                        .exec();
+                    return result;
+                } catch (err) {
+                    console.log(err);
+                    res.status(500).json({
+                        error: err
+                    });
+                }
+            })
+            .then(result => {
+                return res.status(201).json({
+                    message: "Product deleled successfully"
+                })
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    error: err
+                })
+            })
+        } else {
+            return res.status(404).json({
+                error: "Product not found"
+            })
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({
+            error: err
         })
+    })
+
+}
+
+// 1. Delete old image if exits
+// 2. Upload new image
+// 3. Update the product
+module.exports.updateProductImage = (req,res) => {
+    const productid = req.body.productid
+
+    Product.find({ _id: productid })
+    .exec()
+    .then(result => {
+        if(result.length>0) {
+            const imageidOld = result[0].productImage.imageid
+
+            if(imageidOld !== "null") {
+                cloudinary.uploader.destroy(imageidOld, (err,result) => {
+                    if(err) {
+                        return res.status(500).json({
+                            error: "error in deleting the old image"
+                        })
+                    }
+                })
+            }
+
+            const file = req.files.newProductImage
+            cloudinary.uploader.upload(file.tempFilePath, (err, image) => {
+                if(err) {
+                    return res.status(500).json({
+                        error: "image upload failed"
+                    })
+                }
+                Product.updateOne({ _id: productid }, {
+                    $set: { productImage: {
+                        url: image.url,
+                        imageid: image.public_id
+                    }}
+                })
+                .exec()
+                .then(docs => {
+                    return res.status(201).json({
+                        message: "Image updated successfully"
+                    })
+                })
+                .catch(err => {
+                    console.log(err);
+                    res.status(500).json({
+                        error: err
+                    })
+                })
+            })
+        } else {
+            return res.status(404).json({
+                error: "Product not found"
+            })
+        }
     })
     .catch(err => {
         console.log(err);

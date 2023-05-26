@@ -9,5 +9,6 @@ router.post('/signup', ownerController.signup);
 router.post('/login', ownerController.login);
 
 router.patch('/addOutlet', checkAuth, ownerController.addOutlet);
+router.patch('/updateImage', checkAuth, ownerController.updateImage);
 
 module.exports = router;
