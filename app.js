@@ -2,6 +2,7 @@ const express    = require('express');
 const mongoose   = require('mongoose');
 const bodyParser = require('body-parser');
 const morgan     = require('morgan');
+const fileUpload = require('express-fileupload');
 
 const app = express();
 mongoose.connect("mongodb+srv://mridul549:xTKgkDyitxpKcOY7@cluster0.iuoe1mb.mongodb.net/?retryWrites=true&w=majority")
