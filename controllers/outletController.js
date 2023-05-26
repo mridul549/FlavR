@@ -204,10 +204,12 @@ module.exports.updateOutlet = (req,res) => {
 }
 
 // 0. Find an outlet
-// 1. remove outlet from DB
-// 2. remove outlet from owner's outlet array
-// 3. romove all products from products array in owner schema of an outlet
-// 4. romove all products of this outlet
+// 1. If outlet image present, remove it from cloud
+// 2. Delete qr from cloud
+// 3. remove outlet from DB
+// 4. remove outlet from owner's outlet array
+// 5. romove all products from products array in owner schema of an outlet
+// 6. romove all products of this outlet
 // using async functions here, as suggested by vs code
 module.exports.deleteOutlet = (req,res) => {
     const outletid = req.body.outletid
@@ -217,6 +219,29 @@ module.exports.deleteOutlet = (req,res) => {
     .exec()
     .then(result => {
         if(result.length>0) {
+            const imageidOld = result[0].outletImage.imageid
+            const qrid       = result[0].outletqr.qrid
+
+            if(imageidOld!=="null") {
+                // deleting outlet image from cloud
+                cloudinary.uploader.destroy(imageidOld, (err,result) => {
+                    if(err) {
+                        return res.status(500).json({
+                            error: "error in deleting the old image"
+                        })
+                    }
+                })
+            }
+
+            // deleteing qr from cloud
+            cloudinary.uploader.destroy(qrid, (err,result) => {
+                if(err) {
+                    return res.status(500).json({
+                        error: "error in deleting the old image"
+                    })
+                }
+            })
+
             Outlet.deleteOne({ _id: outletid })
             .exec()
             .then(async result => {
