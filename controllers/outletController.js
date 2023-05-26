@@ -12,43 +12,8 @@ cloudinary.config({
     secure: true
 });
 
-function createQRAndUpload (result, req, res) {
-    qrcode.toDataURL(`${result._id}`, {
-        errorCorrectionLevel: 'H',
-        color: {
-          dark: '#000',  // black dots
-          light: '#fff' // white background
-        }
-    }, function (err, qrurl) {
-        if (err) {
-            return res.status(201).json({
-                error: "QR Generation failed"
-            })
-        }
-        cloudinary.uploader.upload(qrurl, (err, image) => {
-            if(err) {
-                return res.status(201).json({
-                    error: "image upload failed"
-                })
-            }
-            Outlet.updateOne({ _id: result._id }, {
-                $set: {
-                    "outletqr": {
-                        url: image.url,
-                        qrid: image.public_id
-                    }
-                }
-            })
-            .exec()
-            .then()
-            .catch(err => {
-                console.log(err);
-                res.status(500).json({
-                    error: err
-                })
-            })
-        })
-    })
+function uploadOutletImage (result, req, res) {
+    
 }
 
 // in this we first search the database to check for an
@@ -84,6 +49,7 @@ module.exports.addOutlet = (req,res) => {
         return outlet.save()
     })
     .then(result => {
+        // generates a qr code data url
         const qrCodePromise = new Promise((resolve, reject) => {
             qrcode.toDataURL(`${result._id}`, {
                 errorCorrectionLevel: 'H',
@@ -99,10 +65,11 @@ module.exports.addOutlet = (req,res) => {
                 }
             });
         });
-
+        // passing the outlet created and the data url to next promise
         return Promise.all([result, qrCodePromise]);
     })
     .then(([result, qrdata]) => {
+        // uploading the genrated qr code to cloud
         return new Promise((resolve, reject) => {
             cloudinary.uploader.upload(qrdata, (err, image) => {
                 if (err) {
@@ -114,6 +81,7 @@ module.exports.addOutlet = (req,res) => {
         });
     })
     .then(async ({ result, image }) => {
+        // updating the created outled with the cloud link just created
         try {
             await Outlet.updateOne({ _id: result._id }, {
                 $set: {
