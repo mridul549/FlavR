@@ -386,3 +386,28 @@ module.exports.updateImage = (req,res) => {
         })
     })
 }
+
+module.exports.getUserProfile = (req,res) => {
+    const userid = req.userData.userid
+
+    User.find({ _id: userid })
+    .select('_id userName email orders userProfilePic')
+    .exec()
+    .then(result => {
+        if(result.length>0) {
+            return res.status(201).json({
+                user: result
+            })
+        } else {
+            return res.status(404).json({
+                error: "User not found!"
+            })
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}

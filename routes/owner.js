@@ -4,6 +4,7 @@ const ownerController = require('../controllers/ownerController');
 const checkAuth = require('../middlewares/check-auth');
 
 router.get('/getOutlets', checkAuth, ownerController.getOutlets);
+router.get('/ownerprofile', checkAuth, ownerController.getOwnerProfile);
 
 router.patch('/addOutlet', checkAuth, ownerController.addOutlet);
 router.patch('/updateImage', checkAuth, ownerController.updateImage);

@@ -11,6 +11,7 @@ router.post('/login', userController.login);
 // GET methods
 router.get('/getCartItems', checkAuth, userController.getCartItems);
 router.get('/getCartSize', checkAuth, userController.getCartSize);
+router.get('/userprofile', checkAuth, userController.getUserProfile);
 
 // POST methods
 router.post('/addOneProductToCart', checkAuth, userController.addOneProductToCart);

@@ -279,3 +279,28 @@ module.exports.updateImage = (req,res) => {
 module.exports.deleteOwner = (req,res) => {
 
 }
+
+module.exports.getOwnerProfile = (req,res) => {
+    const ownerid = req.userData.ownerid
+
+    Owner.find({ _id: ownerid })
+    .select('_id ownerName email outlets ownerProfilePic')
+    .exec()
+    .then(result => {
+        if(result.length>0) {
+            return res.status(201).json({
+                owner: result
+            })
+        } else {
+            return res.status(404).json({
+                error: "Owner not found!"
+            })
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
