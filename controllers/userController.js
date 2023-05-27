@@ -199,7 +199,7 @@ module.exports.getCartItems = (req,res) => {
     .populate('cart.product', '_id category productName description price productImage')
     .exec()
     .then(result => {
-        return res.status(201).json({
+        return res.status(200).json({
             size: result[0].cart.length,
             cart: result[0].cart
         })
@@ -216,7 +216,7 @@ module.exports.getCartSize = (req,res) => {
     User.find({ _id: req.userData.userid })
     .exec()
     .then(result => {
-        return res.status(201).json({
+        return res.status(200).json({
             size: result[0].cart.length,
         })
     })
@@ -246,7 +246,7 @@ module.exports.updateQuantity = (req,res) => {
         })
         .exec()
         .then(result => {
-            return res.status(201).json({
+            return res.status(200).json({
                 message: "Product removed from cart"
             })
         })
@@ -264,7 +264,7 @@ module.exports.updateQuantity = (req,res) => {
         })
         .exec()
         .then(result => {
-            return res.status(201).json({
+            return res.status(200).json({
                 message: "Quantity Updated successfully"
             })
         })
@@ -289,7 +289,7 @@ module.exports.clearCart = (req,res) => {
     })
     .exec()
     .then(result => {
-        return res.status(201).json({
+        return res.status(200).json({
             message: "Cleared cart",
             ACK: result
         })
@@ -315,7 +315,7 @@ module.exports.removeProductCart = (req,res) => {
     })
     .exec()
     .then(result => {
-        return res.status(201).json({
+        return res.status(200).json({
             message: "Product removed from cart"
         })
     })
@@ -362,7 +362,7 @@ module.exports.updateImage = (req,res) => {
                 })
                 .exec()
                 .then(docs => {
-                    return res.status(201).json({
+                    return res.status(200).json({
                         message: "Image updated successfully"
                     })
                 })

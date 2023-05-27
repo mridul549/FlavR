@@ -179,7 +179,7 @@ module.exports.updateOutlet = (req,res) => {
             })
             .exec()
             .then(result => {
-                return res.status(201).json({
+                return res.status(200).json({
                     message: "Outlet Updated successfully",
                 })
             })
@@ -264,7 +264,7 @@ module.exports.deleteOutlet = (req,res) => {
                 return result;
             })
             .then(result => {
-                return res.status(201).json({
+                return res.status(200).json({
                     message: "Outlet deleted successfully"
                 })
             })
@@ -294,11 +294,11 @@ module.exports.getMenuSize = (req,res) => {
     .exec()
     .then(result => {
         if(result.length>0) {
-            return res.status(201).json({
+            return res.status(200).json({
                 menuSize: result[0].menu.length
             })
         } else {
-            return res.status(201).json({
+            return res.status(404).json({
                 error: "Outlet doesn't exist"
             })
         }
@@ -346,7 +346,7 @@ module.exports.updateImage = (req,res) => {
                 })
                 .exec()
                 .then(docs => {
-                    return res.status(201).json({
+                    return res.status(200).json({
                         message: "Image updated successfully"
                     })
                 })
@@ -383,7 +383,7 @@ module.exports.getOutlet = (req,res) => {
             .select('_id outletName address owner outletImage outletqr createdAt updatedAt')
             .exec()
             .then(result => {
-                return res.status(201).json({
+                return res.status(200).json({
                     result
                 })
             })

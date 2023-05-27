@@ -20,7 +20,7 @@ module.exports.getNewToken = (req,res) => {
     const newToken = jwt.sign(decodedPayload, process.env.TOKEN_SECRET, {
         expiresIn: "30 days"
     })
-    return res.status(201).json({
+    return res.status(200).json({
         newToken: newToken
     })
 }
@@ -145,7 +145,7 @@ module.exports.getOutlets = (req,res) => {
     .exec()
     .then(result => {
         if(result){
-            return res.status(201).json({
+            return res.status(200).json({
                 outlets: result[0].outlets
             })
         } else {
@@ -189,7 +189,7 @@ module.exports.updateOwner = (req,res) => {
             })
             .exec()
             .then(result => {
-                return res.status(201).json({
+                return res.status(200).json({
                     message: "Owner updated successfully"
                 })
             })
@@ -248,7 +248,7 @@ module.exports.updateImage = (req,res) => {
                 })
                 .exec()
                 .then(docs => {
-                    return res.status(201).json({
+                    return res.status(200).json({
                         message: "Image updated successfully"
                     })
                 })

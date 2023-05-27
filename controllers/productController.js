@@ -31,7 +31,7 @@ module.exports.getProductsOfOutlet = (req,res) => {
                     }
                 })
             }
-            res.status(201).json(response);
+            res.status(200).json(response);
         } else {
             return res.status(404).json({
                 error: "No products found"
@@ -182,7 +182,7 @@ module.exports.getProductsByCategory = (req,res) => {
     .exec()
     .then(result => {
         if(result) {
-            return res.status(201).json({
+            return res.status(200).json({
                 products: result
             })
         } else {
@@ -206,11 +206,11 @@ module.exports.getSingleProduct = (req,res) => {
     .exec()
     .then(result => {
         if(result) {
-            return res.status(201).json({
+            return res.status(200).json({
                 product: result
             })
         } else {
-            return res.status(201).json({
+            return res.status(404).json({
                 error: "No product found"
             })
         }
@@ -252,7 +252,7 @@ module.exports.getAllCategories = (req,res) => {
                 })
             })
     
-            return res.status(201).json({
+            return res.status(200).json({
                 categories: categoryArray
             })
         } else {
@@ -286,8 +286,9 @@ module.exports.updateProduct = (req,res) => {
             })
             .exec()
             .then(result => {
-                return res.status(201).json({
-                    result
+                return res.status(200).json({
+                    message: "Product updated successfully",
+                    ACK: result
                 })
             })
             .catch(err => {
@@ -372,7 +373,7 @@ module.exports.deleteProduct = (req,res) => {
                 }
             })
             .then(result => {
-                return res.status(201).json({
+                return res.status(200).json({
                     message: "Product deleled successfully"
                 })
             })
@@ -434,7 +435,7 @@ module.exports.updateProductImage = (req,res) => {
                 })
                 .exec()
                 .then(docs => {
-                    return res.status(201).json({
+                    return res.status(200).json({
                         message: "Image updated successfully"
                     })
                 })
