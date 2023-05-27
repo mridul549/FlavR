@@ -275,6 +275,7 @@ module.exports.updateImage = (req,res) => {
 
 /*
     1. Delete owner
+    2. Delete its profile pic from database
 */
 module.exports.deleteOwner = (req,res) => {
 
