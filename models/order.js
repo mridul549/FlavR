@@ -29,11 +29,10 @@ const orderSchema = mongoose.Schema({
     }],
     totalPrice: {
         type: mongoose.SchemaTypes.Decimal128,
-        required: true
     },
     status: [{
         type: String,
-        required: true
+        default: "processing"
     }]
 }, {
     timestamps: true

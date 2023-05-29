@@ -7,8 +7,9 @@ const User       = require('../models/user');
 
 /* 
     1. get all items in cart
-    2. get total price
-    3. 
+    2. calculate total price
+    3. update the order schema accordingly
+    4. 
 
 */
 module.exports.placeOrder = async (req, res) => {
