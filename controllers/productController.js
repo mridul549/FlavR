@@ -13,7 +13,7 @@ cloudinary.config({
 
 module.exports.getProductsOfOutlet = (req,res) => {
     Product.find({ outlet: req.query.outletid })
-    .select('_id category productName description price outlet veg productImage')
+    .select('veg productImage _id category productName description price outlet')
     .populate('outlet', '_id outletName address owner')
     .exec()
     .then(result => {
@@ -27,6 +27,8 @@ module.exports.getProductsOfOutlet = (req,res) => {
                         name: doc.productName,
                         description: doc.description,
                         price: doc.price,
+                        veg: doc.veg,
+                        productImage: doc.productImage,
                         outlet: doc.outlet
                     }
                 })
@@ -326,7 +328,7 @@ module.exports.deleteProduct = (req,res) => {
         if(result.length>0) {
             const imageidOld = result[0].productImage.imageid
 
-            if(imageidOld!=="null") {
+            if(imageidOld!=="null" || imageidOld===undefined) {
                 cloudinary.uploader.destroy(imageidOld, (err,result) => {
                     if(err) {
                         return res.status(500).json({
