@@ -3,8 +3,7 @@ const mongoose = require('mongoose');
 const orderSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     orderNumber: {
-        type: Number,
-        required: true
+        type: Number
     },
     user: {
         type: mongoose.Schema.Types.ObjectId,
@@ -23,12 +22,23 @@ const orderSchema = mongoose.Schema({
             ref: 'Product'
         },
         quantity: {
-            type: Number,
-            default: 1
+            type: Number
         }
     }],
     totalPrice: {
         type: mongoose.SchemaTypes.Decimal128,
+        default: 0
+    },
+    totalQuantity: {
+        type: Number,
+        default: 0
+    },
+    payment: {
+        type: Boolean,
+        default: false
+    },
+    instructions: {
+        type: String
     },
     status: [{
         type: String,
