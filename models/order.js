@@ -40,10 +40,10 @@ const orderSchema = mongoose.Schema({
     instructions: {
         type: String
     },
-    status: [{
+    status: {
         type: String,
         default: "processing"
-    }]
+    }
 }, {
     timestamps: true
 })
