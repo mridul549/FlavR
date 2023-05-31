@@ -17,8 +17,9 @@ app.use(bodyParser.json());
 app.use(fileUpload({
     useTempFiles: true
 }))
+
 require('./processQueue/index')
- 
+
 // implementing CORS security mechanism
 app.use((req,res,next) => {
     res.header("Access-Control-Allow-Origin", "*");
