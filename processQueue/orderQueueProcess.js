@@ -19,9 +19,7 @@ const orderQueueProcess = async (job, done) => {
         return result
     })
     .then(result => {
-        // setTimeout(() => {
-            done()
-        // }, 4000)
+        done()
     })
     .catch(err => {
         console.log(err);
