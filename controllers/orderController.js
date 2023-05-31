@@ -8,7 +8,7 @@ const User       = require('../models/user');
 /* 
     1. get all items in cart
     2. get total price
-    3. 
+    3. changes are in order-handling
 
 */
 module.exports.placeOrder = async (req, res) => {
