@@ -20,3 +20,21 @@ module.exports.newSeq = (req,res) => {
         })
     })
 }
+
+module.exports.resetSeq = (req,res) => {
+    Seq.updateOne({ key: "Counter_key"}, {
+        $set: { counter: 0 }
+    })
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            message: "Order numbers reset successfully"
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}

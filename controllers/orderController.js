@@ -76,7 +76,7 @@ module.exports.placeOrder = async (req, res) => {
 
 
             .then(result => {
-                return res.status(200).json({
+                return res.status(201).json({
                     message: "Order successfully placed"
                 })
             })
@@ -111,3 +111,19 @@ module.exports.placeOrder = async (req, res) => {
 // TODO- UPDATE PAYMENT STATUS
 // 1. send a res to client here and let the rest of the functioning work
 
+module.exports.deleteAll = (req,res) => {
+    const userid = req.userData.userid
+    Order.deleteMany({ user: userid })
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            message: "Deleted all"
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}

@@ -7,44 +7,21 @@ mongoose.connect("mongodb+srv://mridul549:xTKgkDyitxpKcOY7@cluster0.iuoe1mb.mong
 const orderQueueProcess = async (job, done) => {
     const orderid = job.data.orderid
 
-    Seq.findOneAndUpdate({ id: "autoval" }, { $inc: {"seq": 1 } }, { new: true })
-
-    done()
-}
-module.exports = orderQueueProcess
-
-
-/*
-    OrderSeq.findOneAndUpdate({ id: "autoval" }, { $inc: {"seq": 1 } }, { new: true })
+    Seq.findOneAndUpdate({ key: "Counter_key" }, { $inc: { "counter": 1 } }, { new: true })
     .exec()
+    .then(async result => {
+        let orderNum = result.counter
+
+        await Order.updateOne({ _id: orderid }, { 
+            $set: { orderNumber: orderNum, status: "preparing" }
+        })
+        .exec()
+        return result
+    })
     .then(result => {
-        let seqID;
-        if(result==null) {
-            const newVal = new OrderSeq({
-                id: "autoval", 
-                seq: 1
-            })
-            seqID=1
-            newVal.save()
-        } else {
-            seqID=result.seq
-        }
-        const order = new TestOrder({
-            id: seqID,
-            name: req.body.name
-        })
-        order.save()
-        .then(result => {
-            return res.status(201).json({
-                result
-            })
-        })
-        .catch(err => {
-            console.log(err);
-            return res.status(500).json({
-                error: err
-            })
-        })
+        // setTimeout(() => {
+            done()
+        // }, 4000)
     })
     .catch(err => {
         console.log(err);
@@ -52,5 +29,6 @@ module.exports = orderQueueProcess
             error: err
         })
     })
+}
 
-*/
+module.exports = orderQueueProcess

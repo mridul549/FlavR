@@ -36,6 +36,7 @@
     "nodemon": "^2.0.22",
     "qrcode": "^1.5.3",
     "redis": "^4.6.6",
+    "taskforce-connector": "^1.24.3",
     "twilio": "^4.11.1"
   }
 }
