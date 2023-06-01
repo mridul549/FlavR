@@ -5,7 +5,7 @@ const { Connect } = require("taskforce-connector");
 const redis = require('redis');
 
 const client = redis.createClient({
-    url: "redis://default:zvrM2aS77e1WPps4D4gO6u4cIB1L5Jmo@redis-10818.c273.us-east-1-2.ec2.cloud.redislabs.com:10818",
+    url: REDIS_HOST,
 });
 
 client.connect();
