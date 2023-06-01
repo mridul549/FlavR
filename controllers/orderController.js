@@ -21,10 +21,10 @@ const orderQueue = new Queue('orderQueue', {
     3. update the order schema accordingly without order number
     4. take payment
     5. after payment assign order number
+    6. add the order to the respective outlet
 
     Things to work on:
-    1. Order number generation
-    2. Payment
+    1. Payment
 */
 module.exports.placeOrder = async (req, res) => {
     const userid   = req.userData.userid
