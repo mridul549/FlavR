@@ -3,7 +3,11 @@ const path  = require('path')
 const redis = require('redis');
 
 const client = redis.createClient({
-    url: process.env.URI,
+    password: process.env.REDIS_PASSWORD,
+    socket: {
+        host: 'redis-10818.c273.us-east-1-2.ec2.cloud.redislabs.com',
+        port: 10818
+    }
 });
 
 client.connect();
