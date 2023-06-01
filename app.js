@@ -5,11 +5,11 @@ const morgan     = require('morgan');
 const fileUpload = require('express-fileupload');
 
 const app = express();
-mongoose.connect("mongodb+srv://mridul549:xTKgkDyitxpKcOY7@cluster0.iuoe1mb.mongodb.net/?retryWrites=true&w=majority")
 
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config();
 }
+mongoose.connect(process.env.MONGOOSE_CONNECTION_STRING)
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
@@ -17,7 +17,7 @@ app.use(fileUpload({
     useTempFiles: true
 }))
 
-require('./processQueue/index')
+require('./queue/index')
 
 // implementing CORS security mechanism
 app.use((req,res,next) => {
