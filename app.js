@@ -17,6 +17,7 @@ app.use(fileUpload({
     useTempFiles: true
 }))
 
+// Require bull queue processor for orders
 require('./queue/index')
 
 // implementing CORS security mechanism
