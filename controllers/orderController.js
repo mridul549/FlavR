@@ -5,12 +5,13 @@ const Outlet     = require('../models/outlet');
 const Owner      = require('../models/owner');
 const User       = require('../models/user');
 const Queue      = require('bull');
-const { REDIS_PORT, REDIS_URI } = require('../config/redis')
 
 const orderQueue = new Queue('orderQueue', {
     redis: {
-        port: REDIS_PORT,
-        host: REDIS_URI
+        host: process.env.REDIS_HOST,
+        port: process.env.REDIS_PORT,
+        password: process.env.REDIS_PASSWORD,
+        username: process.env.REDIS_USERNAME
     }
 })
 

@@ -5,7 +5,7 @@ const { Connect } = require("taskforce-connector");
 const redis = require('redis');
 
 const client = redis.createClient({
-    url: REDIS_HOST,
+    url: process.env.URI,
 });
 
 client.connect();
@@ -18,12 +18,13 @@ client.on('connect', () => {
 client.on('error', (err) => {
     console.error('Redis Error:', err);
 });
-  
+
 const orderQueue = new Queue('orderQueue', {
     redis: {
-        port: REDIS_PORT,
-        host: REDIS_URI,
-        password: REDIS_PASSWORD,
+        host: process.env.REDIS_HOST,
+        port: process.env.REDIS_PORT,
+        password: process.env.REDIS_PASSWORD,
+        username: process.env.REDIS_USERNAME
     }
 })
 
