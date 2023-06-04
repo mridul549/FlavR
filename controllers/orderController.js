@@ -5,6 +5,9 @@ const Outlet     = require('../models/outlet');
 const Owner      = require('../models/owner');
 const User       = require('../models/user');
 const Queue      = require('bull');
+const cashfree = require("cashfree-pg-sdk-nodejs");
+
+var cfConfig = new cashfree.CFConfig(cashfree.CFEnvironment.SANDBOX, "2022-09-01", process.env.CF_APP_ID, process.env.CF_API_KEY);
 
 const orderQueue = new Queue('orderQueue', {
     redis: {
@@ -61,20 +64,51 @@ module.exports.placeOrder = async (req, res) => {
             })
     
             order.save()
+            // TODO- COLLECT PAYMENT
+            .then(async newOrder => {
 
-            // TODO- ASSIGN ORDER NUMBER by adding to queue
+                var customerDetails = new cashfree.CFCustomerDetails();
+                customerDetails.customerId = "some_random_id";
+                customerDetails.customerPhone = "9999999999";
+                customerDetails.customerEmail = "b.a@cashfree.com";
+                var d = {};
+                d["order_tag_01"] = "TESTING IT";
+                
+                var cFOrderRequest = new cashfree.CFOrderRequest();
+                cFOrderRequest.orderAmount = 1;
+                cFOrderRequest.orderCurrency = "INR";
+                cFOrderRequest.customerDetails = customerDetails;
+                cFOrderRequest.orderTags = d;
+            
+                try {
+                    var apiInstance = new cashfree.CFPaymentGateway();
+
+                    var result = await apiInstance.orderCreate(
+                        cfConfig,
+                        cFOrderRequest
+                    );
+                    if (result != null) {
+                        console.log(result?.cfOrder?.paymentSessionId);
+                        console.log(result?.cfOrder?.orderId);
+                        console.log(result?.cfHeaders);
+                    }
+                    return newOrder
+                } catch (e) {
+                    console.log(e);
+                }
+            })
+
+            // ASSIGN ORDER NUMBER by adding to queue
             .then(async result => {
                 const orderid = result._id
                 await orderQueue.add({ orderid })
                 return result
             })
 
-
             // TODO- ADD THE ORDER TO THE OUTLET
             // .then(async result => {
 
             // })
-
 
             .then(result => {
                 return res.status(201).json({
