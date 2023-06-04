@@ -372,10 +372,10 @@ module.exports.updateImage = (req,res) => {
 }
 
 module.exports.getOutlet = (req,res) => {
-    const ownerid  = req.userData.ownerid
+    const userid  = req.userData.userid
     const outletid = req.query.outletid
 
-    Owner.find({ _id: ownerid })
+    User.find({ _id: userid })
     .exec()
     .then(result => {
         if(result.length>0) {
@@ -395,7 +395,7 @@ module.exports.getOutlet = (req,res) => {
             })
         } else {
             return res.status(404).json({
-                error: "No owner found"
+                error: "No user found"
             })
         }
     })
