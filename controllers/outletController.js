@@ -4,6 +4,7 @@ const Owner                 = require('../models/owner');
 const Product               = require('../models/product')
 const qrcode                = require('qrcode');
 const cloudinary            = require('cloudinary').v2;
+const User                  = require('../models/user');
 
 cloudinary.config({ 
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
@@ -389,7 +390,7 @@ module.exports.getOutlet = (req,res) => {
             })
             .catch(err => {
                 console.log(err);
-                res.status(500).json({
+                return res.status(500).json({
                     error: err
                 })
             })
