@@ -21,6 +21,9 @@
   },
   "homepage": "https://github.com/mridul549/OrderApp#readme",
   "dependencies": {
+    "api": "^5.0.8",
+    "axios": "^1.4.0",
+    "axois": "^0.0.1-security",
     "bcrypt": "^5.1.0",
     "body-parser": "^1.20.2",
     "bull": "^4.10.4",
