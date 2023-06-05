@@ -342,62 +342,78 @@ module.exports.deleteProduct = (req,res) => {
     const ownerid = req.userData.ownerid
     const outletid = req.body.outletid
 
-    Product.find({ _id: productid })
+    Outlet.find({ _id: outletid })
     .exec()
     .then(result => {
-        if(result.length>0) {
-            const imageidOld = result[0].productImage.imageid
+        if(result[0].owner == ownerid) {
+            Product.find({ _id: productid })
+            .exec()
+            .then(result => {
+                if(result.length>0) {
+                    const imageidOld = result[0].productImage.imageid
 
-            if(imageidOld!=="null" || imageidOld===undefined) {
-                cloudinary.uploader.destroy(imageidOld, (err,result) => {
-                    if(err) {
-                        return res.status(500).json({
-                            error: "error in deleting the old image"
+                    if(imageidOld!=="null" || imageidOld===undefined) {
+                        cloudinary.uploader.destroy(imageidOld, (err,result) => {
+                            if(err) {
+                                return res.status(500).json({
+                                    error: "error in deleting the old image"
+                                })
+                            }
                         })
                     }
-                })
-            }
 
-            Product.deleteOne({ _id: productid })
-            .exec()
-            .then(async result => {
-                try {
-                    await Owner.updateOne({ _id: ownerid }, {
-                        $pull: {
-                            "products": {
-                                "product": productid
-                            }
+                    Product.deleteOne({ _id: productid })
+                    .exec()
+                    .then(async result => {
+                        try {
+                            await Owner.updateOne({ _id: ownerid }, {
+                                $pull: {
+                                    "products": {
+                                        "product": productid
+                                    }
+                                }
+                            })
+                            .exec();
+                            return result
+                        } catch (err) {
+                            console.log(err);
+                            res.status(500).json({
+                                error: err
+                            });
                         }
                     })
-                    .exec();
-                    return result
-                } catch (err) {
-                    console.log(err);
-                    res.status(500).json({
-                        error: err
-                    });
-                }
-            })
-            .then(async result => {
-                try {
-                    await Outlet.updateOne({ _id: outletid, "menu": productid }, {
-                        $pull: {
-                            "menu": productid
+                    .then(async result => {
+                        try {
+                            await Outlet.updateOne({ _id: outletid, "menu": productid }, {
+                                $pull: {
+                                    "menu": productid
+                                }
+                            })
+                                .exec();
+                            return result;
+                        } catch (err) {
+                            console.log(err);
+                            res.status(500).json({
+                                error: err
+                            });
                         }
                     })
-                        .exec();
-                    return result;
-                } catch (err) {
-                    console.log(err);
-                    res.status(500).json({
-                        error: err
-                    });
+                    .then(result => {
+                        return res.status(200).json({
+                            message: "Product deleled successfully"
+                        })
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        res.status(500).json({
+                            error: err
+                        })
+                    })
+                } else {
+                    return res.status(404).json({
+                        error: "Product not found"
+                    })
                 }
-            })
-            .then(result => {
-                return res.status(200).json({
-                    message: "Product deleled successfully"
-                })
             })
             .catch(err => {
                 console.log(err);
@@ -406,18 +422,18 @@ module.exports.deleteProduct = (req,res) => {
                 })
             })
         } else {
-            return res.status(404).json({
-                error: "Product not found"
+            return res.status(401).json({
+                error: "Bad request",
+                message: "Owner does not have auth to delete this product"
             })
         }
     })
     .catch(err => {
         console.log(err);
-        res.status(500).json({
+        return res.status(500).json({
             error: err
         })
     })
-
 }
 
 // 1. Delete old image if exits
