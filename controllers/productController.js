@@ -92,56 +92,37 @@ function saveProduct (product, req, res) {
 // if a file is passed in the form, it is accepted and uploaded
 // else image id and url is passed as null
 module.exports.addProduct = (req,res) => {
-    Product.find({
-        $and: [
-            { category: req.body.category },
-            { productName: req.body.productName },
-            { description: req.body.description },
-            { price: req.body.price },
-            { outlet: req.body.outletid },
-            { owner: req.userData.ownerid }
-        ]
-    })
+    const ownerid = req.userData.ownerid
+    const outletid = req.body.outletid
+
+    Outlet.find({ _id: outletid })
     .exec()
     .then(result => {
-        if(result.length>0){
-            return res.status(404).json({
-                message: "Product already exists"
+        if(result[0].owner == ownerid) {
+            Product.find({
+                $and: [
+                    { category: req.body.category },
+                    { productName: req.body.productName },
+                    { description: req.body.description },
+                    { price: req.body.price },
+                    { outlet: outletid },
+                    { owner: ownerid }
+                ]
             })
-        }
-        
-        var imageProp = {
-            url: "null",
-            imageid: "null"
-        }
-
-        const productwofile = new Product({
-            _id: new mongoose.Types.ObjectId(),
-            category: req.body.category,
-            productName: req.body.productName,
-            description: req.body.description,
-            price: req.body.price,
-            veg: req.body.veg,
-            owner: req.userData.ownerid,
-            outlet: req.body.outletid,
-            productImage: imageProp
-        })
-
-        if(req.files && req.files.productImage) {
-            const file = req.files.productImage
-            cloudinary.uploader.upload(file.tempFilePath, (err, image) => {
-                if(err) {
-                    return res.status(201).json({
-                        error: "image upload failed"
+            .exec()
+            .then(result => {
+                if(result.length>0){
+                    return res.status(404).json({
+                        message: "Product already exists"
                     })
                 }
-    
-                imageProp = {
-                    url: image.url,
-                    imageid: image.public_id
+                
+                var imageProp = {
+                    url: "null",
+                    imageid: "null"
                 }
-
-                const productwfile = new Product({
+        
+                const productwofile = new Product({
                     _id: new mongoose.Types.ObjectId(),
                     category: req.body.category,
                     productName: req.body.productName,
@@ -152,15 +133,54 @@ module.exports.addProduct = (req,res) => {
                     outlet: req.body.outletid,
                     productImage: imageProp
                 })
-                saveProduct(productwfile, req, res)
+        
+                if(req.files && req.files.productImage) {
+                    const file = req.files.productImage
+                    cloudinary.uploader.upload(file.tempFilePath, (err, image) => {
+                        if(err) {
+                            return res.status(201).json({
+                                error: "image upload failed"
+                            })
+                        }
+            
+                        imageProp = {
+                            url: image.url,
+                            imageid: image.public_id
+                        }
+        
+                        const productwfile = new Product({
+                            _id: new mongoose.Types.ObjectId(),
+                            category: req.body.category,
+                            productName: req.body.productName,
+                            description: req.body.description,
+                            price: req.body.price,
+                            veg: req.body.veg,
+                            owner: req.userData.ownerid,
+                            outlet: req.body.outletid,
+                            productImage: imageProp
+                        })
+                        saveProduct(productwfile, req, res)
+                    })
+                } else {
+                    saveProduct(productwofile, req, res)
+                }
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    error: err
+                })
             })
         } else {
-            saveProduct(productwofile, req, res)
+            return res.status(401).json({
+                error: "Bad request",
+                message: "Owner id not matching with the outlet"
+            })
         }
     })
     .catch(err => {
         console.log(err);
-        res.status(500).json({
+        return res.status(500).json({
             error: err
         })
     })
