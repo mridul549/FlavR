@@ -26,7 +26,7 @@ const orderSchema = mongoose.Schema({
         }
     }],
     totalPrice: {
-        type: mongoose.SchemaTypes.Decimal128,
+        type: Number,
         default: 0
     },
     totalQuantity: {

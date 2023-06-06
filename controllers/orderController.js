@@ -5,11 +5,9 @@ const Outlet     = require('../models/outlet');
 const Owner      = require('../models/owner');
 const User       = require('../models/user');
 const Queue      = require('bull');
-const cashfree = require("cashfree-pg-sdk-nodejs");
-const sdk = require('api')('@cashfreedocs-new/v3#9qqu7am5li0449pa');
-const axios = require('axios');
-
-var cfConfig = new cashfree.CFConfig(cashfree.CFEnvironment.SANDBOX, "2022-01-01", process.env.CF_APP_ID, process.env.CF_API_KEY);
+const axios      = require('axios');
+const cashfree   = require('cashfree-pg-sdk-nodejs');
+const crypto     = require('crypto')
 
 const orderQueue = new Queue('orderQueue', {
     redis: {
@@ -64,62 +62,28 @@ module.exports.placeOrder = async (req, res) => {
                 totalPrice: totalAmount,
                 totalQuantity: totalQuantity
             })
-    
+            
             order.save()
-            // TODO- COLLECT PAYMENT
+
+            // Generate cashfree token and send to the frontend SDK
             .then(async newOrder => {
                 const payment = await getPaymentToken(newOrder, result, req, res)
-                return newOrder
-
-                // var customerDetails = new cashfree.CFCustomerDetails();
-                // customerDetails.customerId = "some_random_id";
-                // customerDetails.customerPhone = "9999999999";
-                // customerDetails.customerEmail = "b.a@cashfree.com";
-                // var d = {};
-                // d["order_tag_01"] = "TESTING IT";
-                
-                // var cFOrderRequest = new cashfree.CFOrderRequest();
-                // cFOrderRequest.orderAmount = 100;
-                // cFOrderRequest.orderCurrency = "INR";
-                // cFOrderRequest.customerDetails = customerDetails;
-                // cFOrderRequest.orderTags = d;
-
-                // try {
-                //     var apiInstance = new cashfree.CFPaymentGateway();
-
-                //     var result = await apiInstance.orderCreate(
-                //         cfConfig,
-                //         cFOrderRequest
-                //     );
-                //     if (result != null) {
-                //         // console.log(result?.cfOrder?.paymentSessionId);
-                //         // console.log(result?.cfOrder?.orderId);
-                //         // console.log(result?.cfHeaders);
-                //         console.log(result);
-                //     }
-                // } catch (e) {
-                //     console.log(e);
-                // }
-                // return newOrder
+                return res.status(201).json({
+                    message: "Order added to the database and cashfree token successfully generated",
+                    cf_order_id: payment.data.cf_order_id,
+                    order_id: newOrder._id,
+                    payment_session_id: payment.data.payment_session_id,
+                    order_status: payment.data.order_status
+                })
             })
 
             // ASSIGN ORDER NUMBER by adding to queue
-            .then(async newOrder => {
-                const orderid = newOrder._id
-                await orderQueue.add({ orderid })
-                return newOrder
-            })
-
-            // TODO- ADD THE ORDER TO THE OUTLET
-            // .then(async result => {
-
+            // To be handled after payment success, using webhooks for this
+            // .then(async newOrder => {
+            //     const orderid = newOrder._id
+            //     await orderQueue.add({ orderid })
+            //     return newOrder
             // })
-
-            .then(result => {
-                return res.status(201).json({
-                    message: "Order successfully placed"
-                })
-            })
             .catch(err => {
                 console.log(err);
                 return res.status(500).json({
@@ -146,11 +110,6 @@ module.exports.placeOrder = async (req, res) => {
     3. after order number assignment, add this order to the respective outlet
 */
 
-// TODO- COLLECT PAYMENT
-
-// TODO- UPDATE PAYMENT STATUS
-// 1. send a res to client here and let the rest of the functioning work
-
 module.exports.deleteAll = (req,res) => {
     const userid = req.userData.userid
     Order.deleteMany({ user: userid })
@@ -168,70 +127,39 @@ module.exports.deleteAll = (req,res) => {
     })
 }
 
+/**
+ *** All payment methods go here ***
+
+ ** Get payment token- 
+ * called on creation of a new order and generates a cashfree token for the frontend to handle.
+*/ 
 getPaymentToken = async (neworder, user, req, res) => {
     const headers = {
-        'Content-Type': 'application/json',
         'x-client-id': process.env.CF_APP_ID,
         'x-client-secret': process.env.CF_API_KEY,
         'x-api-version': '2022-09-01',
-        'x-request-id': 'developer_name'
     };
     
     const data = {
-    order_amount: 1.0,
-    order_id: 'dbwbdjw82',
-    order_currency: 'INR',
-    customer_details: {
-        customer_id: '32132143',
-        customer_name: 'customer_name',
-        customer_email: 'customer_email',
-        customer_phone: 7009100026
-    },
-    order_meta: {
-        notify_url: 'https://test.cashfree.com'
-    },
-    order_note: 'some order note here'
+        order_amount: neworder.totalPrice,
+        order_id: neworder._id,
+        order_currency: 'INR',
+        customer_details: {
+            customer_id: user[0]._id,
+            customer_name: user[0].userName,
+            customer_email: user[0].email,
+            customer_phone: "7009100026"
+        },
     };
 
     try {
         const response = await axios.post('https://sandbox.cashfree.com/pg/orders', data, { headers });
-        console.log(response.data);
+        return response
     } catch (error) {
         console.error(error);
     }
 }
 
-/*
-    var customerDetails = new cashfree.CFCustomerDetails();
-    customerDetails.customerId = "some_random_id";
-    customerDetails.customerPhone = "9999999999";
-    customerDetails.customerEmail = "b.a@cashfree.com";
-    var d = {};
-    d["order_tag_01"] = "TESTING IT";
-    
-    var cFOrderRequest = new cashfree.CFOrderRequest();
-    cFOrderRequest.orderAmount = 1;
-    cFOrderRequest.orderCurrency = "INR";
-    cFOrderRequest.customerDetails = customerDetails;
-    cFOrderRequest.orderTags = d;
+module.exports.catchRequest = (req,res) => {
 
-    try {
-        var apiInstance = new cashfree.CFPaymentGateway();
-
-        var result = await apiInstance.orderCreate(
-            cfConfig,
-            cFOrderRequest
-        );
-        if (result != null) {
-            console.log(result?.cfOrder?.paymentSessionId);
-            console.log(result?.cfOrder?.orderId);
-            console.log(result?.cfHeaders);
-        }
-        return newOrder
-    } catch (e) {
-        console.log(e);
-    }
-
- */
-
-    
+}

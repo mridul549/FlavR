@@ -6,4 +6,6 @@ const checkAuth = require('../middlewares/check-auth');
 router.post('/placeOrder', checkAuth, orderController.placeOrder);
 router.delete('/deleteall', checkAuth, orderController.deleteAll)
 
+// Webhooks
+router.post('/catchreq', orderController.catchRequest)
 module.exports = router;
