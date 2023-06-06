@@ -132,6 +132,10 @@ module.exports.deleteAll = (req,res) => {
 
  ** Get payment token- 
  * called on creation of a new order and generates a cashfree token for the frontend to handle.
+ * 
+ * TODO-
+ * Add easy split
+ * Add notifyUrl for webhooks
 */ 
 getPaymentToken = async (neworder, user, req, res) => {
     const headers = {
@@ -160,6 +164,10 @@ getPaymentToken = async (neworder, user, req, res) => {
     }
 }
 
+/**
+ *** Webhooks *** 
+ * Webhooks are server callbacks to your server from Cashfree Payments. Webhooks are event-based and are sent when specific events related to a transaction happen. 
+ */
 module.exports.catchRequest = (req,res) => {
-
+    
 }
