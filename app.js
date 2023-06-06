@@ -11,8 +11,6 @@ if (process.env.NODE_ENV !== 'production') {
 }
 mongoose.connect(process.env.MONGOOSE_CONNECTION_STRING)
 
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(bodyParser.json());
 app.use(fileUpload({
     useTempFiles: true
 }))
@@ -26,6 +24,8 @@ app.use(
         },
     })
 );
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}));
 
 // Require bull queue processor for orders
 require('./queue/index')
