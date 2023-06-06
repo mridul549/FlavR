@@ -169,7 +169,8 @@ getPaymentToken = async (neworder, user, req, res) => {
  * Webhooks are server callbacks to your server from Cashfree Payments. Webhooks are event-based and are sent when specific events related to a transaction happen. 
  */
 module.exports.catchRequest = (req,res) => {
-    console.log(req);
+    console.log(req.rawBody);
+    console.log(req.headers["x-webhook-timestamp"]); 
     const ts = req.headers["x-webhook-timestamp"]
     const signature = req.headers["x-webhook-signature"]  
     const currTs = Math.floor(new Date().getTime() / 1000)
