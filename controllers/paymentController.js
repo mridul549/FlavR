@@ -87,7 +87,7 @@ async function paymentSuccess (req, res, orderid, userid, outletid) {
     .then(async result => {
         try {
             await Order.findByIdAndUpdate(orderid, {
-                $set: { payment: tru}
+                $set: { payment: true}
             })
             .exec();
         } catch (error) {
