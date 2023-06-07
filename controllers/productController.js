@@ -83,12 +83,19 @@ function saveProduct (product, req, res) {
     });
 }
 
-// we first check the DB for an existing produc if not found, 
+// we first check the DB for an existing product if not found, 
 // first we add it to the DB, then we add it to the outlet
 // menu array and owner products array
 // image handling is done the following way:
 // if a file is passed in the form, it is accepted and uploaded
 // else image id and url is passed as null
+
+/**
+ * 1. A single product ID can contain multiple variants of a product.
+ * 2. If no variant of a product is passed in request, default variant is sent in DB and res.
+ * 3. In future an owner will get an option to update the variants of a product.
+ * 4.  
+ */
 module.exports.addProduct = (req,res) => {
     Product.find({
         $and: [

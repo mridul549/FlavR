@@ -38,7 +38,17 @@ const productSchema = mongoose.Schema({
         imageid: {
             type: String,
         }
-    }
+    },
+    variants: [
+        {
+            variantName: {
+                type: String
+            },
+            price: {
+                type: Number
+            }
+        }
+    ]
 }, {
     timestamps: true
 })
