@@ -77,7 +77,20 @@ async function paymentSuccess (req, res, orderid, userid, outletid) {
                 $push: { orders: orderid }
             })
             .exec();
+            return result
         } catch (err) {
+            return res.status(500).json({
+                error: err
+            });
+        }
+    })
+    .then(async result => {
+        try {
+            await Order.findByIdAndUpdate(orderid, {
+                $set: { payment: tru}
+            })
+            .exec();
+        } catch (error) {
             return res.status(500).json({
                 error: err
             });

@@ -15,8 +15,7 @@ const orderQueueProcess = async (job, done) => {
         await Order.updateOne({ _id: orderid }, { 
             $set: { 
                 orderNumber: orderNum, 
-                status: "preparing",
-                payment: true 
+                status: "preparing"
             }
         })
         .exec()
