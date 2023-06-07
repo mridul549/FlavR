@@ -92,7 +92,7 @@ async function paymentSuccess (req, res, orderid, userid, outletid) {
             .exec();
         } catch (error) {
             return res.status(500).json({
-                error: err
+                error: error
             });
         }
     })
