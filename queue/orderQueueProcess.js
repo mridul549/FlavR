@@ -12,7 +12,7 @@ const orderQueueProcess = async (job, done) => {
     .exec()
     .then(async result => {
         let orderNum = result.counter
-
+ 
         await Order.updateOne({ _id: orderid }, { 
             $set: { 
                 orderNumber: orderNum, 
@@ -27,9 +27,6 @@ const orderQueueProcess = async (job, done) => {
     })
     .catch(err => {
         console.log(err);
-        return res.status(500).json({
-            error: err
-        })
     })
 }
 
