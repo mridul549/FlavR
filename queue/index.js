@@ -34,6 +34,5 @@ const orderQueue = new Queue('orderQueue', {
 orderQueue.process(path.join(__dirname, 'orderQueueProcess.js'))
 
 orderQueue.on('completed', (job) => {
-    console.log(`Completed #${job.id} Job`);
-    console.log(job);
+    console.log(`Completed #${job.id} Job of outlet ${job.data.outletid}`);
 })
