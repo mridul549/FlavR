@@ -117,13 +117,12 @@ module.exports.addProduct = (req,res) => {
             })
         }
         
-        let variants = JSON.parse(req.body.variants)
+        let variants = req.body.variants
         // if variants array is not recieved, intialise it to empty array
         if(variants===undefined) {
             variants=[]
-            return res.status(404).json({
-                message: "Wrong variant array"
-            })
+        } else {
+            variants = JSON.parse(variants)
         }
 
         var imageProp = {
