@@ -78,15 +78,11 @@ async function paymentSuccess (req, res, orderid, userid, outletid) {
                 $push: { orders: orderid }
             })
             .exec();
-            return result;
         } catch (err) {
             return res.status(500).json({
                 error: err
             });
         }
-    })
-    .then(async result => {
-        
     })
     .catch(err => {
         console.log(err);
