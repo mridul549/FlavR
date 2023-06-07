@@ -8,7 +8,7 @@ const client = redis.createClient({
         host: 'redis-10818.c273.us-east-1-2.ec2.cloud.redislabs.com',
         port: 10818
     },
-    connect_timeout: 10000
+    connect_timeout: 30000
 });
 
 client.connect();
