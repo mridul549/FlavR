@@ -2,6 +2,7 @@ const { default: mongoose } = require('mongoose');
 const Outlet                = require('../models/outlet');
 const Owner                 = require('../models/owner');
 const Product               = require('../models/product')
+const Seq                   = require('../models/seq')
 const qrcode                = require('qrcode');
 const cloudinary            = require('cloudinary').v2;
 
@@ -146,11 +147,26 @@ module.exports.addOutlet = (req,res) => {
             });
         }
     })
-    .then(result => {
-        return res.status(201).json({
-            message: "Outlet added successfully",
-            createdOutlet: result
-        })
+    .then(async result => {
+        const outletid = result._id
+
+        try {
+            const seq = new Seq({
+                _id: new mongoose.Types.ObjectId(),
+                counter: 0,
+                outlet: outletid
+            })
+            await seq.save()
+
+            return res.status(201).json({
+                message: "Outlet added successfully",
+                createdOutlet: result
+            })
+        } catch (error) {
+            return res.status(500).json({
+                error: err
+            });
+        }
     })
     .catch(err => {
         console.log(err);
