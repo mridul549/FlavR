@@ -65,7 +65,7 @@ module.exports.processPayment = (req,res) => {
     * Add order to outlet and user- done
  */
 async function paymentSuccess (req, res, orderid, userid, outletid) {
-    await orderQueue.add({ orderid })
+    await orderQueue.add({ orderid, outletid })
 
     User.findByIdAndUpdate(userid, {
         $push: { orders: orderid }

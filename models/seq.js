@@ -2,9 +2,10 @@ const mongoose = require('mongoose');
 
 const SeqSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
-    key: {
-        type: String,
-        default: "Counter_key"
+    outlet: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Outlet',
+        required: true
     },
     counter: {
         type: Number,

@@ -40,6 +40,9 @@ const outletSchema = mongoose.Schema({
         qrid: {
             type: String
         }
+    },
+    currentOrderNumber: {
+        type: Number
     }
 }, {
     timestamps: true

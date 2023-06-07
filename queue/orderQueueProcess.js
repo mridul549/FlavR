@@ -6,8 +6,9 @@ mongoose.connect("mongodb+srv://mridul549:xTKgkDyitxpKcOY7@cluster0.iuoe1mb.mong
 
 const orderQueueProcess = async (job, done) => {
     const orderid = job.data.orderid
+    const outletid = job.data.outletid
 
-    Seq.findOneAndUpdate({ key: "Counter_key" }, { $inc: { "counter": 1 } }, { new: true })
+    Seq.findOneAndUpdate({ outlet: outletid }, { $inc: { "counter": 1 } }, { new: true })
     .exec()
     .then(async result => {
         let orderNum = result.counter
