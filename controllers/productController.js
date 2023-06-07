@@ -92,9 +92,11 @@ function saveProduct (product, req, res) {
 
 /**
  * 1. A single product ID can contain multiple variants of a product.
- * 2. If no variant of a product is passed in request, default variant is sent in DB and res.
- * 3. In future an owner will get an option to update the variants of a product.
- * 4.  
+ * 2. If no variant of a product is passed in request, give the price of the product simply
+ * 3. If variants exist, owner will be asked to give the price of (main) product as the lowest price from the variants.
+ *      E.g. -> If half price is 40, and full is 80 then the price of the product will be 40.
+ * 4. An owner will get an option to update the variants of a product through a seperate route if he doesn't do so on the creation.
+ * 
  */
 module.exports.addProduct = (req,res) => {
     Product.find({
@@ -115,6 +117,15 @@ module.exports.addProduct = (req,res) => {
             })
         }
         
+        let variants = JSON.parse(req.body.variants)
+        // if variants array is not recieved, intialise it to empty array
+        if(variants===undefined) {
+            variants=[]
+            return res.status(404).json({
+                message: "Wrong variant array"
+            })
+        }
+
         var imageProp = {
             url: "null",
             imageid: "null"
@@ -129,6 +140,7 @@ module.exports.addProduct = (req,res) => {
             veg: req.body.veg,
             owner: req.userData.ownerid,
             outlet: req.body.outletid,
+            variants: variants,
             productImage: imageProp
         })
 
@@ -155,6 +167,7 @@ module.exports.addProduct = (req,res) => {
                     veg: req.body.veg,
                     owner: req.userData.ownerid,
                     outlet: req.body.outletid,
+                    variants: variants,
                     productImage: imageProp
                 })
                 saveProduct(productwfile, req, res)
