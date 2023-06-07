@@ -26,7 +26,7 @@ function verify(ts, rawBody){
 }
 
 module.exports.processPayment = (req,res) => {
-    console.log(req.body);
+    console.log(req.body.data.order.order_tags);
     const paymentStatus = req.body.data.payment.payment_status
     const orderid = req.body.data.order.order_id
     const userid  = req.body.data.customer_details.customer_id
@@ -60,6 +60,7 @@ module.exports.processPayment = (req,res) => {
 
 /**
  * TODO-
+ * update order payment status
  * Assign order number using bull
  * Add order to outlet and user
  */
