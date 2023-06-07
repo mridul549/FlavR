@@ -153,7 +153,7 @@ getPaymentToken = async (neworder, user, req, res) => {
             customer_name: user[0].userName,
             customer_email: user[0].email,
             customer_phone: "7009100026"
-        },
+        }
     };
 
     try {
