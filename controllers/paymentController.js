@@ -26,6 +26,7 @@ function verify(ts, rawBody){
 }
 
 module.exports.processPayment = (req,res) => {
+    console.log(req.body);
     const paymentStatus = req.body.data.payment.payment_status
     const orderid = req.body.data.order.order_id
     const userid  = req.body.data.customer_details.customer_id
@@ -40,17 +41,17 @@ module.exports.processPayment = (req,res) => {
     if(signature === genSignature){
         res.send('OK')
 
-        switch (paymentStatus) {
-            case "SUCCESS":
-                paymentSuccess(req, res, orderid, userid)
-                break;
-            case "FAILED":
-                break;
-            case "USER_DROPPED":
-                break;
-            default:
-                break;
-        }
+        // switch (paymentStatus) {
+        //     case "SUCCESS":
+        //         paymentSuccess(req, res, orderid, userid)
+        //         break;
+        //     case "FAILED":
+        //         break;
+        //     case "USER_DROPPED":
+        //         break;
+        //     default:
+        //         break;
+        // }
 
     } else {
         res.send("failed")
@@ -62,22 +63,25 @@ module.exports.processPayment = (req,res) => {
  * Assign order number using bull
  * Add order to outlet and user
  */
-function paymentSuccess (req, res, orderid, userid) {
-    User.findByIdAndUpdate({ _id: userid }, )
-    .exec()
-    .then(customer => {
-        if(result.length>0) {
+async function paymentSuccess (req, res, orderid, userid) {
+    console.log("Hi");
+    // await orderQueue.add({ orderid })
 
-            
+    // User.findByIdAndUpdate(userid, {
+    //     $push: { orders: orderid }
+    // })
+    // .exec()
+    // .then(result => {
+        
 
-        }
-    })
-    .catch(err => {
-        console.log(err);
-        return res.status(500).json({
-            error: err
-        })
-    })
+
+    // })
+    // .catch(err => {
+    //     console.log(err);
+    //     return res.status(500).json({
+    //         error: err
+    //     })
+    // })
 }
 
 

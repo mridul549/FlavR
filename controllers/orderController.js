@@ -67,7 +67,7 @@ module.exports.placeOrder = async (req, res) => {
 
             // Generate cashfree token and send to the frontend SDK
             .then(async newOrder => {
-                const payment = await getPaymentToken(newOrder, result, req, res)
+                const payment = await getPaymentToken(newOrder, outletid, result, req, res)
                 return res.status(201).json({
                     message: "Order added to the database and cashfree token successfully generated",
                     cf_order_id: payment.data.cf_order_id,
@@ -137,7 +137,7 @@ module.exports.deleteAll = (req,res) => {
  * Add easy split
  * Add notifyUrl for webhooks
 */ 
-getPaymentToken = async (neworder, user, req, res) => {
+getPaymentToken = async (neworder, outletid, user, req, res) => {
     const headers = {
         'x-client-id': process.env.CF_APP_ID,
         'x-client-secret': process.env.CF_API_KEY,
@@ -153,7 +153,10 @@ getPaymentToken = async (neworder, user, req, res) => {
             customer_name: user[0].userName,
             customer_email: user[0].email,
             customer_phone: "7009100026"
-        }
+        },
+        order_tags: {
+            outlet_id: outletid
+        },
     };
 
     try {
