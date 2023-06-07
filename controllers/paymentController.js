@@ -26,7 +26,7 @@ function verify(ts, rawBody){
 }
 
 module.exports.processPayment = (req,res) => {
-    console.log(req.body.data.payment);
+    console.log(req.body.data.payment.payment_status);
 
     const ts = req.headers["x-webhook-timestamp"]
     const signature = req.headers["x-webhook-signature"]  
