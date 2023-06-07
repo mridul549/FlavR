@@ -76,14 +76,6 @@ module.exports.placeOrder = async (req, res) => {
                     order_status: payment.data.order_status
                 })
             })
-
-            // ASSIGN ORDER NUMBER by adding to queue
-            // To be handled after payment success, using webhooks for this
-            // .then(async newOrder => {
-            //     const orderid = newOrder._id
-            //     await orderQueue.add({ orderid })
-            //     return newOrder
-            // })
             .catch(err => {
                 console.log(err);
                 return res.status(500).json({

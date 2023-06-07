@@ -28,8 +28,9 @@ function verify(ts, rawBody){
 module.exports.processPayment = (req,res) => {
     console.log(req.body.data.order.order_tags);
     const paymentStatus = req.body.data.payment.payment_status
-    const orderid = req.body.data.order.order_id
-    const userid  = req.body.data.customer_details.customer_id
+    const orderid  = req.body.data.order.order_id
+    const userid   = req.body.data.customer_details.customer_id
+    const outletid = req.body.data.order.order_tags.outlet_id
     
     const ts = req.headers["x-webhook-timestamp"]
     const signature = req.headers["x-webhook-signature"]  
@@ -41,17 +42,17 @@ module.exports.processPayment = (req,res) => {
     if(signature === genSignature){
         res.send('OK')
 
-        // switch (paymentStatus) {
-        //     case "SUCCESS":
-        //         paymentSuccess(req, res, orderid, userid)
-        //         break;
-        //     case "FAILED":
-        //         break;
-        //     case "USER_DROPPED":
-        //         break;
-        //     default:
-        //         break;
-        // }
+        switch (paymentStatus) {
+            case "SUCCESS":
+                paymentSuccess(req, res, orderid, userid, outletid)
+                break;
+            case "FAILED":
+                break;
+            case "USER_DROPPED":
+                break;
+            default:
+                break;
+        }
 
     } else {
         res.send("failed")
@@ -60,29 +61,39 @@ module.exports.processPayment = (req,res) => {
 
 /**
  * TODO-
- * update order payment status
- * Assign order number using bull
- * Add order to outlet and user
+    * update order payment status- done in queue processor
+    * Assign order number using bull- done
+    * Add order to outlet and user- done
  */
-async function paymentSuccess (req, res, orderid, userid) {
-    console.log("Hi");
-    // await orderQueue.add({ orderid })
+async function paymentSuccess (req, res, orderid, userid, outletid) {
+    await orderQueue.add({ orderid })
 
-    // User.findByIdAndUpdate(userid, {
-    //     $push: { orders: orderid }
-    // })
-    // .exec()
-    // .then(result => {
+    User.findByIdAndUpdate(userid, {
+        $push: { orders: orderid }
+    })
+    .exec()
+    .then(async result => {
+        try {
+            await Outlet.findByIdAndUpdate(outletid, {
+                $push: { orders: orderid }
+            })
+            .exec();
+            return result;
+        } catch (err) {
+            return res.status(500).json({
+                error: err
+            });
+        }
+    })
+    .then(async result => {
         
-
-
-    // })
-    // .catch(err => {
-    //     console.log(err);
-    //     return res.status(500).json({
-    //         error: err
-    //     })
-    // })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
 }
 
 
