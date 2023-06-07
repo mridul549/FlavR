@@ -44,7 +44,10 @@ module.exports.processPayment = (req,res) => {
             case "SUCCESS":
                 paymentSuccess(req, res, orderid, userid)
                 break;
-        
+            case "FAILED":
+                break;
+            case "USER_DROPPED":
+                break;
             default:
                 break;
         }
@@ -54,9 +57,38 @@ module.exports.processPayment = (req,res) => {
     } 
 }
 
+/**
+ * TODO-
+ * Assign order number using bull
+ * Add order to outlet and user
+ */
 function paymentSuccess (req, res, orderid, userid) {
-    console.log("I'm the payment method");
+    User.findByIdAndUpdate({ _id: userid }, )
+    .exec()
+    .then(customer => {
+        if(result.length>0) {
+
+            
+
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
 }
+
+
+
+
+
+
+
+
+
+
 
 
 
