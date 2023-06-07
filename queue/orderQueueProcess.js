@@ -11,7 +11,6 @@ const orderQueueProcess = async (job, done) => {
     Seq.findOneAndUpdate({ outlet: outletid }, { $inc: { "counter": 1 } }, { new: true })
     .exec()
     .then(async result => {
-        console.log(result);
         let orderNum = result.counter
 
         await Order.updateOne({ _id: orderid }, { 
