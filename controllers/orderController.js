@@ -99,29 +99,6 @@ module.exports.placeOrder = async (req, res) => {
     })
 }
 
-/* 
-    1. after updating the order with all the deets and collecting payment
-    2. add this order to the queue for order number assignment
-    3. after order number assignment, add this order to the respective outlet
-*/
-
-module.exports.deleteAll = (req,res) => {
-    const userid = req.userData.userid
-    Order.deleteMany({ user: userid })
-    .exec()
-    .then(result => {
-        return res.status(200).json({
-            message: "Deleted all"
-        })
-    })
-    .catch(err => {
-        console.log(err);
-        return res.status(500).json({
-            error: err
-        })
-    })
-}
-
 /**
  ** Get payment token- 
  * called on creation of a new order and generates a cashfree token for the frontend to handle.
@@ -157,4 +134,67 @@ getPaymentToken = async (neworder, outletid, user, req, res) => {
     } catch (error) {
         console.error(error);
     }
+}
+
+module.exports.deleteAll = (req,res) => {
+    const userid = req.userData.userid
+    Order.deleteMany({ user: userid })
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            message: "Deleted all"
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
+// delivers an item individually
+module.exports.deliverItem = async (req,res) => {
+    const productid = req.body.productid
+    const variant   = req.body.variant
+    const orderid   = req.body.orderid
+
+    try {
+        const order = await Order.findById(orderid);
+        if (!order) {
+            return res.status(404).json({
+                error: "order not found"
+            })
+        }
+
+        const productItem = order.products.find(item => item.item.toString() === productid && item.variant === variant)
+        if (!productItem) {
+            return res.status(404).json({
+                error: "Product item not found"
+            })
+        }
+
+        productItem.readyToDeliver = true;
+        await order.save()
+        return res.status(200).json({
+            message: "Delived an item"
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            error: "Error while trying to deilver an item"
+        })
+    }
+}
+
+/**
+ * 1. An outlet will have two order arrays as follows:
+ *      => active orders or preparing orders array A
+ *      => completed orders array B
+ * A new order will always be put in the acive orders array A
+ * When this order is completed, it is moved to the completed orders array B from A
+*/
+module.exports.deliverEntireOrder = (req,res) => {
+    const orderid = req.body.orderid
+    
 }

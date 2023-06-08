@@ -26,6 +26,10 @@ const orderSchema = mongoose.Schema({
         },
         quantity: {
             type: Number
+        },
+        readyToDeliver: {
+            type: Boolean,
+            default: false
         }
     }],
     totalPrice: {
