@@ -43,17 +43,31 @@ module.exports.placeOrder = async (req, res) => {
 
             for (let i = 0; i < cart.length; i++) {
                 const element = cart[i];
-                const product = await Product.find({ _id: element.product });
+                const variant = element.variant
+                let price=0
 
-                totalAmount += (product[0].price*element.quantity)
+                if(variant==="default"){
+                    // if no variant exists of a product
+                    const product = await Product.find({ _id: element.product });
+                    price=product[0].price
+                } else {
+                    // only returns 1 element in the variants array matching the variantName
+                    const product = await Product.find({ 
+                        _id: element.product, 
+                        'variants.variantName': variant
+                    }, { 'variants.$': 1 })
+                    price = product[0].variants[0].price
+                }
+                totalAmount += (price*element.quantity)
                 totalQuantity += element.quantity
     
                 productArr.push({
                     item: element.product,
+                    variant: variant,
                     quantity: element.quantity
                 })
             }
-
+            
             const order = new Order({
                 _id: new mongoose.Types.ObjectId(),
                 user: userid,
@@ -75,6 +89,7 @@ module.exports.placeOrder = async (req, res) => {
                     payment_session_id: payment.data.payment_session_id,
                     order_status: payment.data.order_status
                 })
+                
             })
             .catch(err => {
                 console.log(err);

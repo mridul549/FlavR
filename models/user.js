@@ -22,7 +22,8 @@ const userSchema = mongoose.Schema({
             ref: 'Product'
         },
         variant: {
-            typ
+            type: String,
+            default: "default"
         },
         quantity: {
             type: Number,

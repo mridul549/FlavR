@@ -23,7 +23,6 @@ const orderSchema = mongoose.Schema({
         },
         variant: {
             type: String,
-            default: "default"
         },
         quantity: {
             type: Number
