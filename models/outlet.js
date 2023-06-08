@@ -19,7 +19,13 @@ const outletSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
     }],
-    orders: [
+    activeOrders: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Order'
+        }
+    ],
+    completedOrders: [
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Order'

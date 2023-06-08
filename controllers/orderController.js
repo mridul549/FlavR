@@ -195,6 +195,66 @@ module.exports.deliverItem = async (req,res) => {
  * When this order is completed, it is moved to the completed orders array B from A
 */
 module.exports.deliverEntireOrder = (req,res) => {
-    const orderid = req.body.orderid
-    
+    const orderid  = req.body.orderid
+    const ownerid  = req.userData.ownerid
+    const outletid = req.body.outletid
+
+    Owner.find({ _id: ownerid })
+    .exec()
+    .then(result => {
+        if(result.length>0){
+            Order.updateOne({ _id: orderid }, {
+                $set: { status: "completed" }
+            })
+            .exec()
+            .then(async result => {
+                try {
+                    await Outlet.updateOne({ _id: outletid }, {
+                        $pull: { activeOrders: orderid }
+                    })
+                    .exec()
+                    return result
+                } catch (error) {
+                    return res.status(500).json({
+                        error: "Error while pulling the order from outlet's active orders array"
+                    })
+                }
+            })
+            .then(async result => {
+                try {
+                    await Outlet.updateOne({ _id: outletid }, {
+                        $push: { completedOrders: orderid }
+                    })
+                    .exec()
+                    return result
+                } catch (error) {
+                    return res.status(500).json({
+                        error: "Error while pushing the order into outlet's completed orders array"
+                    })
+                }
+            })
+            .then(async result => {
+                return res.status(200).json({
+                    message: "Order marked completed and shifted from active array to completed in outlet"
+                })
+            })
+            .catch(err => {
+                console.log(err);
+                return res.status(500).json({
+                    error: err
+                })
+            })
+
+        } else {
+            return res.status(404).json({
+                error: "Owner not found"
+            })
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
 }

@@ -53,6 +53,8 @@ module.exports.addOutlet = (req,res) => {
                         outletName: req.body.outletName,
                         address: req.body.address,
                         owner: req.userData.ownerid,
+                        activeOrders: [],
+                        completedOrders: [],
                         outletImage: {
                             url: image.url,
                             imageid: image.public_id,

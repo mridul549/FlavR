@@ -74,7 +74,7 @@ async function paymentSuccess (req, res, orderid, userid, outletid) {
     .then(async result => {
         try {
             await Outlet.findByIdAndUpdate(outletid, {
-                $push: { orders: orderid }
+                $push: { activeOrders: orderid }
             })
             .exec();
             return result
