@@ -38,7 +38,7 @@ module.exports.addOutlet = (req,res) => {
         } 
         
         let outletPromise;
-
+        console.log(JSON.parse(req.body.address));
         if (req.files && req.files.outletImage) {
             const file = req.files.outletImage;
 
@@ -51,7 +51,7 @@ module.exports.addOutlet = (req,res) => {
                     const outlet = new Outlet({
                         _id: new mongoose.Types.ObjectId(),
                         outletName: req.body.outletName,
-                        address: req.body.address,
+                        address: JSON.parse(req.body.address),
                         owner: req.userData.ownerid,
                         activeOrders: [],
                         completedOrders: [],
@@ -68,7 +68,7 @@ module.exports.addOutlet = (req,res) => {
             const outlet = new Outlet({
                 _id: new mongoose.Types.ObjectId(),
                 outletName: req.body.outletName,
-                address: req.body.address,
+                address: JSON.parse(req.body.address),
                 owner: req.userData.ownerid,
                 outletImage: {
                     url: "null",
