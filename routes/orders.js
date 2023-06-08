@@ -7,9 +7,9 @@ router.use('/payments', require('./payments'))
 
 // POST Methods
 router.post('/placeOrder', checkAuth, orderController.placeOrder);
-router.post('/deliverOrder', checkAuth, orderController.deliverEntireOrder);
 
 // PATCH Methods
+router.patch('/deliverOrder', checkAuth, orderController.deliverEntireOrder);
 router.patch('/deliveritem', checkAuth, orderController.deliverItem)
 
 // DELETE Methods

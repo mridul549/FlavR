@@ -524,3 +524,24 @@ module.exports.getAllVariants = (req,res) => {
         })
     })
 }
+
+module.exports.inStock = (req,res) => {
+    const instock   = req.body.instock
+    const productid = req.body.productid
+    
+    Product.updateOne({ _id: productid }, {
+        $set: { inStock: instock }
+    })
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            message: "In Stock value updated successfully"
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
