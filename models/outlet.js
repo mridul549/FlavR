@@ -75,16 +75,24 @@ const outletSchema = mongoose.Schema({
         type: Number,
         default: 0
     },
-    timings: {
-        opening: {
-            type: String,
-            default: "00:00"
-        },
-        closing: {
-            type: String,
-            default: "00:00"
+    timings: [
+        {
+            day: {
+                type: String,
+            },
+            opening: {
+                type: String,
+            },
+            closing: {
+                type: String,
+            }
         }
-    }
+    ],
+    daysOpen: [
+        {
+            type: String
+        }
+    ]
 }, {
     timestamps: true
 })

@@ -38,7 +38,21 @@ module.exports.addOutlet = (req,res) => {
         } 
         
         let outletPromise;
-        console.log(JSON.parse(req.body.address));
+        let timings  = req.body.timings
+        let daysOpen = req.body.daysOpen
+
+        if(timings==undefined){
+            timings=[]
+        } else {
+            timings=JSON.parse(timings)
+        }
+
+        if(daysOpen==undefined){
+            daysOpen=[]
+        } else {
+            daysOpen=JSON.parse(daysOpen)
+        }
+
         if (req.files && req.files.outletImage) {
             const file = req.files.outletImage;
 
@@ -55,12 +69,13 @@ module.exports.addOutlet = (req,res) => {
                         owner: req.userData.ownerid,
                         activeOrders: [],
                         completedOrders: [],
+                        timings: timings,
+                        daysOpen: daysOpen,
                         outletImage: {
                             url: image.url,
                             imageid: image.public_id,
                         },
                     });
-
                     resolve(outlet.save());
                 });
             });
@@ -70,6 +85,10 @@ module.exports.addOutlet = (req,res) => {
                 outletName: req.body.outletName,
                 address: JSON.parse(req.body.address),
                 owner: req.userData.ownerid,
+                activeOrders: [],
+                completedOrders: [],
+                timings: timings,
+                daysOpen: daysOpen,
                 outletImage: {
                     url: "null",
                     imageid: "null",
@@ -416,6 +435,82 @@ module.exports.getOutlet = (req,res) => {
                 error: "No owner found"
             })
         }
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.getTimings = (req,res) => {
+    const outletid = req.body.outletid
+
+    Outlet.find({ _id: outletid })
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            timings: result[0].timings
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.getDaysOpen = (req,res) => {
+    const outletid = req.body.outletid
+
+    Outlet.find({ _id: outletid })
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            daysOpen: result[0].daysOpen
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.updateDaysOpen = (req,res) => {
+    const outletid = req.body.outletid
+
+    Outlet.updateOne({ _id: outletid }, {
+        $set: { daysOpen: req.body.daysOpen}
+    })
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            daysOpen: result[0].daysOpen
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.updateTimings = (req,res) => {
+    const outletid = req.body.outletid
+
+    Outlet.updateOne({ _id: outletid }, {
+        $set: { timings: req.body.timings}
+    })
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            daysOpen: result[0].daysOpen
+        })
     })
     .catch(err => {
         console.log(err);
