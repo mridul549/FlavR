@@ -123,14 +123,11 @@ module.exports.deleteAll = (req,res) => {
 }
 
 /**
- *** All payment methods go here ***
-
  ** Get payment token- 
  * called on creation of a new order and generates a cashfree token for the frontend to handle.
  * 
  * TODO-
  * Add easy split
- * Add notifyUrl for webhooks
 */ 
 getPaymentToken = async (neworder, outletid, user, req, res) => {
     const headers = {

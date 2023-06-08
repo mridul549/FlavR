@@ -231,50 +231,47 @@ module.exports.getCartSize = (req,res) => {
 // update a cart element quantity
 // if quantity is 0 it is removed
 // else it is updated to the obtained
-module.exports.updateQuantity = (req,res) => {
-    const quantity = req.body.quantity
-    const userid = req.userData.userid
-    const cartElementID = req.body.cartEleid
+module.exports.updateQuantity = async (req,res) => {
+    const productid = req.body.productid
+    const variant   = req.body.variant
+    const quantity  = req.body.quantity
+    const userid    = req.userData.userid
 
-    if(quantity==0) {
-        User.updateOne({ _id: userid, "cart._id": cartElementID }, {
-            $pull: {
-                "cart": {
-                    _id: cartElementID
-                }
-            }
-        })
-        .exec()
-        .then(result => {
+    try {
+        const user = await User.findById(userid);
+        if (!user) {
+            return res.status(404).json({
+                error: "User not found"
+            })
+        }
+    
+        const cartItem = user.cart.find(item => item.product.toString() === productid && item.variant === variant);
+        if (!cartItem) {
+            return res.status(404).json({
+                error: "Cart item not found"
+            })
+        }
+    
+        if (quantity === 0) {
+            user.cart.pull(cartItem);
+            await user.save();
             return res.status(200).json({
-                message: "Product removed from cart"
+                message: "Item removed from cart"
             })
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(500).json({
-                error: err
-            })
-        })
-    } else {
-        User.updateOne({ _id: userid, "cart._id": cartElementID }, {
-            $set: {
-                "cart.$.quantity": quantity
-            }
-        })
-        .exec()
-        .then(result => {
+        } else {
+            cartItem.quantity = quantity;
+            await user.save();
             return res.status(200).json({
-                message: "Quantity Updated successfully"
+                message: "Cart item updated successfully!"
             })
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(500).json({
-                error: err
-            })
+        }
+    
+    } catch (error) {
+        return res.status(500).json({
+            error: "error while updating cart item"
         })
     }
+
 }
 
 module.exports.clearCart = (req,res) => {
