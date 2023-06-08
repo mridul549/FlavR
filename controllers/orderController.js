@@ -4,19 +4,7 @@ const Product    = require('../models/product');
 const Outlet     = require('../models/outlet');
 const Owner      = require('../models/owner');
 const User       = require('../models/user');
-const Queue      = require('bull');
 const axios      = require('axios');
-const cashfree   = require('cashfree-pg-sdk-nodejs');
-const crypto     = require('crypto')
-
-const orderQueue = new Queue('orderQueue', {
-    redis: {
-        host: process.env.REDIS_HOST,
-        port: process.env.REDIS_PORT,
-        password: process.env.REDIS_PASSWORD,
-        username: process.env.REDIS_USERNAME
-    }
-})
 
 /* 
     1. get all items in cart
@@ -172,31 +160,4 @@ getPaymentToken = async (neworder, outletid, user, req, res) => {
     } catch (error) {
         console.error(error);
     }
-}
-
-/**
- *** Webhooks *** 
- * Webhooks are server callbacks to your server from Cashfree Payments. Webhooks are event-based and are sent when specific events related to a transaction happen. 
- */
-module.exports.catchRequest = (req,res) => {
-    console.log(req.body);
-    const ts = req.headers["x-webhook-timestamp"]
-    const signature = req.headers["x-webhook-signature"]  
-    const currTs = Math.floor(new Date().getTime() / 1000)
-    if(currTs - ts > 30000){
-        res.send("Failed")
-    }  
-    const genSignature = verify(ts, req.rawBody)
-    if(signature === genSignature){
-        res.send('OK')
-    } else {
-        res.send("failed")
-    } 
-}
-
-function verify(ts, rawBody){
-    const body = ts + rawBody
-    const secretKey = process.env.CF_API_KEY;
-    let genSignature = crypto.createHmac('sha256',secretKey).update(body).digest("base64");
-    return genSignature
 }
