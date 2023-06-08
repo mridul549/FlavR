@@ -478,3 +478,49 @@ module.exports.updateProductImage = (req,res) => {
         })
     })
 }
+
+module.exports.updateVariants = (req,res) => {
+    const productid = req.body.productid
+    const variants  = req.body.variants
+
+    Product.updateOne({ _id: productid }, {
+        $set: { variants: variants }
+    })
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            message: "Variants updated successfully!"
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.getAllVariants = (req,res) => {
+    const productid = req.query.productid
+
+    Product.find({ _id: productid })
+    .exec()
+    .then(result => {
+        if(result.length>0){
+            const variants = result[0].variants
+            return res.status(200).json({
+                variants: variants
+            })
+        } else {
+            return res.status(404).json({
+                error: "Product not found!"
+            })
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}

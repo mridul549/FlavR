@@ -21,6 +21,9 @@ const userSchema = mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Product'
         },
+        variant: {
+            typ
+        },
         quantity: {
             type: Number,
             default: 1
