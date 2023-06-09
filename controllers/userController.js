@@ -299,29 +299,36 @@ module.exports.clearCart = (req,res) => {
     })
 }
 
-module.exports.removeProductCart = (req,res) => {
+module.exports.removeProductCart = async (req,res) => {
     const userid = req.userData.userid
     const productid = req.body.productid
+    const variant = req.body.variant
 
-    User.updateOne({ _id: userid }, {
-        $pull: {
-            "cart": {
-                "product": productid
-            }
+    const user = await User.findById(userid);
+    try {
+        if (!user) {
+            return res.status(404).json({
+                error: "User not found"
+            })
         }
-    })
-    .exec()
-    .then(result => {
+    
+        const cartItem = user.cart.find(item => item.product.toString() === productid && item.variant === variant);
+        if (!cartItem) {
+            return res.status(404).json({
+                error: "Cart item not found"
+            })
+        }
+    
+        user.cart.pull(cartItem);
+        await user.save();
         return res.status(200).json({
-            message: "Product removed from cart"
+            message: "Item removed from cart"
         })
-    })
-    .catch(err => {
-        console.log(err);
-        res.status(500).json({
-            error: err
-        })
-    })
+    } catch (error) {
+        return res.status(500).json({
+            error: "Couldn't remove product from cart"
+        })   
+    }
 }
 
 module.exports.updateImage = (req,res) => {
