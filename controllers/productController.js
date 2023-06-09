@@ -28,7 +28,6 @@ module.exports.getProductsOfOutlet = (req,res) => {
                         price: doc.price,
                         veg: doc.veg,
                         productImage: doc.productImage,
-                        outlet: doc.outlet,
                         variants: doc.variants,
                         inStock: doc.inStock
                     }
