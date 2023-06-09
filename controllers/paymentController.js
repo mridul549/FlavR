@@ -26,11 +26,6 @@ function verify(ts, rawBody){
 }
 
 module.exports.processPayment = (req,res) => {
-    const paymentStatus = req.body.data.payment.payment_status
-    const orderid  = req.body.data.order.order_id
-    const userid   = req.body.data.customer_details.customer_id
-    const outletid = req.body.data.order.order_tags.outlet_id
-    
     const ts = req.headers["x-webhook-timestamp"]
     const signature = req.headers["x-webhook-signature"]  
     const currTs = Math.floor(new Date().getTime() / 1000)
@@ -40,7 +35,11 @@ module.exports.processPayment = (req,res) => {
     const genSignature = verify(ts, req.rawBody)
     if(signature === genSignature){
         res.send('OK')
-
+        
+        const paymentStatus = req.body.data.payment.payment_status
+        const orderid  = req.body.data.order.order_id
+        const userid   = req.body.data.customer_details.customer_id
+        const outletid = req.body.data.order.order_tags.outlet_id
         switch (paymentStatus) {
             case "SUCCESS":
                 paymentSuccess(req, res, orderid, userid, outletid)
