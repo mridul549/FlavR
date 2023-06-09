@@ -126,7 +126,7 @@ module.exports.addProduct = (req,res) => {
         } else {
             variants = JSON.parse(variants)
         }
-
+        
         var imageProp = {
             url: "null",
             imageid: "null"

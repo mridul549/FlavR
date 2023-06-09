@@ -30,7 +30,7 @@
     "cashfree-pg-sdk-nodejs": "^2.0.2",
     "cloudinary": "^1.37.0",
     "crypto": "^1.0.1",
-    "dotenv": "^16.0.3",
+    "dotenv": "^16.1.4",
     "express": "^4.18.2",
     "express-fileupload": "^1.4.0",
     "http": "^0.0.1-security",
