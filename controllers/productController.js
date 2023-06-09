@@ -13,7 +13,6 @@ cloudinary.config({
 
 module.exports.getProductsOfOutlet = (req,res) => {
     Product.find({ outlet: req.query.outletid })
-    .select('veg productImage _id category productName description price outlet')
     .populate('outlet', '_id outletName address owner')
     .exec()
     .then(result => {
