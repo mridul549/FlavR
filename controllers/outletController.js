@@ -43,13 +43,13 @@ module.exports.addOutlet = (req,res) => {
         let daysOpen = req.body.daysOpen
 
         if(timings==undefined){
-            timings=[]
+            timings={}
         } else {
             timings=JSON.parse(timings)
         }
 
         if(daysOpen==undefined){
-            daysOpen=[]
+            daysOpen={}
         } else {
             daysOpen=JSON.parse(daysOpen)
         }
@@ -200,42 +200,46 @@ module.exports.addOutlet = (req,res) => {
 
 module.exports.updateOutlet = (req,res) => {
     const outletid = req.params.outletid
-    // not using the ownerid here, but accessing just to make sure
-    // that only an owner can access this route and no regular user
     const ownerid = req.userData.ownerid
 
     Outlet.find({ _id: outletid })
     .exec()
     .then(result => {
-        if(result) {
-            const updateOps = {};
-            for(const ops of req.body.updates) {
-                updateOps[ops.propName] = ops.value
+        if(result.length>0) {
+            if(result[0].owner==ownerid){
+                const updateOps = {};
+                for(const ops of req.body.updates) {
+                    updateOps[ops.propName] = ops.value
+                }
+                Outlet.updateOne({ _id: outletid }, {
+                    $set: updateOps
+                })
+                .exec()
+                .then(result => {
+                    return res.status(200).json({
+                        message: "Outlet Updated successfully",
+                    })
+                })
+                .catch(err => {
+                    console.log(err);
+                    res.status(500).json({
+                        error: err
+                    })
+                })
+            } else {
+                return res.status(401).json({
+                    error: "Unauthorised access"
+                })
             }
-            Outlet.updateOne({ _id: outletid }, {
-                $set: updateOps
-            })
-            .exec()
-            .then(result => {
-                return res.status(200).json({
-                    message: "Outlet Updated successfully",
-                })
-            })
-            .catch(err => {
-                console.log(err);
-                res.status(500).json({
-                    error: err
-                })
-            })
         } else {
             return res.status(404).json({
-                error: "You don't have access to this route"
+                error: "Outlet not found"
             })
         }
     })
     .catch(err => {
         console.log(err);
-        res.status(500).json({
+        return res.status(500).json({
             error: err
         })
     })
@@ -248,6 +252,7 @@ module.exports.updateOutlet = (req,res) => {
 // 4. remove outlet from owner's outlet array
 // 5. romove all products from products array in owner schema of an outlet
 // 6. romove all products of this outlet
+// 7. Delete the outlet sequence too
 // using async functions here, as suggested by vs code
 module.exports.deleteOutlet = (req,res) => {
     const outletid = req.body.outletid
@@ -300,6 +305,11 @@ module.exports.deleteOutlet = (req,res) => {
                 await Product.deleteMany({ outlet: outletid })
                 .exec();
                 return result;
+            })
+            .then(async result => {
+                await Seq.deleteOne({ outlet: outletid })
+                .exec()
+                return result
             })
             .then(result => {
                 return res.status(200).json({
@@ -490,7 +500,7 @@ module.exports.updateDaysOpen = (req,res) => {
     .exec()
     .then(result => {
         return res.status(200).json({
-            daysOpen: result[0].daysOpen
+            message: "Days open updated successfully!!"
         })
     })
     .catch(err => {
@@ -510,7 +520,7 @@ module.exports.updateTimings = (req,res) => {
     .exec()
     .then(result => {
         return res.status(200).json({
-            daysOpen: result[0].daysOpen
+            message: "Timings updated successfully!!"
         })
     })
     .catch(err => {

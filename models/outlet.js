@@ -75,24 +75,108 @@ const outletSchema = mongoose.Schema({
         type: Number,
         default: 0
     },
-    timings: [
-        {
-            day: {
+    timings: {
+        monday: {
+            open: {
                 type: String,
+                default: "00:00 AM"
             },
-            opening: {
+            close: {
                 type: String,
+                default: "00:00 AM"
+            }
+        },
+        tuesday: {
+            open: {
+                type: String,
+                default: "00:00 AM"
             },
-            closing: {
+            close: {
                 type: String,
+                default: "00:00 AM"
+            }
+        },
+        wednesday: {
+            open: {
+                type: String,
+                default: "00:00 AM"
+            },
+            close: {
+                type: String,
+                default: "00:00 AM"
+            }
+        },
+        thursday: {
+            open: {
+                type: String,
+                default: "00:00 AM"
+            },
+            close: {
+                type: String,
+                default: "00:00 AM"
+            }
+        },
+        friday: {
+            open: {
+                type: String,
+                default: "00:00 AM"
+            },
+            close: {
+                type: String,
+                default: "00:00 AM"
+            }
+        },
+        saturday: {
+            open: {
+                type: String,
+                default: "00:00 AM"
+            },
+            close: {
+                type: String,
+                default: "00:00 AM"
+            }
+        },
+        sunday: {
+            open: {
+                type: String,
+                default: "00:00 AM"
+            },
+            close: {
+                type: String,
+                default: "00:00 AM"
             }
         }
-    ],
-    daysOpen: [
-        {
-            type: String
+    },
+    daysOpen: {
+        monday: {
+            type: Boolean,
+            default: true
+        },
+        tuesday: {
+            type: Boolean,
+            default: true
+        },
+        wednesday: {
+            type: Boolean,
+            default: true
+        },
+        thursday: {
+            type: Boolean,
+            default: true
+        },
+        friday: {
+            type: Boolean,
+            default: true
+        },
+        saturday: {
+            type: Boolean,
+            default: true
+        },
+        sunday: {
+            type: Boolean,
+            default: true
         }
-    ]
+    }
 }, {
     timestamps: true
 })
