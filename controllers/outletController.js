@@ -428,7 +428,7 @@ module.exports.getOutlet = (req,res) => {
     .then(result => {
         if(result.length>0) {
             Outlet.find({ _id: outletid })
-            .select('_id outletName address owner outletImage outletqr createdAt updatedAt')
+            .select('_id outletName address outletImage timings daysOpen')
             .exec()
             .then(result => {
                 return res.status(200).json({
