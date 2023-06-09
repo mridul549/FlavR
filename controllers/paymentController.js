@@ -35,23 +35,23 @@ module.exports.processPayment = (req,res) => {
     const genSignature = verify(ts, req.rawBody)
     if(signature === genSignature){
         res.send('OK')
-        
-        const paymentStatus = req.body.data.payment.payment_status
-        const orderid  = req.body.data.order.order_id
-        const userid   = req.body.data.customer_details.customer_id
-        const outletid = req.body.data.order.order_tags.outlet_id
-        switch (paymentStatus) {
-            case "SUCCESS":
-                paymentSuccess(req, res, orderid, userid, outletid)
-                break;
-            case "FAILED":
-                break;
-            case "USER_DROPPED":
-                break;
-            default:
-                break;
+        if(req.body.data.payment.payment_status!=undefined){
+            const paymentStatus = req.body.data.payment.payment_status
+            const orderid  = req.body.data.order.order_id
+            const userid   = req.body.data.customer_details.customer_id
+            const outletid = req.body.data.order.order_tags.outlet_id
+            switch (paymentStatus) {
+                case "SUCCESS":
+                    paymentSuccess(req, res, orderid, userid, outletid)
+                    break;
+                case "FAILED":
+                    break;
+                case "USER_DROPPED":
+                    break;
+                default:
+                    break;
+            }
         }
-
     } else {
         res.send("failed")
     } 
