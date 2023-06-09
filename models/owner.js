@@ -20,10 +20,6 @@ const ownerSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Outlet'
     }],
-    orders: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Order'
-    }],
     products: [
         {
             product: {

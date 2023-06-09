@@ -38,6 +38,20 @@ const productSchema = mongoose.Schema({
         imageid: {
             type: String,
         }
+    },
+    variants: [
+        {
+            variantName: {
+                type: String
+            },
+            price: {
+                type: Number
+            }
+        }
+    ], 
+    inStock: {
+        type: Boolean,
+        default: true
     }
 }, {
     timestamps: true

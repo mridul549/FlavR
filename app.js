@@ -5,20 +5,31 @@ const morgan     = require('morgan');
 const fileUpload = require('express-fileupload');
 
 const app = express();
-mongoose.connect("mongodb+srv://mridul549:xTKgkDyitxpKcOY7@cluster0.iuoe1mb.mongodb.net/?retryWrites=true&w=majority")
 
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config();
 }
+mongoose.connect(process.env.MONGOOSE_CONNECTION_STRING)
 
-app.use(morgan('dev'));
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(bodyParser.json());
 app.use(fileUpload({
     useTempFiles: true
 }))
 
- 
+// For the cashfree webhook
+app.use(
+    express.json({
+        limit: '1mb',
+        verify: (req, res, buf) => {
+            req.rawBody = buf.toString();
+        },
+    })
+);
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}));
+
+// Require bull queue processor for orders
+require('./queue/index')
+
 // implementing CORS security mechanism
 app.use((req,res,next) => {
     res.header("Access-Control-Allow-Origin", "*");

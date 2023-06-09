@@ -7,8 +7,32 @@ const outletSchema = mongoose.Schema({
         required: true
     },
     address: {
-        type: String,
-        required: true
+        addressLine1: {
+            type: String,
+            required: true
+        },
+        addressLine2: {
+            type: String
+        },
+        landmark: {
+            type: String
+        },
+        city: {
+            type: String,
+            required: true
+        },
+        state: {
+            type: String,
+            required: true
+        },
+        zipCode: {
+            type: String,
+            required: true
+        },
+        country: {
+            type: String,
+            required: true
+        },
     },
     owner: {
         type: mongoose.Schema.Types.ObjectId,
@@ -19,6 +43,18 @@ const outletSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
     }],
+    activeOrders: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Order'
+        }
+    ],
+    completedOrders: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Order'
+        }
+    ],
     outletImage: {
         url: {
             type: String
@@ -34,7 +70,29 @@ const outletSchema = mongoose.Schema({
         qrid: {
             type: String
         }
-    }
+    },
+    currentOrderNumber: {
+        type: Number,
+        default: 0
+    },
+    timings: [
+        {
+            day: {
+                type: String,
+            },
+            opening: {
+                type: String,
+            },
+            closing: {
+                type: String,
+            }
+        }
+    ],
+    daysOpen: [
+        {
+            type: String
+        }
+    ]
 }, {
     timestamps: true
 })

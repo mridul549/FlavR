@@ -21,6 +21,10 @@ const userSchema = mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Product'
         },
+        variant: {
+            type: String,
+            default: "default"
+        },
         quantity: {
             type: Number,
             default: 1

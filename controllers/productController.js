@@ -85,44 +85,81 @@ function saveProduct (product, req, res) {
     });
 }
 
-// we first check the DB for an existing produc if not found, 
+// we first check the DB for an existing product if not found, 
 // first we add it to the DB, then we add it to the outlet
 // menu array and owner products array
 // image handling is done the following way:
 // if a file is passed in the form, it is accepted and uploaded
 // else image id and url is passed as null
-module.exports.addProduct = (req,res) => {
-    const ownerid = req.userData.ownerid
-    const outletid = req.body.outletid
 
-    Outlet.find({ _id: outletid })
+/**
+ * 1. A single product ID can contain multiple variants of a product.
+ * 2. If no variant of a product is passed in request, give the price of the product simply
+ * 3. If variants exist, owner will be asked to give the price of (main) product as the lowest price from the variants.
+ *      E.g. -> If half price is 40, and full is 80 then the price of the product will be 40.
+ * 4. An owner will get an option to update the variants of a product through a seperate route if he doesn't do so on the creation.
+ * 
+ */
+module.exports.addProduct = (req,res) => {
+    Product.find({
+        $and: [
+            { category: req.body.category },
+            { productName: req.body.productName },
+            { description: req.body.description },
+            { price: req.body.price },
+            { outlet: req.body.outletid },
+            { owner: req.userData.ownerid }
+        ]
+    })
     .exec()
     .then(result => {
-        if(result[0].owner == ownerid) {
-            Product.find({
-                $and: [
-                    { category: req.body.category },
-                    { productName: req.body.productName },
-                    { description: req.body.description },
-                    { price: req.body.price },
-                    { outlet: outletid },
-                    { owner: ownerid }
-                ]
+        if(result.length>0){
+            return res.status(404).json({
+                message: "Product already exists"
             })
-            .exec()
-            .then(result => {
-                if(result.length>0){
-                    return res.status(404).json({
-                        message: "Product already exists"
+        }
+        
+        let variants = req.body.variants
+        // if variants array is not recieved, intialise it to empty array
+        if(variants===undefined) {
+            variants=[]
+        } else {
+            variants = JSON.parse(variants)
+        }
+
+        var imageProp = {
+            url: "null",
+            imageid: "null"
+        }
+
+        const productwofile = new Product({
+            _id: new mongoose.Types.ObjectId(),
+            category: req.body.category,
+            productName: req.body.productName,
+            description: req.body.description,
+            price: req.body.price,
+            veg: req.body.veg,
+            owner: req.userData.ownerid,
+            outlet: req.body.outletid,
+            variants: variants,
+            productImage: imageProp
+        })
+
+        if(req.files && req.files.productImage) {
+            const file = req.files.productImage
+            cloudinary.uploader.upload(file.tempFilePath, (err, image) => {
+                if(err) {
+                    return res.status(201).json({
+                        error: "image upload failed"
                     })
                 }
-                
-                var imageProp = {
-                    url: "null",
-                    imageid: "null"
+    
+                imageProp = {
+                    url: image.url,
+                    imageid: image.public_id
                 }
-        
-                const productwofile = new Product({
+
+                const productwfile = new Product({
                     _id: new mongoose.Types.ObjectId(),
                     category: req.body.category,
                     productName: req.body.productName,
@@ -131,56 +168,18 @@ module.exports.addProduct = (req,res) => {
                     veg: req.body.veg,
                     owner: req.userData.ownerid,
                     outlet: req.body.outletid,
+                    variants: variants,
                     productImage: imageProp
                 })
-        
-                if(req.files && req.files.productImage) {
-                    const file = req.files.productImage
-                    cloudinary.uploader.upload(file.tempFilePath, (err, image) => {
-                        if(err) {
-                            return res.status(201).json({
-                                error: "image upload failed"
-                            })
-                        }
-            
-                        imageProp = {
-                            url: image.url,
-                            imageid: image.public_id
-                        }
-        
-                        const productwfile = new Product({
-                            _id: new mongoose.Types.ObjectId(),
-                            category: req.body.category,
-                            productName: req.body.productName,
-                            description: req.body.description,
-                            price: req.body.price,
-                            veg: req.body.veg,
-                            owner: req.userData.ownerid,
-                            outlet: req.body.outletid,
-                            productImage: imageProp
-                        })
-                        saveProduct(productwfile, req, res)
-                    })
-                } else {
-                    saveProduct(productwofile, req, res)
-                }
-            })
-            .catch(err => {
-                console.log(err);
-                res.status(500).json({
-                    error: err
-                })
+                saveProduct(productwfile, req, res)
             })
         } else {
-            return res.status(401).json({
-                error: "Bad request",
-                message: "Owner id not matching with the outlet"
-            })
+            saveProduct(productwofile, req, res)
         }
     })
     .catch(err => {
         console.log(err);
-        return res.status(500).json({
+        res.status(500).json({
             error: err
         })
     })
@@ -493,6 +492,73 @@ module.exports.updateProductImage = (req,res) => {
     .catch(err => {
         console.log(err);
         res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.updateVariants = (req,res) => {
+    const productid = req.body.productid
+    const variants  = req.body.variants
+
+    Product.updateOne({ _id: productid }, {
+        $set: { variants: variants }
+    })
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            message: "Variants updated successfully!"
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.getAllVariants = (req,res) => {
+    const productid = req.query.productid
+
+    Product.find({ _id: productid })
+    .exec()
+    .then(result => {
+        if(result.length>0){
+            const variants = result[0].variants
+            return res.status(200).json({
+                variants: variants
+            })
+        } else {
+            return res.status(404).json({
+                error: "Product not found!"
+            })
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.inStock = (req,res) => {
+    const instock   = req.body.instock
+    const productid = req.body.productid
+    
+    Product.updateOne({ _id: productid }, {
+        $set: { inStock: instock }
+    })
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            message: "In Stock value updated successfully"
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
             error: err
         })
     })
