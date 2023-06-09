@@ -249,7 +249,7 @@ module.exports.getSingleProduct = (req,res) => {
 // converting the map to an array of objects and returning it
 module.exports.getAllCategories = (req,res) => {
     const outletid = req.query.outletid
-    console.log(outletid);
+
     Product.find({ outlet: outletid })
     .select('category')
     .exec()
