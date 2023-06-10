@@ -161,11 +161,7 @@ module.exports.addProductsToCart = (req,res) => {
     .then(result => {
         if(result.length>0) {
             User.updateOne({ _id: userid }, {
-                $push: {
-                    cart: {
-                        $each: items
-                    }
-                }
+                $set: { cart: items }
             })
             .exec()
             .then(result => {
