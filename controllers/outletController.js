@@ -14,6 +14,24 @@ cloudinary.config({
     secure: true
 });
 
+module.exports.getOutlet = (req,res) => {
+    const outletid = req.query.outletid
+
+    Outlet.find({ _id: outletid })
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            result
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
 // in this we first search the database to check for an
 // already existing outlet, if one is found we throw an error
 // if not then we create one, add it to DB
@@ -410,118 +428,6 @@ module.exports.updateImage = (req,res) => {
                 error: "Outlet not found"
             })
         }
-    })
-    .catch(err => {
-        console.log(err);
-        return res.status(500).json({
-            error: err
-        })
-    })
-}
-
-module.exports.getOutlet = (req,res) => {
-    const userid  = req.userData.userid
-    const outletid = req.query.outletid
-
-    User.find({ _id: userid })
-    .exec()
-    .then(result => {
-        if(result.length>0) {
-            Outlet.find({ _id: outletid })
-            .select('_id outletName address outletImage timings daysOpen')
-            .exec()
-            .then(result => {
-                return res.status(200).json({
-                    result
-                })
-            })
-            .catch(err => {
-                console.log(err);
-                return res.status(500).json({
-                    error: err
-                })
-            })
-        } else {
-            return res.status(404).json({
-                error: "No user found"
-            })
-        }
-    })
-    .catch(err => {
-        console.log(err);
-        return res.status(500).json({
-            error: err
-        })
-    })
-}
-
-module.exports.getTimings = (req,res) => {
-    const outletid = req.body.outletid
-
-    Outlet.find({ _id: outletid })
-    .exec()
-    .then(result => {
-        return res.status(200).json({
-            timings: result[0].timings
-        })
-    })
-    .catch(err => {
-        console.log(err);
-        return res.status(500).json({
-            error: err
-        })
-    })
-}
-
-module.exports.getDaysOpen = (req,res) => {
-    const outletid = req.body.outletid
-
-    Outlet.find({ _id: outletid })
-    .exec()
-    .then(result => {
-        return res.status(200).json({
-            daysOpen: result[0].daysOpen
-        })
-    })
-    .catch(err => {
-        console.log(err);
-        return res.status(500).json({
-            error: err
-        })
-    })
-}
-
-module.exports.updateDaysOpen = (req,res) => {
-    const outletid = req.body.outletid
-
-    Outlet.updateOne({ _id: outletid }, {
-        $set: { daysOpen: req.body.daysOpen}
-    })
-    .exec()
-    .then(result => {
-        return res.status(200).json({
-            message: "Days open updated successfully!!"
-        })
-    })
-    .catch(err => {
-        console.log(err);
-        return res.status(500).json({
-            error: err
-        })
-    })
-}
-
-module.exports.updateTimings = (req,res) => {
-    const outletid = req.body.outletid
-
-    Outlet.updateOne({ _id: outletid }, {
-        $set: { timings: req.body.timings}
-    })
-    .exec()
-    .then(result => {
-        return res.status(200).json({
-            message: "Timings updated successfully!!"
-        })
     })
     .catch(err => {
         console.log(err);
