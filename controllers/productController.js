@@ -23,7 +23,7 @@ module.exports.getProductsOfOutlet = (req,res) => {
                     return {
                         id: doc._id,
                         category: doc.category,
-                        name: doc.productName,
+                        productName: doc.productName,
                         description: doc.description,
                         price: doc.price,
                         veg: doc.veg,
