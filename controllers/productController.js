@@ -21,7 +21,7 @@ module.exports.getProductsOfOutlet = (req,res) => {
                 count: result.length,
                 products: result.map(doc => {
                     return {
-                        id: doc._id,
+                        _id: doc._id,
                         category: doc.category,
                         productName: doc.productName,
                         description: doc.description,
