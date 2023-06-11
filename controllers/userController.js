@@ -155,7 +155,7 @@ module.exports.addOneProductToCart = (req,res) => {
 module.exports.addProductsToCart = (req,res) => {
     const items = req.body.items
     const userid = req.userData.userid
-    console.log(items);
+    console.log(JSON.parse(items));
     User.find({ _id: userid })
     .exec()
     .then(result => {
