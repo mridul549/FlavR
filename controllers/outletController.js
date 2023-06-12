@@ -15,7 +15,8 @@ cloudinary.config({
 });
 
 module.exports.getAllOutlets = (req,res) => {
-    Outlet.find({})
+    const city = req.query.city
+    Outlet.find({ "address.city": city })
     .exec()
     .then(result => {
         return res.status(200).json({
