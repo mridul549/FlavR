@@ -46,7 +46,13 @@ const userSchema = mongoose.Schema({
             type: String,
             default: "null"
         }
-    }
+    },
+    coupons: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Coupon'
+        }
+    ]
 }, {
     timestamps: true
 })
