@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 const productController = require('../controllers/productController');
 const checkAuth = require('../middlewares/check-auth');
+const getOutletProductsCache = require('../middlewares/cache/getOutletProducts')
 
-router.get('/getProductsOfOutlet', productController.getProductsOfOutlet); // U
+router.get('/getProductsOfOutlet', getOutletProductsCache, productController.getProductsOfOutlet); // U
 router.get('/getProductsByCategory', productController.getProductsByCategory); // U
 router.get('/getSingleProduct', productController.getSingleProduct); // U
 router.get('/getAllCategories', productController.getAllCategories); // U

@@ -3,6 +3,7 @@ const Product               = require('../models/product');
 const Owner                 = require('../models/owner');
 const Outlet                = require('../models/outlet');
 const cloudinary            = require('cloudinary').v2;
+const redis                 = require('redis');
 
 cloudinary.config({ 
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
@@ -10,6 +11,17 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
     secure: true
 });
+
+
+const client = redis.createClient({
+    password: process.env.REDIS_PASSWORD,
+    socket: {
+        host: 'redis-10818.c273.us-east-1-2.ec2.cloud.redislabs.com',
+        port: 10818
+    }
+});
+
+client.connect();
 
 module.exports.getProductsOfOutlet = (req,res) => {
     Product.find({ outlet: req.query.outletid })
@@ -33,6 +45,8 @@ module.exports.getProductsOfOutlet = (req,res) => {
                     }
                 })
             }
+            client.setEx(req.query.outletid, 36000, JSON.stringify(response))
+
             res.status(200).json(response);
         } else {
             return res.status(404).json({
