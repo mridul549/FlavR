@@ -14,6 +14,22 @@ cloudinary.config({
     secure: true
 });
 
+module.exports.getAllOutlets = (req,res) => {
+    Outlet.find({})
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            outlets: result
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
 module.exports.getOutlet = (req,res) => {
     const outletid = req.query.outletid
 
