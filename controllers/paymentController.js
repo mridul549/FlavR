@@ -17,6 +17,32 @@ const orderQueue = new Queue('orderQueue', {
     }
 })
 
+module.exports.generateCouponCode = (req,res) => {
+    const userid = req.userData.userid
+
+    User.find({ _id: userid})
+    .exec()
+    .then(result => {
+        if(result.length>0) {
+            
+
+
+
+        } else {
+            return res.status(404).json({
+                error: "No user found"
+            })
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
+
 // Verifies the cashfree signature with the secret key
 function verify(ts, rawBody){
     const body = ts + rawBody
@@ -102,6 +128,11 @@ async function paymentSuccess (req, res, orderid, userid, outletid) {
         })
     })
 }
+
+
+
+
+
 
 
 
