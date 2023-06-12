@@ -42,11 +42,13 @@ module.exports.processPayment = (req,res) => {
         const outletid = req.body.data.order.order_tags.outlet_id
         switch (paymentStatus) {
             case "SUCCESS":
-                paymentSuccess(req, res, orderid, userid, outletid)
+                paymentSuccess(req,res,orderid,userid,outletid)
                 break;
             case "FAILED":
+                // paymentFailed_UserDropped(req,res,orderid)
                 break;
             case "USER_DROPPED":
+                // paymentFailed_UserDropped(req,res,orderid)
                 break;
             default:
                 break;
@@ -103,7 +105,17 @@ async function paymentSuccess (req, res, orderid, userid, outletid) {
     })
 }
 
-
+// just delete the order from the system and retry payment
+async function paymentFailed_UserDropped (req,res,orderid) {
+    try {
+        await Order.deleteOne({ _id: orderid })
+        .exec()
+    } catch (error) {
+        return res.status(500).json({
+            error: error
+        });
+    }
+}
 
 
 

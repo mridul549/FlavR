@@ -36,15 +36,28 @@ module.exports.placeOrder = async (req, res) => {
 
                 if(variant==="default"){
                     // if no variant exists of a product
-                    const product = await Product.find({ _id: element.product });
-                    price=product[0].price
+                    try {
+                        const product = await Product.find({ _id: element.product });
+                        price=product[0].price
+                    } catch (error) {
+                        return res.status(500).json({
+                            error: "Error in fetching product"
+                        })
+                    }
                 } else {
                     // only returns 1 element in the variants array matching the variantName
-                    const product = await Product.find({ 
-                        _id: element.product, 
-                        'variants.variantName': variant
-                    }, { 'variants.$': 1 })
-                    price = product[0].variants[0].price
+                    try {
+                        const product = await Product.find({ 
+                            _id: element.product, 
+                            'variants.variantName': variant
+                        }, { 'variants.$': 1 })
+                        price = product[0].variants[0].price
+                    } catch (error) {
+
+                        return res.status(500).json({
+                            error: "error in fetching product"
+                        })
+                    }
                 }
                 totalAmount += (price*element.quantity)
                 totalQuantity += element.quantity
