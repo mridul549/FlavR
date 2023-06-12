@@ -4,22 +4,20 @@ const Product    = require('../models/product');
 const Outlet     = require('../models/outlet');
 const Owner      = require('../models/owner');
 const User       = require('../models/user');
+const Coupon     = require('../models/coupon');
 const axios      = require('axios');
 
 /* 
     1. get all items in cart
     2. calculate total price
-    3. update the order schema accordingly without order number
-    4. take payment
-    5. after payment assign order number
-    6. add the order to the respective outlet
-
-    Things to work on:
-    1. Payment
+    3. check for a coupon code and deduct the price accordingly 
+    4. update the order schema accordingly without order number
+    5. 
 */
 module.exports.placeOrder = async (req, res) => {
-    const userid   = req.userData.userid
-    const outletid = req.body.outletid
+    const userid     = req.userData.userid
+    const outletid   = req.body.outletid
+    const couponcode = req.body.couponcode
 
     User.find({ _id: userid })
     .exec()
@@ -55,6 +53,47 @@ module.exports.placeOrder = async (req, res) => {
                     quantity: element.quantity
                 })
             }
+
+            if(couponcode!==undefined){
+                Coupon.find({ code: couponcode })
+                .exec()
+                .then(coupon => {
+                    if(coupon.length>0){
+                        // coupon already used
+                        if(coupon[0].used){
+                            return res.status(400).json({
+                                error: "BAD REQUEST",
+                                message: "Coupon already used once"
+                            })
+                        } else {
+                            // coupon not used before, set its used field to true
+                            Coupon.updateOne({ code: couponcode }, {
+                                $set: { used: true }
+                            })
+                            .exec()
+                            .then(coupon => {
+                                totalAmount-=coupon[0].discount
+                            })
+                            .catch(err => {
+                                console.log(err);
+                                return res.status(500).json({
+                                    error: err
+                                })
+                            })
+                        }
+                    } else {
+                        return res.status(404).json({
+                            error: "Coupon not found"
+                        })
+                    }
+                })
+                .catch(err => {
+                    console.log(err);
+                    return res.status(500).json({
+                        error: err
+                    })
+                })
+            }
             
             const order = new Order({
                 _id: new mongoose.Types.ObjectId(),
@@ -77,7 +116,6 @@ module.exports.placeOrder = async (req, res) => {
                     payment_session_id: payment.data.payment_session_id,
                     order_status: payment.data.order_status
                 })
-                
             })
             .catch(err => {
                 console.log(err);
