@@ -52,7 +52,7 @@ const orderSchema = mongoose.Schema({
         default: "processing"
     },
     coupon: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         ref: 'Coupon'
     }
 }, {

@@ -106,16 +106,32 @@ module.exports.placeOrder = async (req, res) => {
             
             order.save()
 
+            // if coupon exist, add it to order
             // Generate cashfree token and send to the frontend SDK
             .then(async newOrder => {
-                const payment = await getPaymentToken(newOrder, outletid, result, req, res)
-                return res.status(201).json({
-                    message: "Order added to the database and cashfree token successfully generated",
-                    cf_order_id: payment.data.cf_order_id,
-                    order_id: newOrder._id,
-                    payment_session_id: payment.data.payment_session_id,
-                    order_status: payment.data.order_status
-                })
+                try {
+                    if(couponcode!==undefined){
+                        await Order.updateOne({ _id: newOrder._id }, {
+                            $set: { coupon: couponcode }
+                        })
+                        .exec()
+                    }
+
+                    const payment = await getPaymentToken(newOrder, outletid, result, req, res)
+                    return res.status(201).json({
+                        message: "Order added to the database and cashfree token successfully generated",
+                        cf_order_id: payment.data.cf_order_id,
+                        order_id: newOrder._id,
+                        payment_session_id: payment.data.payment_session_id,
+                        order_status: payment.data.order_status
+                    })
+
+                } catch (error) {
+                    console.log(err);
+                    return res.status(500).json({
+                        error: err
+                    })                    
+                }
             })
             .catch(err => {
                 console.log(err);
