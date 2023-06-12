@@ -45,7 +45,6 @@ module.exports.getProductsOfOutlet = (req,res) => {
                     }
                 })
             }
-            client.setEx(req.query.outletid, 36000, JSON.stringify(response))
 
             res.status(200).json(response);
         } else {
