@@ -66,13 +66,28 @@ module.exports.placeOrder = async (req, res) => {
                                 message: "Coupon already used once"
                             })
                         } else {
+                            if(coupon[0].outlet!=outletid){
+                                return res.status(400).json({
+                                    error: "BAD REQUEST",
+                                    message: "Coupon doesn't belong to this outlet"
+                                })
+                            }
+
+                            if(coupon[0].discount>totalAmount){
+                                return res.status(400).json({
+                                    error: "BAD REQUEST",
+                                    message: "Coupon amount is greater than total price of items to be ordered"
+                                })
+                            }
+
                             // coupon not used before, set its used field to true
-                            Coupon.updateOne({ code: couponcode }, {
-                                $set: { used: true }
+                            Coupon.findOneAndUpdate({ code: couponcode }, {
+                                $set: { used: false }
                             })
                             .exec()
                             .then(coupon => {
-                                totalAmount-=coupon[0].discount
+                                totalAmount-=coupon.discount
+                                console.log(totalAmount);
                             })
                             .catch(err => {
                                 console.log(err);
@@ -94,7 +109,10 @@ module.exports.placeOrder = async (req, res) => {
                     })
                 })
             }
-            
+
+            return res.status(200).json({
+                amt: totalAmount
+            })
             const order = new Order({
                 _id: new mongoose.Types.ObjectId(),
                 user: userid,
@@ -110,7 +128,7 @@ module.exports.placeOrder = async (req, res) => {
             // Generate cashfree token and send to the frontend SDK
             .then(async newOrder => {
                 try {
-                    if(couponcode!==undefined){
+                    if(couponcode!=undefined){
                         await Order.updateOne({ _id: newOrder._id }, {
                             $set: { coupon: couponcode }
                         })
@@ -125,11 +143,10 @@ module.exports.placeOrder = async (req, res) => {
                         payment_session_id: payment.data.payment_session_id,
                         order_status: payment.data.order_status
                     })
-
                 } catch (error) {
-                    console.log(err);
+                    console.log(error);
                     return res.status(500).json({
-                        error: err
+                        error: error
                     })                    
                 }
             })
