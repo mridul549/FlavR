@@ -12,8 +12,63 @@ const axios      = require('axios');
     2. calculate total price
     3. check for a coupon code and deduct the price accordingly 
     4. update the order schema accordingly without order number
-    5. 
+    5. generate the payment token using cashfree API
 */
+
+async function addcoupon (req,res,outletid,couponcode,totalAmount) {
+    return new Promise((resolve, reject) => {
+        Coupon.find({ code: couponcode })
+        .exec()
+        .then(coupon => {
+            if(coupon.length>0){
+                // coupon already used
+                if(coupon[0].used){
+                    return res.status(400).json({
+                        error: "BAD REQUEST",
+                        message: "Coupon already used once."
+                    })
+                } else {
+                    if(coupon[0].outlet!=outletid){
+                        return res.status(400).json({
+                            error: "BAD REQUEST",
+                            message: "Coupon doesn't belong to this outlet."
+                        })
+                    }
+
+                    if(coupon[0].discount>totalAmount){
+                        return res.status(422).json({
+                            error: "BAD REQUEST",
+                            message: "Coupon amount is greater than total price of items to be ordered."
+                        })
+                    }
+
+                    // coupon not used before, set its used field to true
+                    Coupon.findOneAndUpdate({ code: couponcode }, {
+                        $set: { used: false }
+                    })
+                    .exec()
+                    .then(coupon => {
+                        totalAmount-=coupon.discount
+                        resolve(totalAmount);
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        reject(err)
+                    })
+                }
+            } else {
+                return res.status(404).json({
+                    error: "Coupon not found"
+                })
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            reject(err)
+        })
+    })
+}
+
 module.exports.placeOrder = async (req, res) => {
     const userid     = req.userData.userid
     const outletid   = req.body.outletid
@@ -55,64 +110,16 @@ module.exports.placeOrder = async (req, res) => {
             }
 
             if(couponcode!==undefined){
-                Coupon.find({ code: couponcode })
-                .exec()
-                .then(coupon => {
-                    if(coupon.length>0){
-                        // coupon already used
-                        if(coupon[0].used){
-                            return res.status(400).json({
-                                error: "BAD REQUEST",
-                                message: "Coupon already used once"
-                            })
-                        } else {
-                            if(coupon[0].outlet!=outletid){
-                                return res.status(400).json({
-                                    error: "BAD REQUEST",
-                                    message: "Coupon doesn't belong to this outlet"
-                                })
-                            }
-
-                            if(coupon[0].discount>totalAmount){
-                                return res.status(400).json({
-                                    error: "BAD REQUEST",
-                                    message: "Coupon amount is greater than total price of items to be ordered"
-                                })
-                            }
-
-                            // coupon not used before, set its used field to true
-                            Coupon.findOneAndUpdate({ code: couponcode }, {
-                                $set: { used: false }
-                            })
-                            .exec()
-                            .then(coupon => {
-                                totalAmount-=coupon.discount
-                                console.log(totalAmount);
-                            })
-                            .catch(err => {
-                                console.log(err);
-                                return res.status(500).json({
-                                    error: err
-                                })
-                            })
-                        }
-                    } else {
-                        return res.status(404).json({
-                            error: "Coupon not found"
-                        })
-                    }
-                })
-                .catch(err => {
+                try {
+                    totalAmount = await addcoupon(req,res,outletid,couponcode,totalAmount)
+                } catch (error) {
                     console.log(err);
                     return res.status(500).json({
                         error: err
-                    })
-                })
+                    });
+                }
             }
 
-            return res.status(200).json({
-                amt: totalAmount
-            })
             const order = new Order({
                 _id: new mongoose.Types.ObjectId(),
                 user: userid,
@@ -123,7 +130,6 @@ module.exports.placeOrder = async (req, res) => {
             })
             
             order.save()
-
             // if coupon exist, add it to order
             // Generate cashfree token and send to the frontend SDK
             .then(async newOrder => {
