@@ -32,7 +32,6 @@ module.exports.getAllOutletsByCity = (req,res) => {
 }
 
 module.exports.getAllOutlets = (req,res) => {
-
     Outlet.find({})
     .exec()
     .then(result => {
@@ -420,7 +419,7 @@ module.exports.updateImage = (req,res) => {
         if(result.length>0) {
             const imageidOld = result[0].outletImage.imageid
 
-            if(imageidOld !== "null") {
+            if(imageidOld!==undefined && imageidOld !== "null") {
                 cloudinary.uploader.destroy(imageidOld, (err,result) => {
                     if(err) {
                         return res.status(500).json({
@@ -429,34 +428,39 @@ module.exports.updateImage = (req,res) => {
                     }
                 })
             }
-
-            const file = req.files.newOutletImage
-
-            cloudinary.uploader.upload(file.tempFilePath, (err, image) => {
-                if(err) {
-                    return res.status(500).json({
-                        error: "image upload failed"
+            
+            if(req.files && req.files.newOutletImage) {
+                const file = req.files.newOutletImage
+                cloudinary.uploader.upload(file.tempFilePath, (err, image) => {
+                    if(err) {
+                        return res.status(500).json({
+                            error: "image upload failed"
+                        })
+                    }
+                    Outlet.updateOne({ _id: outletid }, {
+                        $set: { outletImage: {
+                            url: image.url,
+                            imageid: image.public_id
+                        }}
                     })
-                }
-                Outlet.updateOne({ _id: outletid }, {
-                    $set: { outletImage: {
-                        url: image.url,
-                        imageid: image.public_id
-                    }}
-                })
-                .exec()
-                .then(docs => {
-                    return res.status(200).json({
-                        message: "Image updated successfully"
+                    .exec()
+                    .then(docs => {
+                        return res.status(200).json({
+                            message: "Image updated successfully"
+                        })
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        res.status(500).json({
+                            error: err
+                        })
                     })
                 })
-                .catch(err => {
-                    console.log(err);
-                    res.status(500).json({
-                        error: err
-                    })
+            } else {
+                return res.status(400).json({
+                    error: "No file found to upload"
                 })
-            })
+            }
         } else {
             return res.status(404).json({
                 error: "Outlet not found"
