@@ -44,7 +44,7 @@ async function addcoupon (req,res,outletid,couponcode,totalAmount) {
 
                     // coupon not used before, set its used field to true
                     Coupon.findOneAndUpdate({ code: couponcode }, {
-                        $set: { used: false }
+                        $set: { used: true }
                     })
                     .exec()
                     .then(coupon => {
