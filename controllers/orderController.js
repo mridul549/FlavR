@@ -15,7 +15,7 @@ const axios      = require('axios');
     5. generate the payment token using cashfree API
 */
 
-async function addcoupon (req,res,outletid,couponcode,totalAmount) {
+async function addcoupon (req,res,userid,outletid,couponcode,totalAmount) {
     return new Promise((resolve, reject) => {
         Coupon.find({ code: couponcode })
         .exec()
@@ -29,16 +29,23 @@ async function addcoupon (req,res,outletid,couponcode,totalAmount) {
                     })
                 } else {
                     if(coupon[0].outlet!=outletid){
-                        return res.status(400).json({
-                            error: "BAD REQUEST",
+                        return res.status(403).json({
+                            error: "FORBIDDEN",
                             message: "Coupon doesn't belong to this outlet."
                         })
                     }
 
                     if(coupon[0].discount>totalAmount){
                         return res.status(422).json({
-                            error: "BAD REQUEST",
+                            error: "Unprocessable Entity",
                             message: "Coupon amount is greater than total price of items to be ordered."
+                        })
+                    }
+
+                    if(coupon[0].createdBy!==userid){
+                        return res.status(400).json({
+                            error: "BAD REQUEST",
+                            message: "Coupon does not belong to you."
                         })
                     }
 
@@ -87,18 +94,21 @@ module.exports.placeOrder = async (req, res) => {
                 const variant = element.variant
                 let price=0
 
-                if(variant==="default"){
-                    // if no variant exists of a product
-                    const product = await Product.find({ _id: element.product });
-                    price=product[0].price
-                } else {
-                    // only returns 1 element in the variants array matching the variantName
-                    const product = await Product.find({ 
-                        _id: element.product, 
-                        'variants.variantName': variant
-                    }, { 'variants.$': 1 })
-                    price = product[0].variants[0].price
+                try {
+                    const product = await Product.findById(element.product);
+                    if(variant==="default"){
+                        price=product.price
+                    } else {
+                        const productItem = product.variants.find(item => item.variantName === variant)
+                        price = productItem.price
+                    }
+                } catch (error) {
+                    console.log(error);
+                    return res.status(500).json({
+                        error: "Error while trying to find the variant"
+                    })
                 }
+                
                 totalAmount += (price*element.quantity)
                 totalQuantity += element.quantity
     
@@ -111,7 +121,7 @@ module.exports.placeOrder = async (req, res) => {
 
             if(couponcode!==undefined){
                 try {
-                    totalAmount = await addcoupon(req,res,outletid,couponcode,totalAmount)
+                    totalAmount = await addcoupon(req,res,userid,outletid,couponcode,totalAmount)
                 } catch (error) {
                     console.log(err);
                     return res.status(500).json({
