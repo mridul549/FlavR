@@ -7,6 +7,7 @@ const router           = express.Router();
 router.get('/getMenuSize', checkAuth, outletController.getMenuSize)
 router.get('/getOutlet', checkAuth, outletController.getOutlet)
 router.get('/getAllOutlets', outletController.getAllOutlets)
+router.get('/getAllOutletsByCity', outletController.getAllOutletsByCity)
 
 // POST Methods
 router.post('/addOutlet', checkAuth, outletController.addOutlet);

@@ -14,9 +14,26 @@ cloudinary.config({
     secure: true
 });
 
-module.exports.getAllOutlets = (req,res) => {
+module.exports.getAllOutletsByCity = (req,res) => {
     const city = req.query.city
     Outlet.find({ "address.city": city })
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            outlets: result
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.getAllOutlets = (req,res) => {
+
+    Outlet.find({})
     .exec()
     .then(result => {
         return res.status(200).json({
