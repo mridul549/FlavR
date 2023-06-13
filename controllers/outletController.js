@@ -474,3 +474,66 @@ module.exports.updateImage = (req,res) => {
         })
     })
 }
+
+module.exports.deleteOutletImage = async (req,res) => {
+    const outletid = req.body.outletid
+    const ownerid  = req.userData.ownerid
+
+    Outlet.find({ _id: outletid })
+    .exec()
+    .then(async result => {
+        if(result.length>0) {
+            const imageid = result[0].outletImage.imageid
+
+            if(result[0].owner.toString()!==ownerid){
+                return res.status(401).json({
+                    error: "Unauthorised access"
+                })
+            }
+
+            if(imageid!="null"){
+                cloudinary.uploader.destroy(imageid, (err,result) => {
+                    if(err) {
+                        return res.status(500).json({
+                            error: "error in deleting the old image"
+                        })
+                    }
+                })
+
+                try {
+                    await Outlet.updateOne({ _id: outletid }, {
+                        $set: {
+                            "outletImage.url": "null",
+                            "outletImage.imageid": "null"
+                        }
+                    })
+                    .exec()
+                } catch (error) {
+                    console.log(err);
+                    return res.status(500).json({
+                        error: err
+                    })
+                }
+                
+                return res.status(200).json({
+                    message: "Image deleted successfully"
+                })
+            } else {
+                return res.status(400).json({
+                    error: "No image exists for the outlet"
+                })
+            }
+
+        } else {
+            return res.status(404).json({
+                error: "No outlet found"
+            })
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}

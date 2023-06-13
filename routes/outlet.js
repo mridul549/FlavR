@@ -14,6 +14,7 @@ router.post('/addOutlet', checkAuth, outletController.addOutlet);
 
 // DELETE Methods
 router.delete('/deleteOutlet', checkAuth, outletController.deleteOutlet);
+router.delete('/deleteImage', checkAuth, outletController.deleteOutletImage)
 
 // PATCH Methods
 router.patch('/updateOutlet/:outletid', checkAuth, outletController.updateOutlet);
