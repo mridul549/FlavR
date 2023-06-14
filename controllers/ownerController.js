@@ -184,7 +184,7 @@ module.exports.updateOwner = (req,res) => {
             for(const ops of req.body.updates) {
                 updateOps[ops.propName] = ops.value
             }
-            Owner.updateOne({ _id: productid }, {
+            Owner.updateOne({ _id: ownerid }, {
                 $set: updateOps
             })
             .exec()

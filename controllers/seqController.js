@@ -42,3 +42,13 @@ module.exports.resetSeq = (req,res) => {
         })
     })
 }
+
+module.exports.nano = async (req,res) => {
+    const { customAlphabet } = await import('nanoid');
+    const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    const nanoid = customAlphabet(alphabet, 10);
+    const nano = nanoid()
+    return res.status(200).json({
+        nano: nano
+    })
+}

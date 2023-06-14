@@ -232,11 +232,7 @@ module.exports.addProductsToCart = (req,res) => {
     .then(result => {
         if(result.length>0) {
             User.updateOne({ _id: userid }, {
-                $push: {
-                    cart: {
-                        $each: items
-                    }
-                }
+                $set: { cart: items }
             })
             .exec()
             .then(result => {
@@ -482,6 +478,46 @@ module.exports.getUserProfile = (req,res) => {
     .catch(err => {
         console.log(err);
         return res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.updateUser = (req,res) => {
+    const userid = req.userData.userid
+
+    User.find({ _id: userid })
+    .exec()
+    .then(result => {
+        if(result.length>0) {
+            const updateOps = {};
+            for(const ops of req.body.updates) {
+                updateOps[ops.propName] = ops.value
+            }
+            User.updateOne({ _id: userid }, {
+                $set: updateOps
+            })
+            .exec()
+            .then(result => {
+                return res.status(200).json({
+                    message: "User updated successfully"
+                })
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    error: err
+                })
+            })
+        } else {
+            return res.status(404).json({
+                error: "User not found"
+            })
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({
             error: err
         })
     })
