@@ -2,6 +2,14 @@ const Maintainer = require('../models/maintainer')
 const bcrypt     = require('bcrypt');
 const jwt        = require('jsonwebtoken');
 const mongoose   = require('mongoose')
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({ 
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+    api_key: process.env.CLOUDINARY_API_KEY, 
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure: true
+});
 
 module.exports.getNewToken = (req,res) => {
     const oldToken = req.headers.authorization.split(" ")[1];
@@ -164,6 +172,192 @@ module.exports.google_Login_Signup = (req,res) => {
         } else {
             // Log the maintainer in
             getTokenForGoogleAuth(result[0],req,res)
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.updateImage = (req,res) => {
+    const maintainerid = req.userData.maintainerid
+
+    Maintainer.find({ _id: maintainerid })
+    .exec()
+    .then(result => {
+        if(result.length>0) {
+            const imageidOld = result[0].maintainerPic.id
+
+            if(imageidOld !== "null") {
+                cloudinary.uploader.destroy(imageidOld, (err,result) => {
+                    if(err) {
+                        return res.status(500).json({
+                            error: "error in deleting the old image"
+                        })
+                    }
+                })
+            }
+
+            if(req.files && req.files.newMaintainerImage) {
+                const file = req.files.newMaintainerImage
+                cloudinary.uploader.upload(file.tempFilePath, (err, image) => {
+                    if(err) {
+                        return res.status(500).json({
+                            error: "image upload failed"
+                        })
+                    }
+                    Maintainer.updateOne({ _id: maintainerid }, {
+                        $set: { maintainerProfilePic: {
+                            url: image.url,
+                            id: image.public_id
+                        }}
+                    })
+                    .exec()
+                    .then(docs => {
+                        return res.status(200).json({
+                            message: "Image updated successfully"
+                        })
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        return res.status(500).json({
+                            error: err
+                        })
+                    })
+                })
+            } else {
+                return res.status(400).json({
+                    error: "No file found to upload"
+                })
+            }
+        } else {
+            return res.status(404).json({
+                error: "Maintainer not found"
+            })
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.getMaintainerProfile = (req,res) => {
+    const maintainerid = req.userData.maintainerid
+
+    Maintainer.find({ _id: maintainerid })
+    .select('_id maintainerName email maintainerPic')
+    .exec()
+    .then(result => {
+        if(result.length>0) {
+            return res.status(200).json({
+                maintainer: result
+            })
+        } else {
+            return res.status(404).json({
+                error: "Maintainer not found!"
+            })
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.updateMaintainer = (req,res) => {
+    const maintainerid = req.userData.maintainerid
+
+    Maintainer.find({ _id: maintainerid })
+    .exec()
+    .then(result => {
+        if(result.length>0) {
+            const updateOps = {};
+            for(const ops of req.body.updates) {
+                updateOps[ops.propName] = ops.value
+            }
+            Maintainer.updateOne({ _id: maintainerid }, {
+                $set: updateOps
+            })
+            .exec()
+            .then(result => {
+                return res.status(200).json({
+                    message: "Maintainer updated successfully"
+                })
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    error: err
+                })
+            })
+        } else {
+            return res.status(404).json({
+                error: "Maintainer not found"
+            })
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.deleteMaintainerImage = async (req,res) => {
+    const maintainerid = req.userData.maintainerid
+
+    Maintainer.find({ _id: maintainerid })
+    .exec()
+    .then(async result => {
+        if(result.length>0) {
+            const imageid = result[0].maintainerImage.imageid
+
+            if(imageid!="null"){
+                cloudinary.uploader.destroy(imageid, (err,result) => {
+                    if(err) {
+                        return res.status(500).json({
+                            error: "error in deleting the old image"
+                        })
+                    }
+                })
+
+                try {
+                    await Maintainer.updateOne({ _id: maintainerid }, {
+                        $set: {
+                            "maintainerPic.url": "null",
+                            "maintainerPic.id": "null"
+                        }
+                    })
+                    .exec()
+                } catch (error) {
+                    console.log(err);
+                    return res.status(500).json({
+                        error: err
+                    })
+                }
+                
+                return res.status(200).json({
+                    message: "Image deleted successfully"
+                })
+            } else {
+                return res.status(400).json({
+                    error: "No image exists for the maintainer"
+                })
+            }
+
+        } else {
+            return res.status(404).json({
+                error: "No maintainer found"
+            })
         }
     })
     .catch(err => {

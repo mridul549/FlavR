@@ -34,7 +34,11 @@ const maintainerSchema = mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Outlet'
         }
-    ]
+    ],
+    role: {
+        type: String,
+        default: "Maintainer"
+    }
 }, {
     timestamps: true
 })

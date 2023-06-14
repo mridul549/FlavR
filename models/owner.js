@@ -41,6 +41,10 @@ const ownerSchema = mongoose.Schema({
             type: String,
             default: "null"
         }
+    },
+    role: {
+        type: String,
+        default: "Owner"
     }
 }, {
     timestamps: true
