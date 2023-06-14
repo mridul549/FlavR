@@ -6,4 +6,6 @@ const checkAuth = require('../middlewares/check-auth');
 // Webhooks
 router.post('/process', paymentController.processPayment)
 
+router.post('/createcoupon', checkAuth, paymentController.generateCouponCode)
+
 module.exports = router;

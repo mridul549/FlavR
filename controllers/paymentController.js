@@ -1,12 +1,12 @@
-const mongoose   = require('mongoose');
-const Order      = require('../models/order');
 const Product    = require('../models/product');
 const Outlet     = require('../models/outlet');
+const Coupon     = require('../models/coupon');
+const Order      = require('../models/order');
 const Owner      = require('../models/owner');
 const User       = require('../models/user');
+const mongoose   = require('mongoose');
+const crypto     = require('crypto');
 const Queue      = require('bull');
-const cashfree   = require('cashfree-pg-sdk-nodejs');
-const crypto     = require('crypto')
 
 const orderQueue = new Queue('orderQueue', {
     redis: {
@@ -16,6 +16,67 @@ const orderQueue = new Queue('orderQueue', {
         username: process.env.REDIS_USERNAME
     }
 })
+
+module.exports.generateCouponCode = (req,res) => {
+    const userid   = req.userData.userid
+    const outletid = req.body.outletid 
+    const amount   = req.body.discount
+
+    User.find({ _id: userid})
+    .exec()
+    .then(async result =>  {
+        if(result.length>0) {
+            const { customAlphabet } = await import('nanoid');
+            const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+            const nanoid = customAlphabet(alphabet, 10);
+            const nano = nanoid()
+            const date = new Date()
+
+            const coupon = new Coupon({
+                code: nano,
+                discount: amount,
+                validity: {
+                    until: date.setDate(date.getDate()+60)
+                },
+                outlet: outletid,
+                createdBy: userid
+            })
+
+            coupon.save()
+            .then(async gencoupon => {
+                await User.updateOne({ _id: userid },{
+                    $push: { coupons: gencoupon._id}
+                })
+                .exec()
+                return gencoupon
+            })
+            .then(async gencoupon => {
+                return res.status(201).json({
+                    message: "Coupon generated successfully!",
+                    coupon: gencoupon
+                })
+            })
+            .catch(err => {
+                console.log(err);
+                return res.status(500).json({
+                    error: err
+                })
+            })
+
+        } else {
+            return res.status(404).json({
+                error: "No user found"
+            })
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
 
 // Verifies the cashfree signature with the secret key
 function verify(ts, rawBody){
@@ -116,6 +177,11 @@ async function paymentFailed_UserDropped (req,res,orderid) {
         });
     }
 }
+
+
+
+
+
 
 
 

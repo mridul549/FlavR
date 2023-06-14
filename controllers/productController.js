@@ -3,6 +3,7 @@ const Product               = require('../models/product');
 const Owner                 = require('../models/owner');
 const Outlet                = require('../models/outlet');
 const cloudinary            = require('cloudinary').v2;
+const redis                 = require('redis');
 
 cloudinary.config({ 
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
@@ -33,6 +34,7 @@ module.exports.getProductsOfOutlet = (req,res) => {
                     }
                 })
             }
+
             res.status(200).json(response);
         } else {
             return res.status(404).json({

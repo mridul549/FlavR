@@ -50,6 +50,10 @@ const orderSchema = mongoose.Schema({
     status: {
         type: String,
         default: "processing"
+    },
+    coupon: {
+        type: String,
+        ref: 'Coupon'
     }
 }, {
     timestamps: true

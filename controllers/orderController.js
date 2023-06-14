@@ -4,22 +4,82 @@ const Product    = require('../models/product');
 const Outlet     = require('../models/outlet');
 const Owner      = require('../models/owner');
 const User       = require('../models/user');
+const Coupon     = require('../models/coupon');
 const axios      = require('axios');
 
 /* 
     1. get all items in cart
     2. calculate total price
-    3. update the order schema accordingly without order number
-    4. take payment
-    5. after payment assign order number
-    6. add the order to the respective outlet
-
-    Things to work on:
-    1. Payment
+    3. check for a coupon code and deduct the price accordingly 
+    4. update the order schema accordingly without order number
+    5. generate the payment token using cashfree API
 */
+
+async function addcoupon (req,res,userid,outletid,couponcode,totalAmount) {
+    return new Promise((resolve, reject) => {
+        Coupon.find({ code: couponcode })
+        .exec()
+        .then(coupon => {
+            if(coupon.length>0){
+                // coupon already used
+                if(coupon[0].used){
+                    return res.status(400).json({
+                        error: "BAD REQUEST",
+                        message: "Coupon already used once."
+                    })
+                } else {
+                    if(coupon[0].outlet!=outletid){
+                        return res.status(403).json({
+                            error: "FORBIDDEN",
+                            message: "Coupon doesn't belong to this outlet."
+                        })
+                    }
+
+                    if(coupon[0].createdBy!==userid){
+                        return res.status(400).json({
+                            error: "BAD REQUEST",
+                            message: "Coupon does not belong to you."
+                        })
+                    }
+
+                    if(coupon[0].discount>totalAmount){
+                        return res.status(422).json({
+                            error: "Unprocessable Entity",
+                            message: "Coupon amount is greater than total price of items to be ordered."
+                        })
+                    }
+
+                    // coupon not used before, set its used field to true
+                    Coupon.findOneAndUpdate({ code: couponcode }, {
+                        $set: { used: true }
+                    })
+                    .exec()
+                    .then(coupon => {
+                        totalAmount-=coupon.discount
+                        resolve(totalAmount);
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        reject(err)
+                    })
+                }
+            } else {
+                return res.status(404).json({
+                    error: "Coupon not found"
+                })
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            reject(err)
+        })
+    })
+}
+
 module.exports.placeOrder = async (req, res) => {
-    const userid   = req.userData.userid
-    const outletid = req.body.outletid
+    const userid     = req.userData.userid
+    const outletid   = req.body.outletid
+    const couponcode = req.body.couponcode
 
     User.find({ _id: userid })
     .exec()
@@ -34,31 +94,21 @@ module.exports.placeOrder = async (req, res) => {
                 const variant = element.variant
                 let price=0
 
-                if(variant==="default"){
-                    // if no variant exists of a product
-                    try {
-                        const product = await Product.find({ _id: element.product });
-                        price=product[0].price
-                    } catch (error) {
-                        return res.status(500).json({
-                            error: "Error in fetching product"
-                        })
+                try {
+                    const product = await Product.findById(element.product);
+                    if(variant==="default"){
+                        price=product.price
+                    } else {
+                        const productItem = product.variants.find(item => item.variantName === variant)
+                        price = productItem.price
                     }
-                } else {
-                    // only returns 1 element in the variants array matching the variantName
-                    try {
-                        const product = await Product.find({ 
-                            _id: element.product, 
-                            'variants.variantName': variant
-                        }, { 'variants.$': 1 })
-                        price = product[0].variants[0].price
-                    } catch (error) {
-
-                        return res.status(500).json({
-                            error: "error in fetching product"
-                        })
-                    }
+                } catch (error) {
+                    console.log(error);
+                    return res.status(500).json({
+                        error: "Error while trying to find the variant"
+                    })
                 }
+                
                 totalAmount += (price*element.quantity)
                 totalQuantity += element.quantity
     
@@ -68,7 +118,18 @@ module.exports.placeOrder = async (req, res) => {
                     quantity: element.quantity
                 })
             }
-            
+
+            if(couponcode!==undefined){
+                try {
+                    totalAmount = await addcoupon(req,res,userid,outletid,couponcode,totalAmount)
+                } catch (error) {
+                    console.log(err);
+                    return res.status(500).json({
+                        error: err
+                    });
+                }
+            }
+
             const order = new Order({
                 _id: new mongoose.Types.ObjectId(),
                 user: userid,
@@ -79,18 +140,31 @@ module.exports.placeOrder = async (req, res) => {
             })
             
             order.save()
-
+            // if coupon exist, add it to order
             // Generate cashfree token and send to the frontend SDK
             .then(async newOrder => {
-                const payment = await getPaymentToken(newOrder, outletid, result, req, res)
-                return res.status(201).json({
-                    message: "Order added to the database and cashfree token successfully generated",
-                    cf_order_id: payment.data.cf_order_id,
-                    order_id: newOrder._id,
-                    payment_session_id: payment.data.payment_session_id,
-                    order_status: payment.data.order_status
-                })
-                
+                try {
+                    if(couponcode!=undefined){
+                        await Order.updateOne({ _id: newOrder._id }, {
+                            $set: { coupon: couponcode }
+                        })
+                        .exec()
+                    }
+
+                    const payment = await getPaymentToken(newOrder, outletid, result, req, res)
+                    return res.status(201).json({
+                        message: "Order added to the database and cashfree token successfully generated",
+                        cf_order_id: payment.data.cf_order_id,
+                        order_id: newOrder._id,
+                        payment_session_id: payment.data.payment_session_id,
+                        order_status: payment.data.order_status
+                    })
+                } catch (error) {
+                    console.log(error);
+                    return res.status(500).json({
+                        error: error
+                    })                    
+                }
             })
             .catch(err => {
                 console.log(err);
