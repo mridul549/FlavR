@@ -75,6 +75,12 @@ const outletSchema = mongoose.Schema({
         type: Number,
         default: 0
     },
+    maintainers: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Maintainer'
+        }
+    ],
     timings: {
         monday: {
             open: {
