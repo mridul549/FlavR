@@ -35,17 +35,17 @@ async function addcoupon (req,res,userid,outletid,couponcode,totalAmount) {
                         })
                     }
 
-                    if(coupon[0].discount>totalAmount){
-                        return res.status(422).json({
-                            error: "Unprocessable Entity",
-                            message: "Coupon amount is greater than total price of items to be ordered."
-                        })
-                    }
-
                     if(coupon[0].createdBy!==userid){
                         return res.status(400).json({
                             error: "BAD REQUEST",
                             message: "Coupon does not belong to you."
+                        })
+                    }
+
+                    if(coupon[0].discount>totalAmount){
+                        return res.status(422).json({
+                            error: "Unprocessable Entity",
+                            message: "Coupon amount is greater than total price of items to be ordered."
                         })
                     }
 
