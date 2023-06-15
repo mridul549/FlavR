@@ -241,78 +241,31 @@ module.exports.addProductsToCart = (req,res) => {
                     })
                 }    
             }
-            const cart = {
-                outlet: outletid,
-                products: items
-            }
-
-            // try {
-            //     const user = await User.findById( userid )
-            //     if (!user) {
-            //         return res.status(404).json({
-            //             error: "User not found"
-            //         })
-            //     }
-
-            //     const cartUser = user.cart
-            //     if (!cartUser) {
-            //         return res.status(404).json({
-            //             error: "Cart not found"
-            //         })
-            //     }
-
-            //     cartUser.outlet = outletid
-            //     cartUser.products = items
-            //     await user.save()
-
-            //     return res.status(201).json({
-            //         message: "Cart updated successfully",
-            //         outlet: outletid,
-            //         itemsAdded: items
-            //     })
-
-            // } catch (error) {
-            //     console.log(error);
-            //     return res.status(500).json({
-            //         error: "Couldn't update cart"
-            //     })
-            // }
-
-
-            User.find({ _id: userid })
-            .exec()
-            .then(result => {
-                if(result.length>0) {
-                    User.updateOne({ _id: userid }, {
-                        $set: { cart: cart }
-                    })
-                    .exec()
-                    .then(result => {
-                        return res.status(201).json({
-                            message: "Cart updated successfully",
-                            outlet: outletid,
-                            itemsAdded: items
-                        })
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        res.status(500).json({
-                            error: err
-                        })
-                    })
-                } else {
-                    return res.status(404).json({
-                        error: "User not found"
-                    })
-                }
-            })
-            .catch(err => {
+            
+            try {
+                await User.findOneAndUpdate({ _id: userid },
+                    {
+                        $set: {
+                            cart: {
+                                outlet: outletid,
+                                products: items
+                            }
+                        }
+                    },
+                    { upsert: true }
+                );
+                return res.status(201).json({
+                    message: "Cart updated successfully",
+                    outlet: outletid,
+                    itemsAdded: items
+                })
+                
+            } catch (error) {
                 console.log(err);
-                res.status(500).json({
+                return res.status(500).json({
                     error: err
                 })
-            })
-
+            }
         } else {
             return res.status(404).json({
                 error: "No products found for the selected outlet"
