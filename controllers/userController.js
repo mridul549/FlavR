@@ -226,20 +226,46 @@ module.exports.addOneProductToCart = (req,res) => {
 module.exports.addProductsToCart = (req,res) => {
     const items = req.body.items
     const userid = req.userData.userid
+    const outletid = req.body.outletid
 
-    User.find({ _id: userid })
+    Product.find({ outlet: outletid })
     .exec()
     .then(result => {
-        if(result.length>0) {
-            User.updateOne({ _id: userid }, {
-                $set: { cart: items }
-            })
+        if(result.length>0){
+            for (let i = 0; i < items.length; i++) {
+                const id = items[i].product;
+                const index = result.find(item => item._id.toString()===id)
+                if(index===undefined){
+                    return res.status(400).json({
+                        error: "One or more products in the cart do not belong to this outlet"
+                    })
+                }    
+            }
+            User.find({ _id: userid })
             .exec()
             .then(result => {
-                return res.status(201).json({
-                    message: "Cart updated successfully",
-                    itemsAdded: items
-                })
+                if(result.length>0) {
+                    User.updateOne({ _id: userid }, {
+                        $set: { cart: items }
+                    })
+                    .exec()
+                    .then(result => {
+                        return res.status(201).json({
+                            message: "Cart updated successfully",
+                            itemsAdded: items
+                        })
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        res.status(500).json({
+                            error: err
+                        })
+                    })
+                } else {
+                    return res.status(404).json({
+                        error: "User not found"
+                    })
+                }
             })
             .catch(err => {
                 console.log(err);
@@ -247,18 +273,20 @@ module.exports.addProductsToCart = (req,res) => {
                     error: err
                 })
             })
+            
         } else {
             return res.status(404).json({
-                error: "User not found"
+                error: "No products found for the selected outlet"
             })
         }
     })
     .catch(err => {
         console.log(err);
-        res.status(500).json({
+        return res.status(500).json({
             error: err
         })
     })
+
 }
 
 module.exports.getCartItems = (req,res) => {

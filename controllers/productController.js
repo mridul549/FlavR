@@ -121,6 +121,7 @@ module.exports.addProduct = (req,res) => {
             })
         }
         
+        // TESTING PENDING
         try {
             const outlet = await Outlet.find({ _id: req.body.outletid })
             if(!outlet){
