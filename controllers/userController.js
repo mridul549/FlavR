@@ -412,10 +412,8 @@ module.exports.clearCart = (req,res) => {
     const userid = req.userData.userid
 
     User.updateOne({ _id: userid }, {
-        $pull: {
-            cart: {
-                $exists: true
-            }
+        $set: {
+            cart: {}
         }
     })
     .exec()
