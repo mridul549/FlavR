@@ -232,14 +232,17 @@ module.exports.addProductsToCart = (req,res) => {
     .exec()
     .then(async result => {
         if(result.length>0){
+            // create a set of IDs of products of an outlet- O(N)
+            const set = new Set(result.map(obj => obj._id.toString()))
             for (let i = 0; i < items.length; i++) {
-                const id = items[i].product;
-                const index = result.find(item => item._id.toString()===id)
-                if(index===undefined){
+                const productid = items[i].product;
+
+                // check if the product id exists in the set- O(1)
+                if(!set.has(productid)){
                     return res.status(400).json({
                         error: "One or more products in the cart do not belong to this outlet"
                     })
-                }    
+                }
             }
             
             try {
