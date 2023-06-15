@@ -330,7 +330,7 @@ module.exports.addProductsToCart = (req,res) => {
 
 module.exports.getCartItems = (req,res) => {
     User.find({ _id: req.userData.userid })
-    .populate('cart.product', '_id category productName description price productImage')
+    .populate('cart.products', '_id category productName description price productImage')
     .exec()
     .then(result => {
         return res.status(200).json({
