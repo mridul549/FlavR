@@ -45,7 +45,13 @@ const orderSchema = mongoose.Schema({
         default: false
     },
     instructions: {
-        type: String
+        packOrder: {
+            type: Boolean,
+            default: false
+        },
+        message: {
+            type: String
+        }
     },
     status: {
         type: String,

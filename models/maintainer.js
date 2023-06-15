@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
-const ownerSchema = mongoose.Schema({
+const maintainerSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
-    ownerName: {
+    maintainerName: {
         type: String,
         required: true
     },
@@ -14,25 +14,12 @@ const ownerSchema = mongoose.Schema({
     },
     password: {
         type: String,
+    },
+    authMethod: {
+        type: String,
         required: true
     },
-    outlets: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Outlet'
-    }],
-    products: [
-        {
-            product: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Product'
-            },
-            outlet: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Outlet'
-            }
-        }
-    ],
-    ownerProfilePic: {
+    maintainerPic: {
         url: {
             type: String,
             default: "null"
@@ -42,12 +29,18 @@ const ownerSchema = mongoose.Schema({
             default: "null"
         }
     },
+    outlets: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Outlet'
+        }
+    ],
     role: {
         type: String,
-        default: "Owner"
+        default: "Maintainer"
     }
 }, {
     timestamps: true
 })
 
-module.exports = mongoose.model('Owner', ownerSchema);
+module.exports = mongoose.model('Maintainer', maintainerSchema);
