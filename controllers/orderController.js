@@ -80,6 +80,7 @@ module.exports.placeOrder = async (req, res) => {
     const userid     = req.userData.userid
     const outletid   = req.body.outletid
     const couponcode = req.body.couponcode
+    let instructions = req.body.instructions
 
     User.find({ _id: userid })
     .exec()
@@ -88,6 +89,12 @@ module.exports.placeOrder = async (req, res) => {
             let totalAmount=0, totalQuantity=0;
             const cart = result[0].cart
             const productArr = []
+
+            if(cart.length==0){
+                return res.status(400).json({
+                    error: "Cart is empty"
+                })
+            }
 
             for (let i = 0; i < cart.length; i++) {
                 const element = cart[i];
@@ -130,13 +137,21 @@ module.exports.placeOrder = async (req, res) => {
                 }
             }
 
+            if(instructions===undefined){
+                instructions={
+                    packOrder: false,
+                    message: "No special instructions"
+                }
+            }
+            console.log(totalAmount);
             const order = new Order({
                 _id: new mongoose.Types.ObjectId(),
                 user: userid,
                 outlet: outletid,
                 products: productArr,
                 totalPrice: totalAmount,
-                totalQuantity: totalQuantity
+                totalQuantity: totalQuantity,
+                instructions: instructions
             })
             
             order.save()

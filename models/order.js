@@ -50,7 +50,8 @@ const orderSchema = mongoose.Schema({
             default: false
         },
         message: {
-            type: String
+            type: String,
+            default: "No special instructions"
         }
     },
     status: {
