@@ -19,6 +19,9 @@ const maintainerSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    mobile: {
+        type: Number
+    },
     maintainerPic: {
         url: {
             type: String,

@@ -17,7 +17,9 @@ const userSchema = mongoose.Schema({
     },
     authMethod: {
         type: String,
-
+    },
+    mobile: {
+        type: Number
     },
     cart: {
         outlet: {

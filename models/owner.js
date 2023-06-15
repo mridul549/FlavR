@@ -16,6 +16,13 @@ const ownerSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    authMethod: {
+        type: String,
+
+    },
+    mobile: {
+        type: Number
+    },
     outlets: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Outlet'
