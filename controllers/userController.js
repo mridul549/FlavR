@@ -230,7 +230,7 @@ module.exports.addProductsToCart = (req,res) => {
 
     Product.find({ outlet: outletid })
     .exec()
-    .then(result => {
+    .then(async result => {
         if(result.length>0){
             for (let i = 0; i < items.length; i++) {
                 const id = items[i].product;
@@ -241,17 +241,56 @@ module.exports.addProductsToCart = (req,res) => {
                     })
                 }    
             }
+            const cart = {
+                outlet: outletid,
+                products: items
+            }
+
+            // try {
+            //     const user = await User.findById( userid )
+            //     if (!user) {
+            //         return res.status(404).json({
+            //             error: "User not found"
+            //         })
+            //     }
+
+            //     const cartUser = user.cart
+            //     if (!cartUser) {
+            //         return res.status(404).json({
+            //             error: "Cart not found"
+            //         })
+            //     }
+
+            //     cartUser.outlet = outletid
+            //     cartUser.products = items
+            //     await user.save()
+
+            //     return res.status(201).json({
+            //         message: "Cart updated successfully",
+            //         outlet: outletid,
+            //         itemsAdded: items
+            //     })
+
+            // } catch (error) {
+            //     console.log(error);
+            //     return res.status(500).json({
+            //         error: "Couldn't update cart"
+            //     })
+            // }
+
+
             User.find({ _id: userid })
             .exec()
             .then(result => {
                 if(result.length>0) {
                     User.updateOne({ _id: userid }, {
-                        $set: { cart: items }
+                        $set: { cart: cart }
                     })
                     .exec()
                     .then(result => {
                         return res.status(201).json({
                             message: "Cart updated successfully",
+                            outlet: outletid,
                             itemsAdded: items
                         })
                     })
@@ -273,7 +312,7 @@ module.exports.addProductsToCart = (req,res) => {
                     error: err
                 })
             })
-            
+
         } else {
             return res.status(404).json({
                 error: "No products found for the selected outlet"

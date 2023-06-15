@@ -17,22 +17,30 @@ const userSchema = mongoose.Schema({
     },
     authMethod: {
         type: String,
-        required: true
+
     },
-    cart: [{
-        product: {
+    cart: {
+        outlet: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Product'
+            ref: 'Outlet'
         },
-        variant: {
-            type: String,
-            default: "default"
-        },
-        quantity: {
-            type: Number,
-            default: 1
-        }
-    }],
+        products: [
+            {
+                product: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'Product'
+                },
+                variant: {
+                    type: String,
+                    default: "default"
+                },
+                quantity: {
+                    type: Number,
+                    default: 1
+                }
+            }
+        ]
+    },
     orders: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Order'
