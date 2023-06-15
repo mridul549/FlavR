@@ -12,6 +12,10 @@ if (process.env.NODE_ENV !== 'production') {
 
 mongoose.connect(process.env.MONGOOSE_CONNECTION_STRING)
 
+mongoose.connection.on('connected', function() {
+    console.log("Connected to MongoDB")
+});
+
 app.use(fileUpload({
     useTempFiles: true
 }))
