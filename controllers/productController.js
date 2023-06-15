@@ -114,13 +114,34 @@ module.exports.addProduct = (req,res) => {
         ]
     })
     .exec()
-    .then(result => {
+    .then(async result => {
         if(result.length>0){
             return res.status(404).json({
                 message: "Product already exists"
             })
         }
         
+        try {
+            const outlet = await Outlet.find({ _id: req.body.outletid })
+            if(!outlet){
+                return res.status(404).json({
+                    error: "Outlet Not found"
+                })
+            }
+
+            if(outlet[0].owner.toString()!==req.userData.ownerid){
+                return res.status(401).json({
+                    error: "Owner doesn't belong to this outlet"
+                })
+            }
+
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                error: "Error in finding outlet"
+            })
+        }
+
         let variants = req.body.variants
         // if variants array is not recieved, intialise it to empty array
         if(variants===undefined) {
