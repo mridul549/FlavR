@@ -143,7 +143,7 @@ module.exports.placeOrder = async (req, res) => {
                     message: "No special instructions"
                 }
             }
-            console.log(totalAmount);
+
             const order = new Order({
                 _id: new mongoose.Types.ObjectId(),
                 user: userid,
