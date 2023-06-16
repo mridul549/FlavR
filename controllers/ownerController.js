@@ -242,6 +242,7 @@ module.exports.getOutlets = (req,res) => {
     2. DOB
     3. Gender
 */
+
 module.exports.updateOwner = (req,res) => {
     const ownerid = req.userData.ownerid
 
