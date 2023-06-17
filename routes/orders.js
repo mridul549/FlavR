@@ -5,6 +5,9 @@ const checkAuth = require('../middlewares/check-auth');
 
 router.use('/payments', require('./payments'))
 
+// GET Methods
+router.get('/getOrder', orderController.getOrder)
+
 // POST Methods
 router.post('/placeOrder', checkAuth, orderController.placeOrder);
 

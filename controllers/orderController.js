@@ -363,3 +363,21 @@ module.exports.deliverEntireOrder = (req,res) => {
         })
     })
 }
+
+module.exports.getOrder = (req,res) => {
+    const orderid = req.query.orderid
+
+    Order.find({ _id: orderid })
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            order: result
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
