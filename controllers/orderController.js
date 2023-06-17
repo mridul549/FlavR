@@ -87,7 +87,7 @@ module.exports.placeOrder = async (req, res) => {
     .then(async result => {
         if(result.length>0) {
             let totalAmount=0, totalQuantity=0;
-            const cart = result[0].cart
+            const cart = result[0].cart.products
             const productArr = []
 
             if(cart.length==0){
@@ -96,6 +96,7 @@ module.exports.placeOrder = async (req, res) => {
                 })
             }
 
+
             for (let i = 0; i < cart.length; i++) {
                 const element = cart[i];
                 const variant = element.variant
@@ -103,6 +104,7 @@ module.exports.placeOrder = async (req, res) => {
 
                 try {
                     const product = await Product.findById(element.product);
+
                     if(variant==="default"){
                         price=product.price
                     } else {
@@ -143,6 +145,7 @@ module.exports.placeOrder = async (req, res) => {
                     message: "No special instructions"
                 }
             }
+
 
             const order = new Order({
                 _id: new mongoose.Types.ObjectId(),
