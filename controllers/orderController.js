@@ -325,33 +325,18 @@ module.exports.deliverEntireOrder = (req,res) => {
             .then(async result => {
                 try {
                     await Outlet.updateOne({ _id: outletid }, {
-                        $pull: { activeOrders: orderid }
-                    })
-                    .exec()
-                    return result
-                } catch (error) {
-                    return res.status(500).json({
-                        error: "Error while pulling the order from outlet's active orders array"
-                    })
-                }
-            })
-            .then(async result => {
-                try {
-                    await Outlet.updateOne({ _id: outletid }, {
+                        $pull: { activeOrders: orderid },
                         $push: { completedOrders: orderid }
                     })
                     .exec()
-                    return result
+                    return res.status(200).json({
+                        message: "Order marked completed and shifted from active array to completed in outlet"
+                    })
                 } catch (error) {
                     return res.status(500).json({
-                        error: "Error while pushing the order into outlet's completed orders array"
+                        error: "Error while updating outlet orders"
                     })
                 }
-            })
-            .then(async result => {
-                return res.status(200).json({
-                    message: "Order marked completed and shifted from active array to completed in outlet"
-                })
             })
             .catch(err => {
                 console.log(err);
