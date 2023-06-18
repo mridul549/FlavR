@@ -408,14 +408,15 @@ module.exports.order_confirm_reject = (req,res) => {
     const orderid   = req.body.orderid
     const ownerid   = req.userData.ownerid
 
-    Outlet.find({ _id: ownerid })
+    Outlet.findById(outletid)
     .exec()
     .then(async outlet => {
         if(outlet.length>0){
             if(outlet[0].owner.toString()===ownerid){
                 try {
                     const order = await Order.findById(orderid)
-                    
+
+                    const pendingConfItem = outlet.pendingConfOrders.find(item => item.toString() === orderid);
                     outlet.pendingConfOrders.pull(orderid)
                     if(isConfirm) {
                         await orderQueue.add({ orderid, outletid })
@@ -435,7 +436,7 @@ module.exports.order_confirm_reject = (req,res) => {
                     return res.status(200).json({
                         message: orderStatement 
                     })
-                    
+
                 } catch (error) {
                     console.log(error);
                     return res.status(500).json({

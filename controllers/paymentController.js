@@ -128,7 +128,8 @@ module.exports.processPayment = (req,res) => {
  */
 async function paymentSuccess (req, res, orderid, userid, outletid) {
     User.findByIdAndUpdate(userid, {
-        $push: { orders: orderid }
+        $push: { orders: orderid },
+        $set: { cart: {} }
     })
     .exec()
     .then(async result => {
