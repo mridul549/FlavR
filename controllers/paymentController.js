@@ -127,8 +127,6 @@ module.exports.processPayment = (req,res) => {
     * Add order to outlet and user- done
  */
 async function paymentSuccess (req, res, orderid, userid, outletid) {
-    await orderQueue.add({ orderid, outletid })
-
     User.findByIdAndUpdate(userid, {
         $push: { orders: orderid }
     })
@@ -136,7 +134,7 @@ async function paymentSuccess (req, res, orderid, userid, outletid) {
     .then(async result => {
         try {
             await Outlet.findByIdAndUpdate(outletid, {
-                $push: { activeOrders: orderid }
+                $push: { pendingConfOrders: orderid }
             })
             .exec();
             return result
@@ -149,7 +147,7 @@ async function paymentSuccess (req, res, orderid, userid, outletid) {
     .then(async result => {
         try {
             await Order.findByIdAndUpdate(orderid, {
-                $set: { payment: true}
+                $set: { payment: true }
             })
             .exec();
         } catch (error) {

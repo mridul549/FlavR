@@ -43,6 +43,12 @@ const outletSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
     }],
+    pendingConfOrders: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Order'
+        }
+    ],
     activeOrders: [
         {
             type: mongoose.Schema.Types.ObjectId,

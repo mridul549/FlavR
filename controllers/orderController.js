@@ -6,6 +6,16 @@ const Owner      = require('../models/owner');
 const User       = require('../models/user');
 const Coupon     = require('../models/coupon');
 const axios      = require('axios');
+const Queue      = require('bull');
+
+const orderQueue = new Queue('orderQueue', {
+    redis: {
+        host: process.env.REDIS_HOST,
+        port: process.env.REDIS_PORT,
+        password: process.env.REDIS_PASSWORD,
+        username: process.env.REDIS_USERNAME
+    }
+})
 
 /* 
     1. get all items in cart
@@ -373,6 +383,75 @@ module.exports.getOrder = (req,res) => {
         return res.status(200).json({
             order: result
         })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
+/**
+ * If order confirmed, update status, remove it from pending confirmation orders 
+ * and add it to active orders and then finally add it to the order queue
+ * 
+ * else if order rejected, remove it from pending confirmation orders
+ *      method of refund?
+ *          coupon         -> 
+ *          money transfer -> 
+ * 
+ */
+module.exports.order_confirm_reject = (req,res) => {
+    const isConfirm = req.body.isConfirm
+    const outletid  = req.body.outletid
+    const orderid   = req.body.orderid
+    const ownerid   = req.userData.ownerid
+
+    Outlet.find({ _id: ownerid })
+    .exec()
+    .then(async outlet => {
+        if(outlet.length>0){
+            if(outlet[0].owner.toString()===ownerid){
+                try {
+                    const order = await Order.findById(orderid)
+                    
+                    outlet.pendingConfOrders.pull(orderid)
+                    if(isConfirm) {
+                        await orderQueue.add({ orderid, outletid })
+                        order.status = "PREPARING"
+                        outlet.activeOrders.push(orderid)
+                    } else {
+                        order.status = "REJECTED"
+                    }
+                    
+                    order.save()
+                    Outlet.save()
+
+                    const orderStatement = (isConfirm) ? 
+                        "Order successfully confirmed and sent for futher processing." : 
+                        "Order rejected and refund or coupon has been successfully initiated."
+
+                    return res.status(200).json({
+                        message: orderStatement 
+                    })
+                    
+                } catch (error) {
+                    console.log(error);
+                    return res.status(500).json({
+                        error: error
+                    })    
+                }
+            } else {
+                return res.status(401).json({
+                    error: "Unauthorised access to outlet"
+                })
+            }
+        } else {
+            return res.status(404).json({
+                error: "Outlet not found"
+            })
+        }
     })
     .catch(err => {
         console.log(err);
