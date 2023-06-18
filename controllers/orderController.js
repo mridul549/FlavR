@@ -408,7 +408,7 @@ module.exports.order_confirm_reject = (req,res) => {
     const orderid   = req.body.orderid
     const ownerid   = req.userData.ownerid
 
-    Outlet.findById(outletid)
+    Outlet.find({ _id: outletid })
     .exec()
     .then(async outlet => {
         if(outlet.length>0){
@@ -416,18 +416,18 @@ module.exports.order_confirm_reject = (req,res) => {
                 try {
                     const order = await Order.findById(orderid)
 
-                    const pendingConfItem = outlet.pendingConfOrders.find(item => item.toString() === orderid);
-                    outlet.pendingConfOrders.pull(orderid)
+                    const pendingConfItem = outlet[0].pendingConfOrders.find(item => item.toString() === orderid);
+                    outlet[0].pendingConfOrders.pull(orderid)
                     if(isConfirm) {
                         await orderQueue.add({ orderid, outletid })
                         order.status = "PREPARING"
-                        outlet.activeOrders.push(orderid)
+                        outlet[0].activeOrders.push(orderid)
                     } else {
                         order.status = "REJECTED"
                     }
                     
-                    order.save()
-                    Outlet.save()
+                    await order.save()
+                    await outlet[0].save()
 
                     const orderStatement = (isConfirm) ? 
                         "Order successfully confirmed and sent for futher processing." : 
