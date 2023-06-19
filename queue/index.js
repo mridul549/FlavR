@@ -5,8 +5,8 @@ const redis = require('redis');
 const client = redis.createClient({
     password: process.env.REDIS_PASSWORD,
     socket: {
-        host: 'redis-10818.c273.us-east-1-2.ec2.cloud.redislabs.com',
-        port: 10818
+        host: process.env.REDIS_HOST,
+        port: process.env.REDIS_PORT
     }
 });
 
@@ -30,8 +30,23 @@ const orderQueue = new Queue('orderQueue', {
     }
 })
 
+const mailQueue = new Queue('mailQueue', {
+    concurrency: 80,
+    redis: {
+        host: process.env.REDIS_HOST,
+        port: process.env.REDIS_PORT,
+        password: process.env.REDIS_PASSWORD,
+        username: process.env.REDIS_USERNAME
+    }
+})
+
 orderQueue.process(path.join(__dirname, 'orderQueueProcess.js'))
+mailQueue.process(path.join(__dirname, 'mailQueueProcess.js'))
 
 orderQueue.on('completed', (job) => {
     console.log(`Completed #${job.id} Job of outlet ${job.data.outletid}`);
+})
+
+mailQueue.on('completed', (job) => {
+    console.log(`Mail Sent`);
 })

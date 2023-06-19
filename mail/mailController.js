@@ -4,6 +4,16 @@ const { google } = require('googleapis')
 const fs         = require('fs')
 const ejs        = require('ejs')
 const Otp        = require('../models/otp')
+const Queue      = require('bull');
+
+const mailQueue = new Queue('mailQueue', {
+    redis: {
+        host: process.env.REDIS_HOST,
+        port: process.env.REDIS_PORT,
+        password: process.env.REDIS_PASSWORD,
+        username: process.env.REDIS_USERNAME
+    }
+})
 
 const oAuth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
@@ -30,7 +40,7 @@ const template = fs.readFileSync('/Users/starship/Desktop/Developer stuff/Projec
 async function generateOTP (key) {
     const { customAlphabet } = await import('nanoid');
     const alphabet = '0123456789';
-    const nanoid = customAlphabet(alphabet, 6);
+    const nanoid = customAlphabet(alphabet, 4);
     const nano = nanoid()
     let date = new Date()
     date = date.setMinutes(date.getMinutes()+15)
@@ -44,25 +54,19 @@ async function generateOTP (key) {
                     expiry: date
                 }, 
             },
-            { upsert: true, new: true}
+            { upsert: true, new: true, maxTimeMS: 60000 }
         )
         return nano
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            error: error
-        })
+        throw error
     }
 }
 
-async function sendMail(key) {
+module.exports.sendMail = async (key) => {
     const otpnew = await generateOTP(key)
 
-    const data = {
-        otp: otpnew
-    }
-    
-    const renderedHTML = ejs.render(template, data)
+    const renderedHTML = ejs.render(template, { otp: otpnew })
     try {
         const accessToken = await oAuth2Client.getAccessToken();
 
@@ -79,33 +83,33 @@ async function sendMail(key) {
         })
 
         const mailOptions = {
-            from: 'Mridul Verma <mridulverma478@gmail.com>',
+            from: 'FlavR <mridulverma478@gmail.com>',
             to: key,
-            subject: 'FlavR OTP Verification',
+            subject: `${otpnew} is your FlavR OTP Verification code`,
             html: renderedHTML
         }
 
         const result = await transport.sendMail(mailOptions)
-        return result
+        
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            error: "Error while sending the mail"
-        })
+        throw error
     }
 }
 
-module.exports.sendMail = (req,res) => {
-    sendMail('mridulv.it.21@nitj.ac.in')
-    .then(result => {
-        return res.status(200).json({
-            message: "Mail Sent"
+module.exports.reSendOTP = async (req,res) => {
+    const key = req.body.email
+
+    try {
+        await mailQueue.add({ key })
+        return res.status(201).json({
+            action: "OTP Sent",
+            message: "Please check your mailbox for the OTP."
         })
-    })
-    .catch(err => {
-        console.log(err);
+    } catch (error) {
+        console.log(error);
         return res.status(500).json({
-            error: err
+            error: error
         })
-    })
+    }
 }

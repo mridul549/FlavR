@@ -1,5 +1,3 @@
-// TODO- Change the secret key
-
 const mongoose   = require('mongoose');
 const User       = require('../models/user');
 const bcrypt     = require('bcrypt');
@@ -60,7 +58,7 @@ module.exports.signup = (req,res) => {
                     user
                     .save()
                     .then(result => {
-                        console.log(result);
+                        
                         return res.status(201).json({
                             message: "User created"
                         })

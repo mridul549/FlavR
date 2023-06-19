@@ -2,7 +2,7 @@ const { default: mongoose, model } = require('mongoose');
 const Order    = require('../models/order')
 const Seq      = require('../models/seq')
 
-mongoose.connect("mongodb+srv://mridul549:xTKgkDyitxpKcOY7@cluster0.iuoe1mb.mongodb.net/?retryWrites=true&w=majority")
+mongoose.connect(process.env.MONGOOSE_CONNECTION_STRING)
 
 const orderQueueProcess = async (job, done) => {
     const orderid = job.data.orderid
