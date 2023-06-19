@@ -30,7 +30,7 @@ const template = fs.readFileSync('/Users/starship/Desktop/Developer stuff/Projec
 async function generateOTP (key) {
     const { customAlphabet } = await import('nanoid');
     const alphabet = '0123456789';
-    const nanoid = customAlphabet(alphabet, 4);
+    const nanoid = customAlphabet(alphabet, 6);
     const nano = nanoid()
     let date = new Date()
     date = date.setMinutes(date.getMinutes()+15)
@@ -46,7 +46,6 @@ async function generateOTP (key) {
             },
             { upsert: true, new: true}
         )
-
         return nano
     } catch (error) {
         console.log(error);
