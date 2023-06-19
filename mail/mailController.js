@@ -4,6 +4,7 @@ const { google } = require('googleapis')
 const fs         = require('fs')
 const ejs        = require('ejs')
 const Otp        = require('../models/otp')
+const path       = require('path')
 const Queue      = require('bull');
 
 const mailQueue = new Queue('mailQueue', {
@@ -23,7 +24,7 @@ const oAuth2Client = new google.auth.OAuth2(
 
 oAuth2Client.setCredentials({ refresh_token: process.env.GOOGLE_REFRESH_TOKEN })
 
-const template = fs.readFileSync('/Users/starship/Desktop/Developer stuff/Projects/Nescafe/mail/template.ejs', 'utf8')
+const template = fs.readFileSync(path.join(__dirname, 'template.ejs'), 'utf8')
 
 /**
  * Process to send and verify otp
