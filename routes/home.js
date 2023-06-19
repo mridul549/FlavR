@@ -7,5 +7,6 @@ router.use('/user', require('./user'));
 router.use('/products', require('./products'));
 router.use('/orders', require('./orders'));
 router.use('/seq', require('./sequence'))
+router.use('/mail', require('../mail/mailRoutes'))
 
 module.exports = router;
