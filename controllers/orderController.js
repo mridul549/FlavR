@@ -308,7 +308,7 @@ module.exports.deliverItem = async (req,res) => {
  *      => completed orders array B
  * A new order will always be put in the acive orders array A
  * When this order is completed, it is moved to the completed orders array B from A
-*/
+ */
 module.exports.deliverEntireOrder = (req,res) => {
     const orderid  = req.body.orderid
     const ownerid  = req.userData.ownerid
@@ -385,6 +385,7 @@ module.exports.getOrder = (req,res) => {
  *      method of refund?
  *          coupon         -> 
  *          money transfer -> 
+ *      delete order from DB
  * 
  */
 module.exports.order_confirm_reject = (req,res) => {
