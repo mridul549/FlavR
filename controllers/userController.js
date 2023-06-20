@@ -4,6 +4,16 @@ const bcrypt     = require('bcrypt');
 const jwt        = require('jsonwebtoken');
 const Product    = require('../models/product')
 const cloudinary = require('cloudinary').v2;
+const Queue      = require('bull');
+
+const mailQueue = new Queue('mailQueue', {
+    redis: {
+        host: process.env.REDIS_HOST,
+        port: process.env.REDIS_PORT,
+        password: process.env.REDIS_PASSWORD,
+        username: process.env.REDIS_USERNAME
+    }
+})
 
 cloudinary.config({ 
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
@@ -24,6 +34,7 @@ module.exports.getNewToken = (req,res) => {
     })
 }
 
+// Already signed up Unverified users directed to otp directly
 module.exports.signup = (req,res) => {
     User.find({ email: req.body.email })
     .exec()
@@ -57,10 +68,19 @@ module.exports.signup = (req,res) => {
                     })
                     user
                     .save()
-                    .then(result => {
-                        
+                    .then(async result => {
+                        /**
+                         * the role determines whether it's a user, owner or maintainer
+                         * user -> 0
+                         * owner -> 1
+                         * maintainer -> 2
+                         */
+                        const key = req.body.email
+                        const role = 0
+                        await mailQueue.add({ key, role })
                         return res.status(201).json({
-                            message: "User created"
+                            action: "User created and OTP Sent",
+                            message: "Please check your mailbox for the OTP verification code."
                         })
                     })
                     .catch(err => {
