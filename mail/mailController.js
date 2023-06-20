@@ -135,40 +135,52 @@ module.exports.reSendOTP = async (req,res) => {
 module.exports.verifyOTP = (req,res) => {
     const otp = req.body.otp
     const key = req.body.key
+    const role = req.body.role
 
-    Otp.find({ createdBy: key })
+    Otp.find({ 
+        $and: [
+            { createdBy: key },
+            { role: role }
+        ]
+    })
     .exec()
     .then(async result => {
         if(result.length>0){
             const otpStored = result[0].code
-            const role      = result[0].role
+            const expiry    = result[0].expiry
+            const date = new Date()
 
             if(otp===otpStored) {
-                switch (role) {
-                    case 0:
-                        verifyUser(key,req,res)
-                        break;
-                    case 1:
-                        verifyOwner(key,req,res)
-                        break;
-                    case 2:
-                        verifyMaintainer(key,req,res)
-                        break;
-                    default:
-                        break;
+                if(date<=expiry) {
+                    switch (role) {
+                        case 0:
+                            verifyUser(key,req,res)
+                            break;
+                        case 1:
+                            verifyOwner(key,req,res)
+                            break;
+                        case 2:
+                            verifyMaintainer(key,req,res)
+                            break;
+                        default:
+                            break;
+                    }
+    
+                    await Otp.deleteOne({ createdBy: key })
+                    
+                    return res.status(200).json({
+                        message: "OTP Verified, you can log in now."
+                    })
+                } else {
+                    return res.status(400).json({
+                        message: "OTP has expired, please request for a new one."
+                    })
                 }
-
-                await Otp.deleteOne({ createdBy: key })
-                
-                return res.status(200).json({
-                    message: "OTP Verified, you can log in now."
-                })
             } else {
                 return res.status(400).json({
                     message: "Invalid OTP, please try again."
                 })
             }
-
         } else {
             return res.status(404).json({
                 error: "Wrong key provided"
