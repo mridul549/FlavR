@@ -8,6 +8,14 @@ const app = express();
 const http = require('http').Server(app)
 const io   = require('socket.io')(http)
 
+io.on('connection', (socket) => {
+    console.log('A client connected');
+  
+    socket.on('disconnect', () => {
+      console.log('A client disconnected');
+    });
+});
+  
 module.exports = { io }
 
 if (process.env.NODE_ENV !== 'production') {

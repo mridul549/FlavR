@@ -19,7 +19,7 @@ const orderQueue = new Queue('orderQueue', {
 })
 
 module.exports.checkSocket = (req,res) => {
-    io.on('connection', socket => {
+    io.on('connection', (socket) => {
         console.log('connected');
     })
 
