@@ -148,7 +148,7 @@ module.exports.verifyOTP = (req,res) => {
         if(result.length>0){
             const otpStored = result[0].code
             const expiry    = result[0].expiry
-            const date = new Date()
+            const date      = new Date()
 
             if(otp===otpStored) {
                 if(date<=expiry) {
