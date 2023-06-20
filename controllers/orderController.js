@@ -7,6 +7,7 @@ const User       = require('../models/user');
 const Coupon     = require('../models/coupon');
 const axios      = require('axios');
 const Queue      = require('bull');
+const { io }     = require('../app')
 
 const orderQueue = new Queue('orderQueue', {
     redis: {
@@ -16,6 +17,16 @@ const orderQueue = new Queue('orderQueue', {
         username: process.env.REDIS_USERNAME
     }
 })
+
+module.exports.checkSocket = (req,res) => {
+    io.on('connection', socket => {
+        console.log('connected');
+    })
+
+    socket.on('disconnect', () => {
+        console.log('A client disconnected');
+    });
+}
 
 /* 
     1. get all items in cart

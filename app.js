@@ -5,6 +5,10 @@ const morgan     = require('morgan');
 const fileUpload = require('express-fileupload');
 
 const app = express();
+const http = require('http').Server(app)
+const io   = require('socket.io')(http)
+
+module.exports = { io }
 
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config();
