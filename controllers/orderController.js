@@ -7,7 +7,8 @@ const User       = require('../models/user');
 const Coupon     = require('../models/coupon');
 const axios      = require('axios');
 const Queue      = require('bull');
-const { app }     = require('../app')
+const express    = require('express')
+const app        = express()
 const http = require('http').Server(app)
 const io   = require('socket.io')(http)
 

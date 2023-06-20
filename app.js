@@ -6,8 +6,6 @@ const fileUpload = require('express-fileupload');
 
 const app = express();
 
-module.exports = { app }
-
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config();
 }
