@@ -466,3 +466,19 @@ module.exports.order_confirm_reject = (req,res) => {
         })
     })
 }
+
+module.exports.getOrders = (req,res) => {
+    Order.find({ user: req.userData.userid })
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            result
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
