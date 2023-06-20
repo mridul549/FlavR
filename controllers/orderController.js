@@ -7,10 +7,17 @@ const User       = require('../models/user');
 const Coupon     = require('../models/coupon');
 const axios      = require('axios');
 const Queue      = require('bull');
-const express    = require('express')
-const app        = express()
-const http = require('http').Server(app)
-const io   = require('socket.io')(http)
+const WebSocket  = require('ws')
+
+const { WebSocketServer } = require('ws')
+const wss = new WebSocketServer({ port: 3001 });
+wss.on('connection', function connection(ws) {
+    ws.on('message', function message(data) {
+        console.log('received: %s', data);
+    });
+
+    ws.send('something mridul');
+});
 
 const orderQueue = new Queue('orderQueue', {
     redis: {
@@ -22,18 +29,15 @@ const orderQueue = new Queue('orderQueue', {
 })
 
 module.exports.checkSocket = (req,res) => {
-    io.on('connection', (socket) => {
-        console.log('connected');
+    // io.emit("check-status", "done")
 
-        socket.on('disconnect', () => {
-            console.log('A client disconnected');
-        });
-    })
-    
+    wss.clients.forEach(function each(client) {
+        client.send('from checking');
+    });
     return res.status(200).json({
-        message: "Socket check"
+        message: "Check"
     })
-    
+
 }
 
 /* 
