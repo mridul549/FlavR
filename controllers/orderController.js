@@ -7,7 +7,13 @@ const User       = require('../models/user');
 const Coupon     = require('../models/coupon');
 const axios      = require('axios');
 const Queue      = require('bull');
-const { wss }    = require('../app')
+const {wss}        = require('../app')
+
+wss.on('connection', (ws) => {
+    ws.on('message', function message(data) {
+        console.log('received: %s', data);
+    });
+});
 
 const orderQueue = new Queue('orderQueue', {
     redis: {

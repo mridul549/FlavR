@@ -14,6 +14,7 @@ wss.on('connection', function connection(ws) {
         console.log('received: %s', data);
     });
 });
+module.exports = { server, wss };
 
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config();
@@ -68,4 +69,3 @@ server.listen(3000, () => {
   console.log(`Server started`);
 });
 
-module.exports = { server, wss };
