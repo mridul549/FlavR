@@ -57,7 +57,12 @@ async function generateOTP (key,role) {
 
     try {
         await Otp.findOneAndUpdate(
-            { createdBy: key },
+            { 
+                $and: [
+                    { createdBy: key },
+                    { role: role }
+                ]
+            },
             {
                 $set: {
                     code: nano,
@@ -163,7 +168,7 @@ module.exports.verifyOTP = (req,res) => {
                     message: "Invalid OTP, please try again."
                 })
             }
-            
+
         } else {
             return res.status(404).json({
                 error: "Wrong key provided"
