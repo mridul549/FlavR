@@ -7,7 +7,9 @@ const User       = require('../models/user');
 const Coupon     = require('../models/coupon');
 const axios      = require('axios');
 const Queue      = require('bull');
-const { io }     = require('../app')
+const { app }     = require('../app')
+const http = require('http').Server(app)
+const io   = require('socket.io')(http)
 
 const orderQueue = new Queue('orderQueue', {
     redis: {
@@ -21,11 +23,16 @@ const orderQueue = new Queue('orderQueue', {
 module.exports.checkSocket = (req,res) => {
     io.on('connection', (socket) => {
         console.log('connected');
-    })
 
-    socket.on('disconnect', () => {
-        console.log('A client disconnected');
-    });
+        socket.on('disconnect', () => {
+            console.log('A client disconnected');
+        });
+    })
+    
+    return res.status(200).json({
+        message: "Socket check"
+    })
+    
 }
 
 /* 
