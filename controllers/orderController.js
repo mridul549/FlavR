@@ -486,6 +486,7 @@ module.exports.order_confirm_reject = (req,res) => {
 
 module.exports.getOrders = (req,res) => {
     Order.find({ user: req.userData.userid })
+    .populate('products.item', '_id category productName description price veg productImage')
     .exec()
     .then(result => {
         return res.status(200).json({
