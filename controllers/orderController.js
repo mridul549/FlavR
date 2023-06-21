@@ -5,13 +5,18 @@ const Outlet     = require('../models/outlet');
 const Owner      = require('../models/owner');
 const User       = require('../models/user');
 const Coupon     = require('../models/coupon');
+const Socket     = require('../models/socket');
 const axios      = require('axios');
 const Queue      = require('bull');
-const {wss}        = require('../app')
+const {wss}      = require('../app')
 
 wss.on('connection', (ws) => {
-    ws.on('message', function message(data) {
-        console.log('received: %s', data);
+    ws.on('message', async function message(data) {
+        const parsedData = JSON.parse(data)
+        const socket = new Socket({
+            orderid: parsedData.orderid
+        })
+        await socket.save()
     });
 });
 
@@ -25,7 +30,6 @@ const orderQueue = new Queue('orderQueue', {
 })
 
 module.exports.checkSocket = (req,res) => {
-    // io.emit("check-status", "done")
 
     wss.clients.forEach(function each(client) {
         client.send('from checking');
