@@ -399,6 +399,7 @@ module.exports.getOrder = (req,res) => {
     const orderid = req.query.orderid
 
     Order.find({ _id: orderid })
+    .populate('products.item', '_id category productName description price veg productImage')
     .exec()
     .then(result => {
         return res.status(200).json({
