@@ -9,7 +9,6 @@ const app = express();
 const server     = http.createServer(app)
 const wss        = new WebSocket.Server({ server });
 
-
 module.exports = { server, wss };
 
 if (process.env.NODE_ENV !== 'production') {
@@ -57,11 +56,6 @@ app.use((req,res,next) => {
 
 app.use('/', require('./routes/home'));
 
-// app.listen(process.env.PORT || 3000, (req,res) => {
-//     console.log('Server Started');
-// })
-
 server.listen(3000, () => {
   console.log(`Server started`);
 });
-

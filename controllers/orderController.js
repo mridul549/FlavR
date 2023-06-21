@@ -13,10 +13,19 @@ const {wss}      = require('../app')
 wss.on('connection', (ws) => {
     ws.on('message', async function message(data) {
         const parsedData = JSON.parse(data)
-        const socket = new Socket({
-            orderid: parsedData.orderid
-        })
-        await socket.save()
+
+        await Socket.findOneAndUpdate({ orderid: parsedData.orderid },
+            {
+                $set: {
+                    orderid: parsedData.orderid
+                }, 
+            },
+            { upsert: true, new: true }
+        )
+
+        wss.clients.forEach(function each(client) {
+            client.send(`recieved order ${parsedData.orderid}`);
+        });
     });
 });
 
@@ -32,7 +41,11 @@ const orderQueue = new Queue('orderQueue', {
 module.exports.checkSocket = (req,res) => {
 
     wss.clients.forEach(function each(client) {
-        client.send('from checking');
+        const data = {
+            orderid: "6483550a4eb7f26433a02789",
+            status: "Preparing"
+        }
+        client.send(data.toString());
     });
     return res.status(200).json({
         message: "Check"
