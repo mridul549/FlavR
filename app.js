@@ -9,11 +9,6 @@ const app = express();
 const server     = http.createServer(app)
 const wss        = new WebSocket.Server({ server });
 
-wss.on('connection', function connection(ws) {
-    ws.on('message', function message(data) {
-        console.log('received: %s', data);
-    });
-});
 module.exports = { server, wss };
 
 if (process.env.NODE_ENV !== 'production') {

@@ -7,6 +7,7 @@ router.use('/payments', require('./payments'))
 
 // GET Methods
 router.get('/getOrder', orderController.getOrder)
+router.get('/getorders', checkAuth, orderController.getOrders)
 
 // POST Methods
 router.post('/placeOrder', checkAuth, orderController.placeOrder);
@@ -20,5 +21,4 @@ router.patch('/orderconfrej', checkAuth, orderController.order_confirm_reject)
 router.delete('/deleteall', checkAuth, orderController.deleteAll)
 
 router.get('/checksocket', orderController.checkSocket)
-router.get('/getorders', checkAuth, orderController.getOrders)
 module.exports = router;
