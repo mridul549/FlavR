@@ -8,6 +8,7 @@ router.use('/payments', require('./payments'))
 // GET Methods
 router.get('/getOrder', orderController.getOrder)
 router.get('/getorders', checkAuth, orderController.getOrders)
+router.get('/getincomporder', checkAuth, orderController.inCompleteOrders)
 
 // POST Methods
 router.post('/placeOrder', checkAuth, orderController.placeOrder);

@@ -501,3 +501,28 @@ module.exports.getOrders = (req,res) => {
         })
     })
 }
+
+module.exports.inCompleteOrders = (req,res) => {
+    const userid = req.userData.userid
+
+    Order.find({
+        $and: [
+            { user: userid },
+            { status: { $ne: "completed" } }
+        ]
+    })
+    .populate('products.item', '_id category productName description price veg productImage')
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            pendingOrdersQuantity: result.length,
+            orders: result
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
