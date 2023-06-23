@@ -458,7 +458,7 @@ module.exports.order_confirm_reject = (req,res) => {
 
                     if(isConfirm) {
                         await orderQueue.add({ orderid, outletid })
-                        order.status = "PREPARING"
+                        order.status = "ORDER_CONFIRMED"
                         outlet[0].activeOrders.push(orderid)
 
                         // update on firebase
@@ -467,7 +467,7 @@ module.exports.order_confirm_reject = (req,res) => {
                         });
 
                     } else {
-                        order.status = "REJECTED"
+                        order.status = "ORDER_REJECTED"
 
                         snapshot.forEach((doc) => {
                             doc.ref.update({ status: "ORDER_REJECTED" });
