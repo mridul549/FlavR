@@ -43,9 +43,17 @@ module.exports.signup = (req,res) => {
             const authMethod = user[0].authMethod
 
             if(authMethod=="regular"){
-                return res.status(409).json({
-                    message: "User already exits, try logging in."
-                })
+                const verification = user[0].verification
+    
+                if(!verification){
+                    return res.status(409).json({
+                        message: "Email already exits, complete verification."
+                    })
+                } else {
+                    return res.status(409).json({
+                        message: "User already exits, try logging in."
+                    })
+                }
             } else {
                 return res.status(409).json({
                     message: "This email is already registered with us, use a different login method."
@@ -115,6 +123,12 @@ module.exports.login = (req,res) => {
         if(authMethod=="google"){
             return res.status(409).json({
                 message: "Password is not set for this account. Login using some other method."
+            })
+        }
+        const verification = user[0].verification
+        if(!verification) {
+            return res.status(409).json({
+                message: "User is not verified, please complete verification"
             })
         }
         bcrypt.compare(req.body.password, user[0].password, (err, result) => {
