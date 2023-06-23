@@ -116,7 +116,7 @@ module.exports.login = (req,res) => {
         // for a regular authmethod user
         if(user.length<1){
             return res.status(401).json({
-                message: "Auth Failed- No user found"
+                message: "Auth Failed- No Email found"
             })
         }
         const authMethod = user[0].authMethod
@@ -128,7 +128,7 @@ module.exports.login = (req,res) => {
         const verification = user[0].verification
         if(!verification) {
             return res.status(409).json({
-                message: "User is not verified, please complete verification"
+                message: "Email is not verified, please complete verification"
             })
         }
         bcrypt.compare(req.body.password, user[0].password, (err, result) => {

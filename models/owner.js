@@ -20,6 +20,10 @@ const ownerSchema = mongoose.Schema({
         type: String,
 
     },
+    verification: {
+        type: Boolean,
+        default: false
+    },
     mobile: {
         type: Number
     },

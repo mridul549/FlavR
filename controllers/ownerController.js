@@ -5,6 +5,16 @@ const Owner      = require('../models/owner');
 const bcrypt     = require('bcrypt');
 const jwt        = require('jsonwebtoken');
 const cloudinary = require('cloudinary').v2;
+const Queue      = require('bull');
+
+const mailQueue = new Queue('mailQueue', {
+    redis: {
+        host: process.env.REDIS_HOST,
+        port: process.env.REDIS_PORT,
+        password: process.env.REDIS_PASSWORD,
+        username: process.env.REDIS_USERNAME
+    }
+})
 
 cloudinary.config({ 
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
@@ -33,9 +43,17 @@ module.exports.signup = (req,res) => {
             const authMethod = owner[0].authMethod
 
             if(authMethod=="regular"){
-                return res.status(409).json({
-                    message: "Owner already exits, try logging in."
-                })
+                const verification = owner[0].verification
+    
+                if(!verification){
+                    return res.status(409).json({
+                        message: "Email already exits, complete verification."
+                    })
+                } else {
+                    return res.status(409).json({
+                        message: "Email already exits, try logging in."
+                    })
+                }
             } else {
                 return res.status(409).json({
                     message: "This email is already registered with us, use a different login method."
@@ -57,10 +75,20 @@ module.exports.signup = (req,res) => {
                     })
                     owner
                     .save()
-                    .then(result => {
+                    .then(async result => {
+                        /**
+                         * the role determines whether it's a user, owner or maintainer
+                         * user -> 0
+                         * owner -> 1
+                         * maintainer -> 2
+                         */
+                        const key = req.body.email
+                        const role = 1
+                        await mailQueue.add({ key, role })
                         console.log(result);
                         return res.status(201).json({
-                            message: "Owner created"
+                            action: "Owner created and OTP Sent",
+                            message: "Please check your mailbox for the OTP verification code."
                         })
                     })
                     .catch(err => {
@@ -87,13 +115,19 @@ module.exports.login = (req,res) => {
     .then(user => {
         if(user.length<1){
             return res.status(401).json({
-                message: "Auth Failed- No Owner found"
+                message: "Auth Failed- No Email found"
             })
         }
         const authMethod = user[0].authMethod
         if(authMethod=="google"){
             return res.status(409).json({
                 message: "Password is not set for this account. Login using some other method."
+            })
+        }
+        const verification = user[0].verification
+        if(!verification) {
+            return res.status(409).json({
+                message: "Email is not verified, please complete verification"
             })
         }
         bcrypt.compare(req.body.password, user[0].password, (err, result) => {
