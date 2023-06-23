@@ -20,9 +20,15 @@ const orderQueue = new Queue('orderQueue', {
 })
 
 module.exports.checkFB = async (req,res) => {
-    const orderid = "64834987ad181d3d03bf81e8"
-    const orderRef = orderfb.where('orderid', '==', orderid)
-    const response = await orderRef.get()
+    await orderfb.add({
+        orderid: newOrder._id.toString(),
+        status: newOrder.status.toString(),
+        orderNumber: 0
+    })
+
+    // const orderid = "64834987ad181d3d03bf81e8"
+    // const orderRef = orderfb.where('orderid', '==', orderid)
+    // const response = await orderRef.get()
     console.log(response.docs[0].data());
     return res.status(200).json({
         message: "Order added"
@@ -191,11 +197,11 @@ module.exports.placeOrder = async (req, res) => {
                         .exec()
                     }
 
-                    // await orderfb.add({
-                    //     orderid: newOrder._id.toString(),
-                    //     status: newOrder.status.toString(),
-                    //     orderNumber: 0
-                    // })
+                    await orderfb.add({
+                        orderid: newOrder._id.toString(),
+                        status: newOrder.status.toString(),
+                        orderNumber: 0
+                    })
 
                     const payment = await getPaymentToken(newOrder, outletid, result, req, res)
                     return res.status(201).json({
