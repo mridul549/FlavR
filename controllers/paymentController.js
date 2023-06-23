@@ -152,7 +152,7 @@ async function paymentSuccess (req, res, orderid, userid, outletid) {
             $set: { payment: true, status: "PAYMENT_RECIEVED" }
         })
         .exec()
-        .then(result => {
+        .then(async result => {
             const orderRef = orderfb.where('orderid', '==', orderid)
             const snapshot = await orderRef.get();
             if (snapshot.empty) {
