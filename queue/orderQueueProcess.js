@@ -1,6 +1,8 @@
 const { default: mongoose, model } = require('mongoose');
 const Order    = require('../models/order')
 const Seq      = require('../models/seq')
+const firebase   = require('../config/firebase')
+const orderfb    = firebase.collection('Order')
 
 mongoose.connect(process.env.MONGOOSE_CONNECTION_STRING)
 
@@ -19,6 +21,16 @@ const orderQueueProcess = async (job, done) => {
             }
         })
         .exec()
+
+        const orderRef = orderfb.where('orderid', '==', orderid)
+        const snapshot = await orderRef.get();
+        if (snapshot.empty) {
+            console.log("No matching document found.");
+        } else {
+            snapshot.forEach((doc) => {
+                doc.ref.update({ orderNumber: orderNum });
+            });
+        }
         return result
     })
     .then(result => {
