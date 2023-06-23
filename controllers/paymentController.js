@@ -154,17 +154,17 @@ async function paymentSuccess (req, res, orderid, userid, outletid) {
             })
             .exec();
 
-            const orderid = order._id
-            const orderRef = orderfb.where('orderid', '==', orderid)
-            const respomse = await orderRef.update({
-                status: "PAYMENT_RECIEVED"
-            })
-            console.log(respomse);
-            if(respomse.ok){
-                console.log("OK");
-            } else {
-                console.log("No");
-            }
+            // const orderid = order._id
+            // const orderRef = orderfb.where('orderid', '==', orderid)
+            // const respomse = await orderRef.update({
+            //     status: "PAYMENT_RECIEVED"
+            // })
+            // console.log(respomse);
+            // if(respomse.ok){
+            //     console.log("OK");
+            // } else {
+            //     console.log("No");
+            // }
 
         } catch (error) {
             return res.status(500).json({

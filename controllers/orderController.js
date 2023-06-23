@@ -20,11 +20,29 @@ const orderQueue = new Queue('orderQueue', {
 })
 
 module.exports.checkFB = async (req,res) => {
-    await orderfb.add({
-        orderid: "648eb0b0c63c6a3600e0b758",
-        status: "PREPARING",
-        orderNumber: 0
-    })
+    // await orderfb.add({
+    //     orderid: "648eb0b0c63c6a3600e0b758",
+    //     status: "PREPARING",
+    //     orderNumber: 0
+    // })
+
+    const orderid = "648eb0b0c63c6a3600e0b758"
+    const orderRef = orderfb.where('orderid', '==', orderid)
+    try {
+        const snapshot = await orderRef.get();
+        if (snapshot.empty) {
+          console.log("No matching document found.");
+          return;
+        }
+      
+        snapshot.forEach((doc) => {
+          doc.ref.update({ status: "COMPLETED" });
+          console.log("Order status updated successfully.");
+        });
+    } catch (error) {
+        console.error("Error updating order status:", error);
+    }
+
 
     // const orderid = "64834987ad181d3d03bf81e8"
     // const orderRef = orderfb.where('orderid', '==', orderid)
