@@ -34,7 +34,6 @@
     "express": "^4.18.2",
     "express-fileupload": "^1.4.0",
     "googleapis": "^118.0.0",
-    "http": "^0.0.1-security",
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.2.0",
     "morgan": "^1.10.0",
@@ -44,8 +43,6 @@
     "nodemon": "^2.0.22",
     "qrcode": "^1.5.3",
     "redis": "^4.6.6",
-    "socket.io": "^4.6.2",
-    "taskforce-connector": "^1.24.3",
-    "ws": "^8.13.0"
+    "taskforce-connector": "^1.24.3"
   }
 }

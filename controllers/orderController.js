@@ -5,29 +5,8 @@ const Outlet     = require('../models/outlet');
 const Owner      = require('../models/owner');
 const User       = require('../models/user');
 const Coupon     = require('../models/coupon');
-const Socket     = require('../models/socket');
 const axios      = require('axios');
 const Queue      = require('bull');
-const {wss}      = require('../app')
-
-wss.on('connection', (ws) => {
-    ws.on('message', async function message(data) {
-        const parsedData = JSON.parse(data)
-
-        await Socket.findOneAndUpdate({ orderid: parsedData.orderid },
-            {
-                $set: {
-                    orderid: parsedData.orderid
-                }, 
-            },
-            { upsert: true, new: true }
-        )
-
-        wss.clients.forEach(function each(client) {
-            client.send(`recieved order ${parsedData.orderid}`);
-        });
-    });
-});
 
 const orderQueue = new Queue('orderQueue', {
     redis: {
@@ -37,21 +16,6 @@ const orderQueue = new Queue('orderQueue', {
         username: process.env.REDIS_USERNAME
     }
 })
-
-module.exports.checkSocket = (req,res) => {
-
-    wss.clients.forEach(function each(client) {
-        const data = {
-            orderid: "6483550a4eb7f26433a02789",
-            status: "Preparing"
-        }
-        client.send(data.toString());
-    });
-    return res.status(200).json({
-        message: "Check"
-    })
-
-}
 
 /* 
     1. get all items in cart

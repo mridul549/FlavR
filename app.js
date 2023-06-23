@@ -3,17 +3,7 @@ const mongoose   = require('mongoose');
 const bodyParser = require('body-parser');
 const morgan     = require('morgan');
 const fileUpload = require('express-fileupload');
-const WebSocket  = require('ws')
-const http       = require('http')
 const app = express();
-const server     = http.createServer(app)
-const wss        = new WebSocket.Server({ server });
-
-module.exports = { server, wss };
-
-if (process.env.NODE_ENV !== 'production') {
-    require('dotenv').config();
-}
 
 mongoose.connect(process.env.MONGOOSE_CONNECTION_STRING)
 
@@ -56,6 +46,6 @@ app.use((req,res,next) => {
 
 app.use('/', require('./routes/home'));
 
-server.listen(3000, () => {
-  console.log(`Server started`);
-});
+app.listen(process.env.PORT || 3000, () => {
+    console.log(`Server started`);
+})

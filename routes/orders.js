@@ -21,5 +21,4 @@ router.patch('/orderconfrej', checkAuth, orderController.order_confirm_reject)
 // DELETE Methods
 router.delete('/deleteall', checkAuth, orderController.deleteAll)
 
-router.get('/checksocket', orderController.checkSocket)
 module.exports = router;
