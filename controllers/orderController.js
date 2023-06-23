@@ -21,7 +21,7 @@ const orderQueue = new Queue('orderQueue', {
 
 module.exports.checkFB = async (req,res) => {
     await orderfb.add({
-        orderid: "648ea866c63c6a3600e0b548",
+        orderid: "648eb0b0c63c6a3600e0b758",
         status: "PREPARING",
         orderNumber: 0
     })
