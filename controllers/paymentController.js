@@ -154,19 +154,28 @@ async function paymentSuccess (req, res, orderid, userid, outletid) {
             })
             .exec();
 
-            // const orderid = order._id
-            // const orderRef = orderfb.where('orderid', '==', orderid)
-            // const respomse = await orderRef.update({
-            //     status: "PAYMENT_RECIEVED"
-            // })
-            // console.log(respomse);
-            // if(respomse.ok){
-            //     console.log("OK");
-            // } else {
-            //     console.log("No");
-            // }
+            return order
 
         } catch (error) {
+            return res.status(500).json({
+                error: error
+            });
+        }
+    })
+    .then(async order => {
+        const orderid = order._id
+        const orderRef = orderfb.where('orderid', '==', orderid)
+        try {
+            const snapshot = await orderRef.get();
+            if (snapshot.empty) {
+                console.log("No matching document found.");
+            } else {
+                snapshot.forEach((doc) => {
+                    doc.ref.update({ status: "COMPLETED" });
+                });
+            }
+        } catch (error) {
+            console.error("Error updating order status:", error);
             return res.status(500).json({
                 error: error
             });
