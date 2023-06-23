@@ -430,7 +430,7 @@ module.exports.deliverEntireOrder = (req,res) => {
             .then(async result => {
                 try {
                     await Outlet.updateOne({ _id: outletid }, {
-                        $pull: { activeOrders: orderid },
+                        $pull: { readyOrders: orderid },
                         $push: { completedOrders: orderid }
                     })
                     .exec()
