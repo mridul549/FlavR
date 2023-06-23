@@ -26,7 +26,7 @@ module.exports.checkFB = async (req,res) => {
     //     orderNumber: 0
     // })
 
-    const orderid = "648eb0b0c63c6a3600e0b758"
+    const orderid = "649568dbb60945525daa94d5"
     const orderRef = orderfb.where('orderid', '==', orderid)
     try {
         const snapshot = await orderRef.get();
@@ -36,7 +36,7 @@ module.exports.checkFB = async (req,res) => {
         }
       
         snapshot.forEach((doc) => {
-          doc.ref.update({ status: "COMPLETED" });
+          doc.ref.update({ status: "PAYMENT_RECIEVED" });
           console.log("Order status updated successfully.");
         });
     } catch (error) {
