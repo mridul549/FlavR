@@ -85,7 +85,6 @@ module.exports.signup = (req,res) => {
                         const key = req.body.email
                         const role = 1
                         await mailQueue.add({ key, role })
-                        console.log(result);
                         return res.status(201).json({
                             action: "Owner created and OTP Sent",
                             message: "Please check your mailbox for the OTP verification code."
