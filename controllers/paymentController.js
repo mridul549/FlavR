@@ -7,6 +7,8 @@ const User       = require('../models/user');
 const mongoose   = require('mongoose');
 const crypto     = require('crypto');
 const Queue      = require('bull');
+const firebase    = require('../config/firebase')
+const orderfb    = firebase.collection('Order')
 
 const orderQueue = new Queue('orderQueue', {
     redis: {
@@ -147,10 +149,23 @@ async function paymentSuccess (req, res, orderid, userid, outletid) {
     })
     .then(async result => {
         try {
-            await Order.findByIdAndUpdate(orderid, {
-                $set: { payment: true }
+            const order = await Order.findByIdAndUpdate(orderid, {
+                $set: { payment: true, status: "PEND_CONF" }
             })
             .exec();
+
+            const orderid = order._id
+            const orderRef = orderfb.where('orderid', '==', orderid)
+            const respomse = await orderRef.update({
+                status: "PAYMENT_RECIEVED"
+            })
+            console.log(respomse);
+            if(respomse.ok){
+                console.log("OK");
+            } else {
+                console.log("No");
+            }
+
         } catch (error) {
             return res.status(500).json({
                 error: error

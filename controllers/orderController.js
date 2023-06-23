@@ -7,6 +7,8 @@ const User       = require('../models/user');
 const Coupon     = require('../models/coupon');
 const axios      = require('axios');
 const Queue      = require('bull');
+const firebase   = require('../config/firebase')
+const orderfb    = firebase.collection('Order')
 
 const orderQueue = new Queue('orderQueue', {
     redis: {
@@ -16,6 +18,16 @@ const orderQueue = new Queue('orderQueue', {
         username: process.env.REDIS_USERNAME
     }
 })
+
+module.exports.checkFB = async (req,res) => {
+    const orderid = "64834987ad181d3d03bf81e8"
+    const orderRef = orderfb.where('orderid', '==', orderid)
+    const response = await orderRef.get()
+    console.log(response.docs[0].data());
+    return res.status(200).json({
+        message: "Order added"
+    })
+}
 
 /* 
     1. get all items in cart
@@ -178,6 +190,12 @@ module.exports.placeOrder = async (req, res) => {
                         })
                         .exec()
                     }
+
+                    await orderfb.add({
+                        orderid: newOrder._id.toString(),
+                        status: newOrder.status.toString(),
+                        orderNumber: 0
+                    })
 
                     const payment = await getPaymentToken(newOrder, outletid, result, req, res)
                     return res.status(201).json({

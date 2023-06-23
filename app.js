@@ -5,6 +5,10 @@ const morgan     = require('morgan');
 const fileUpload = require('express-fileupload');
 const app = express();
 
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config();
+}
+
 mongoose.connect(process.env.MONGOOSE_CONNECTION_STRING)
 
 mongoose.connection.on('connected', function() {

@@ -12,6 +12,7 @@ router.get('/getincomporder', checkAuth, orderController.inCompleteOrders)
 
 // POST Methods
 router.post('/placeOrder', checkAuth, orderController.placeOrder);
+router.post('/checkfb', orderController.checkFB)
 
 // PATCH Methods
 router.patch('/deliverOrder', checkAuth, orderController.deliverEntireOrder);

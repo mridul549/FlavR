@@ -56,7 +56,7 @@ const orderSchema = mongoose.Schema({
     },
     status: {
         type: String,
-        default: "processing"
+        default: "PROCESSING"
     },
     coupon: {
         type: String,
