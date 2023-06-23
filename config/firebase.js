@@ -1,7 +1,7 @@
 const { initializeApp, applicationDefault, cert } = require('firebase-admin/app');
 const { getFirestore, Timestamp, FieldValue, Filter } = require('firebase-admin/firestore');
 
-const serviceAccount = require('/Users/starship/Desktop/Developer stuff/Projects/FlavR/flavr-c527b-851cb0a844fd.json');
+const serviceAccount = require('../flavr-firebase-config.json');
 
 initializeApp({
     credential: cert(serviceAccount)
