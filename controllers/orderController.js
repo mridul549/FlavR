@@ -447,12 +447,31 @@ module.exports.order_confirm_reject = (req,res) => {
 
                     const pendingConfItem = outlet[0].pendingConfOrders.find(item => item.toString() === orderid);
                     outlet[0].pendingConfOrders.pull(orderid)
+
+                    const orderRef = orderfb.where('orderid', '==', orderid)
+                    const snapshot = await orderRef.get();
+                    if(snapshot.empty) {
+                        return res.status(200).json({
+                            error: "Order not found in firebase"
+                        })
+                    }
+
                     if(isConfirm) {
                         await orderQueue.add({ orderid, outletid })
                         order.status = "PREPARING"
                         outlet[0].activeOrders.push(orderid)
+
+                        // update on firebase
+                        snapshot.forEach((doc) => {
+                            doc.ref.update({ status: "ORDER_CONFIRMED" });
+                        });
+
                     } else {
                         order.status = "REJECTED"
+
+                        snapshot.forEach((doc) => {
+                            doc.ref.update({ status: "ORDER_REJECTED" });
+                        });
                     }
                     
                     await order.save()

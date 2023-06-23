@@ -153,6 +153,7 @@ async function paymentSuccess (req, res, orderid, userid, outletid) {
         })
         .exec()
         .then(async result => {
+            // ADD to firebase
             const orderRef = orderfb.where('orderid', '==', orderid)
             const snapshot = await orderRef.get();
             if (snapshot.empty) {
@@ -169,33 +170,6 @@ async function paymentSuccess (req, res, orderid, userid, outletid) {
                 error: err
             })
         })
-
-
-
-
-
-        // try {
-        //     const order = await Order.findByIdAndUpdate(orderid, {
-        //         $set: { payment: true, status: "PAYMENT_RECIEVED" }
-        //     })
-        //     .exec();
-
-        //     const orderid = order._id
-        //     const orderRef = orderfb.where('orderid', '==', orderid)
-        //     const snapshot = await orderRef.get();
-        //     if (snapshot.empty) {
-        //         console.log("No matching document found.");
-        //     } else {
-        //         snapshot.forEach((doc) => {
-        //             doc.ref.update({ status: "PAYMENT_RECIEVED" });
-        //         });
-        //     }
-
-        // } catch (error) {
-        //     return res.status(500).json({
-        //         error: error
-        //     });
-        // }
     })
     .catch(err => {
         console.log(err);
