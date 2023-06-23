@@ -191,11 +191,11 @@ module.exports.placeOrder = async (req, res) => {
                         .exec()
                     }
 
-                    await orderfb.add({
-                        orderid: newOrder._id.toString(),
-                        status: newOrder.status.toString(),
-                        orderNumber: 0
-                    })
+                    // await orderfb.add({
+                    //     orderid: newOrder._id.toString(),
+                    //     status: newOrder.status.toString(),
+                    //     orderNumber: 0
+                    // })
 
                     const payment = await getPaymentToken(newOrder, outletid, result, req, res)
                     return res.status(201).json({
