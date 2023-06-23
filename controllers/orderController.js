@@ -29,7 +29,7 @@ module.exports.checkFB = async (req,res) => {
     // const orderid = "64834987ad181d3d03bf81e8"
     // const orderRef = orderfb.where('orderid', '==', orderid)
     // const response = await orderRef.get()
-    console.log(response.docs[0].data());
+    // console.log(response.docs[0].data());
     return res.status(200).json({
         message: "Order added"
     })
