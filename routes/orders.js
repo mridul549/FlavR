@@ -18,6 +18,7 @@ router.post('/checkfb', orderController.checkFB)
 router.patch('/deliverOrder', checkAuth, orderController.deliverEntireOrder);
 router.patch('/deliveritem', checkAuth, orderController.deliverItem)
 router.patch('/orderconfrej', checkAuth, orderController.order_confirm_reject)
+router.patch('/orderReady', checkAuth, orderController.orderReady)
 
 // DELETE Methods
 router.delete('/deleteall', checkAuth, orderController.deleteAll)

@@ -55,6 +55,12 @@ const outletSchema = mongoose.Schema({
             ref: 'Order'
         }
     ],
+    readyOrders: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Order'
+        }
+    ],
     completedOrders: [
         {
             type: mongoose.Schema.Types.ObjectId,

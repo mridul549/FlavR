@@ -344,6 +344,69 @@ module.exports.deliverItem = async (req,res) => {
     }
 }
 
+// remove from active orders and push into ready orders
+module.exports.orderReady = (req,res) => {
+    const orderid  = req.body.orderid
+    const ownerid  = req.userData.ownerid
+    const outletid = req.body.outletid
+
+    Owner.find({ _id: ownerid })
+    .exec()
+    .then(result => {
+        if(result.length>0){
+            Order.updateOne({ _id: orderid }, {
+                $set: { status: "READY" }
+            })
+            .exec()
+            .then(async result => {
+                try {
+                    await Outlet.updateOne({ _id: outletid }, {
+                        $pull: { activeOrders: orderid },
+                        $push: { readyOrders: orderid }
+                    })
+                    .exec()
+
+                    const orderRef = orderfb.where('orderid', '==', orderid)
+                    const snapshot = await orderRef.get();
+                    if (snapshot.empty) {
+                        console.log("No matching document found.");
+                    } else {
+                        snapshot.forEach((doc) => {
+                            doc.ref.update({ status: "READY" });
+                        });
+                    }
+
+                    return res.status(200).json({
+                        message: "Order marked ready and shifted from active to ready in outlet"
+                    })
+                } catch (error) {
+                    return res.status(500).json({
+                        error: "Error while updating outlet orders"
+                    })
+                }
+            })
+            .catch(err => {
+                console.log(err);
+                return res.status(500).json({
+                    error: err
+                })
+            })
+
+        } else {
+            return res.status(404).json({
+                error: "Owner not found"
+            })
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+
+}
+
 /**
  * 1. An outlet will have two order arrays as follows:
  *      => active orders or preparing orders array A
@@ -361,7 +424,7 @@ module.exports.deliverEntireOrder = (req,res) => {
     .then(result => {
         if(result.length>0){
             Order.updateOne({ _id: orderid }, {
-                $set: { status: "completed" }
+                $set: { status: "COMPLETED" }
             })
             .exec()
             .then(async result => {
@@ -371,6 +434,17 @@ module.exports.deliverEntireOrder = (req,res) => {
                         $push: { completedOrders: orderid }
                     })
                     .exec()
+
+                    const orderRef = orderfb.where('orderid', '==', orderid)
+                    const snapshot = await orderRef.get();
+                    if (snapshot.empty) {
+                        console.log("No matching document found.");
+                    } else {
+                        snapshot.forEach((doc) => {
+                            doc.ref.update({ status: "COMPLETED" });
+                        });
+                    }
+
                     return res.status(200).json({
                         message: "Order marked completed and shifted from active array to completed in outlet"
                     })
