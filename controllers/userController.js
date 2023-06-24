@@ -49,11 +49,12 @@ module.exports.signup = (req,res) => {
                     return res.status(409).json({
                         message: "Email already exits, complete verification."
                     })
-                } else {
-                    return res.status(409).json({
-                        message: "User already exits, try logging in."
-                    })
-                }
+                } 
+
+                return res.status(409).json({
+                    message: "User already exits, try logging in."
+                })
+
             } else {
                 return res.status(409).json({
                     message: "This email is already registered with us, use a different login method."
