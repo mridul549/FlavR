@@ -19,6 +19,10 @@ const maintainerSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    verification: {
+        type: Boolean,
+        default: false
+    },
     mobile: {
         type: Number
     },
