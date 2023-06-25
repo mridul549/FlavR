@@ -214,9 +214,9 @@ module.exports.placeOrder = async (req, res) => {
                         })
                         .exec()
                     }
-
-                    await orderfb.add({
-                        orderid: newOrder._id.toString(),
+                    
+                    await orderfb.doc(newOrder._id.toString()).set({
+                        "orderid": newOrder._id.toString(),
                         status: newOrder.status.toString(),
                         orderNumber: 0
                     })
