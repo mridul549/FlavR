@@ -1,3 +1,4 @@
+const mongoose     = require('mongoose')
 const cloudinary   = require('cloudinary').v2;
 const CategoryIcon = require('../models/categoryicon')
 
@@ -26,6 +27,19 @@ module.exports.addIcon = (req,res) => {
             const categoryIcon = new CategoryIcon({
                 _id: new mongoose.Types.ObjectId(),
                 icon: iconProp
+            })
+
+            categoryIcon.save()
+            .then(result => {
+                return res.status(200).json({
+                    message: "Icon uploaded successfully"
+                })
+            })
+            .catch(err => {
+                console.log(err);
+                return res.status(500).json({
+                    error: err
+                })
             })
         })
     }
