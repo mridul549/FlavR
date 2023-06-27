@@ -15,6 +15,7 @@ cloudinary.config({
 module.exports.getProductsOfOutlet = (req,res) => {
     Product.find({ outlet: req.query.outletid })
     .populate('outlet', '_id outletName address owner')
+    .populate('category.icon')
     .exec()
     .then(result => {
         if(result) {
@@ -156,9 +157,14 @@ module.exports.addProduct = (req,res) => {
             imageid: "null"
         }
 
+        const category = {
+            name: req.body.category,
+            icon: req.body.categoryIconId
+        }
+
         const productwofile = new Product({
             _id: new mongoose.Types.ObjectId(),
-            category: req.body.category,
+            category: category,
             productName: req.body.productName,
             description: req.body.description,
             price: req.body.price,
@@ -185,7 +191,7 @@ module.exports.addProduct = (req,res) => {
 
                 const productwfile = new Product({
                     _id: new mongoose.Types.ObjectId(),
-                    category: req.body.category,
+                    category: category,
                     productName: req.body.productName,
                     description: req.body.description,
                     price: req.body.price,
@@ -217,13 +223,14 @@ module.exports.getProductsByCategory = (req,res) => {
     Product.find({
         $and: [
             { 
-                category: { 
+                "category.name": { 
                     $regex: new RegExp(category, 'i') 
                 } 
             },
             { outlet: outletid }
         ]
     })
+    .populate('category.icon')
     .exec()
     .then(result => {
         if(result) {
@@ -248,6 +255,7 @@ module.exports.getSingleProduct = (req,res) => {
     const productID = req.query.productid
 
     Product.find({ _id: productID })
+    .populate('category.icon')
     .exec()
     .then(result => {
         if(result) {
@@ -276,16 +284,19 @@ module.exports.getAllCategories = (req,res) => {
 
     Product.find({ outlet: outletid })
     .select('category')
+    .populate('category.icon')
     .exec()
     .then(result => {
         if(result.length>0) {
             var categoryMap = new Map()
+
             for (let i = 0; i < result.length; i++) {
                 const element = result[i];
-                if(categoryMap.has(element.category)) {
-                    categoryMap.set(element.category, categoryMap.get(element.category)+1);
+                if(categoryMap.has(element.category.name)) {
+                    const count = categoryMap.get(element.category.name);
+                    categoryMap.set(element.category.name, { count: count.count + 1, icon: element.category.icon });
                 } else {
-                    categoryMap.set(element.category, 1);
+                    categoryMap.set(element.category.name, {count: 1, icon: element.category.icon});
                 }
             }
     

@@ -3,8 +3,15 @@ const mongoose = require('mongoose');
 const productSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     category: {
-        type: String,
-        required: true
+        name: {
+            type: String,
+            required: true
+        },
+        icon: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'CategoryIcon',
+            required: true
+        }
     },
     productName: {
         type: String,
@@ -24,6 +31,7 @@ const productSchema = mongoose.Schema({
     },
     owner: {
         type: mongoose.Schema.Types.ObjectId,
+        ref: 'Owner',
         required: true
     },
     outlet: {
