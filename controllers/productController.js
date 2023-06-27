@@ -600,7 +600,8 @@ module.exports.inStock = (req,res) => {
 }
 
 module.exports.getAllProductsCategoryAccording = (req,res) => {
-    Product.find({})
+    const outletid = req.query.outletid
+    Product.find({ outlet: outletid })
     .exec()
     .then(result => {
         var categoryMap = new Map()
