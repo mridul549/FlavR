@@ -598,3 +598,42 @@ module.exports.inStock = (req,res) => {
         })
     })
 }
+
+module.exports.getAllProductsCategoryAccording = (req,res) => {
+    Product.find({})
+    .exec()
+    .then(result => {
+        var categoryMap = new Map()
+
+        for (let i = 0; i < result.length; i++) {
+            const element = result[i];
+            if(categoryMap.has(element.category.name)) {
+                const array = categoryMap.get(element.category.name)
+                array.push(result[i])
+                categoryMap.set(element.category.name, array);
+            } else {
+                const array = [result[i]]
+                categoryMap.set(element.category.name, array);
+            }
+        }
+
+        var categoryArray = []
+        categoryMap.forEach((value,key) => {
+            categoryArray.push({
+                category: key,
+                products: value
+            })
+        })
+
+        return res.status(200).json({
+            categoryArray
+        })
+
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
