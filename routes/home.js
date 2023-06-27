@@ -8,5 +8,6 @@ router.use('/products', require('./products'));
 router.use('/orders', require('./orders'));
 router.use('/seq', require('./sequence'))
 router.use('/mail', require('../mail/mailRoutes'))
+router.use('/category', require('../models/categoryicon'))
 
 module.exports = router;
