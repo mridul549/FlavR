@@ -220,35 +220,74 @@ module.exports.getProductsByCategory = (req,res) => {
     const category = req.query.categoryName
     const outletid = req.query.outletid
 
-    Product.find({
-        $and: [
-            { 
-                "category.name": { 
-                    $regex: new RegExp(category, 'i') 
-                } 
-            },
-            { outlet: outletid }
-        ]
-    })
-    .populate('category.icon')
-    .exec()
-    .then(result => {
-        if(result) {
+    if(category==='All'){
+        Product.find({ outlet: outletid })
+        .exec()
+        .then(result => {
+            var categoryMap = new Map()
+
+            for (let i = 0; i < result.length; i++) {
+                const element = result[i];
+                if(categoryMap.has(element.category.name)) {
+                    const array = categoryMap.get(element.category.name)
+                    array.push(result[i])
+                    categoryMap.set(element.category.name, array);
+                } else {
+                    const array = [result[i]]
+                    categoryMap.set(element.category.name, array);
+                }
+            }
+
+            var categoryArray = []
+            categoryMap.forEach((value,key) => {
+                categoryArray.push({
+                    category: key,
+                    products: value
+                })
+            })
+
             return res.status(200).json({
-                products: result
+                categoryArray
             })
-        } else {
-            return res.status(404).json({
-                error: "No categories found"
-            })
-        }
-    })
-    .catch(err => {
-        console.log(err);
-        res.status(500).json({
-            error: err
+
         })
-    })
+        .catch(err => {
+            console.log(err);
+            return res.status(500).json({
+                error: err
+            })
+        })
+    } else {
+        Product.find({
+            $and: [
+                { 
+                    "category.name": { 
+                        $regex: new RegExp(category, 'i') 
+                    } 
+                },
+                { outlet: outletid }
+            ]
+        })
+        .populate('category.icon')
+        .exec()
+        .then(result => {
+            if(result) {
+                return res.status(200).json({
+                    products: result
+                })
+            } else {
+                return res.status(404).json({
+                    error: "No categories found"
+                })
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            })
+        })
+    }
 }
 
 module.exports.getSingleProduct = (req,res) => {
