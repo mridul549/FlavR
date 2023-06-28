@@ -222,6 +222,7 @@ module.exports.getProductsByCategory = (req,res) => {
 
     if(category==='All'){
         Product.find({ outlet: outletid })
+        .populate('category.icon')
         .exec()
         .then(result => {
             var categoryMap = new Map()
@@ -273,7 +274,12 @@ module.exports.getProductsByCategory = (req,res) => {
         .then(result => {
             if(result) {
                 return res.status(200).json({
-                    products: result
+                    categoryArray: [
+                        {
+                            category: category,
+                            products: result
+                        }
+                    ]
                 })
             } else {
                 return res.status(404).json({
