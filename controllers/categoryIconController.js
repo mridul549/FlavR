@@ -44,19 +44,3 @@ module.exports.addIcon = (req,res) => {
         })
     }
 }
-
-module.exports.getAllIcons = (req,res) => {
-    CategoryIcon.find({})
-    .exec()
-    .then(result => {
-        return res.status(200).json({
-            result
-        })
-    })
-    .catch(err => {
-        console.log(err);
-        return res.status(500).json({
-            error: err
-        })
-    })
-}
