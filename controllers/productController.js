@@ -2,6 +2,7 @@ const { default: mongoose, model } = require('mongoose');
 const Product               = require('../models/product');
 const Owner                 = require('../models/owner');
 const Outlet                = require('../models/outlet');
+const Category              = require('../models/category')
 const cloudinary            = require('cloudinary').v2;
 const redis                 = require('redis');
 
@@ -15,7 +16,13 @@ cloudinary.config({
 module.exports.getProductsOfOutlet = (req,res) => {
     Product.find({ outlet: req.query.outletid })
     .populate('outlet', '_id outletName address owner')
-    .populate('category.icon')
+    .populate('category')
+    .populate({
+        path: 'category',
+        populate: {
+            path: 'icon'
+        }
+    })
     .exec()
     .then(result => {
         if(result) {
@@ -51,8 +58,17 @@ module.exports.getProductsOfOutlet = (req,res) => {
     })
 }
 
-function saveProduct (product, req, res) {
+function saveProduct (product, categoryid, req, res) {
     product.save()
+    .then(async result => {
+        await Category.updateOne({ _id: categoryid }, {
+            $push: {
+                products: result._id 
+            }
+        })
+        .exec()
+        return result
+    })
     .then(async result => {
         await Owner.updateOne({ _id: req.userData.ownerid }, {
             $push: {
@@ -157,14 +173,9 @@ module.exports.addProduct = (req,res) => {
             imageid: "null"
         }
 
-        const category = {
-            name: req.body.category,
-            icon: req.body.categoryIconId
-        }
-
         const productwofile = new Product({
             _id: new mongoose.Types.ObjectId(),
-            category: category,
+            category: req.body.categoryid,
             productName: req.body.productName,
             description: req.body.description,
             price: req.body.price,
@@ -191,7 +202,7 @@ module.exports.addProduct = (req,res) => {
 
                 const productwfile = new Product({
                     _id: new mongoose.Types.ObjectId(),
-                    category: category,
+                    category: req.body.categoryid,
                     productName: req.body.productName,
                     description: req.body.description,
                     price: req.body.price,
@@ -201,10 +212,10 @@ module.exports.addProduct = (req,res) => {
                     variants: variants,
                     productImage: imageProp
                 })
-                saveProduct(productwfile, req, res)
+                saveProduct(productwfile, req.body.categoryid, req, res)
             })
         } else {
-            saveProduct(productwofile, req, res)
+            saveProduct(productwofile, req.body.categoryid, req, res)
         }
     })
     .catch(err => {
@@ -222,7 +233,15 @@ module.exports.getProductsByCategory = (req,res) => {
 
     if(category==='All'){
         Product.find({ outlet: outletid })
-        .populate('category.icon')
+        .populate('category')
+        .populate({
+            path: 'category',
+            select: '_id name icon outlet',
+            populate: {
+                path: 'icon',
+                select: 'icon _id'
+            }
+        })
         .exec()
         .then(result => {
             var categoryMap = new Map()
@@ -259,17 +278,29 @@ module.exports.getProductsByCategory = (req,res) => {
             })
         })
     } else {
-        Product.find({
+        Category.find({
             $and: [
                 { 
-                    "category.name": { 
+                    name: { 
                         $regex: new RegExp(category, 'i') 
                     } 
                 },
                 { outlet: outletid }
             ]
         })
-        .populate('category.icon')
+        .select('products')
+        .populate('products')
+        .populate({
+            path: 'products',
+            populate: {
+                path: 'category',
+                select: '_id name icon outlet',
+                populate: {
+                    path: 'icon',
+                    select: 'icon _id'
+                }
+            }
+        })
         .exec()
         .then(result => {
             if(result) {
@@ -277,7 +308,7 @@ module.exports.getProductsByCategory = (req,res) => {
                     categoryArray: [
                         {
                             category: category,
-                            products: result
+                            products: result[0].products
                         }
                     ]
                 })
@@ -300,7 +331,13 @@ module.exports.getSingleProduct = (req,res) => {
     const productID = req.query.productid
 
     Product.find({ _id: productID })
-    .populate('category.icon')
+    .populate('category')
+    .populate({
+        path: 'category',
+        populate: {
+            path: 'icon'
+        }
+    })
     .exec()
     .then(result => {
         if(result) {
@@ -329,7 +366,13 @@ module.exports.getAllCategories = (req,res) => {
 
     Product.find({ outlet: outletid })
     .select('category')
-    .populate('category.icon')
+    .populate('category')
+    .populate({
+        path: 'category',
+        populate: {
+            path: 'icon'
+        }
+    })
     .exec()
     .then(result => {
         if(result.length>0) {
