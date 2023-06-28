@@ -14,7 +14,6 @@ const categorySchema = mongoose.Schema({
     products: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            required: true,
             ref: 'Product'
         }
     ],
