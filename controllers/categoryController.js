@@ -26,7 +26,8 @@ module.exports.addCategory = async (req,res) => {
 
             await category.save()
             return res.status(201).json({
-                message: "Category created"
+                message: "Category created",
+                categoryId: category._id
             })
         } else {
             return res.status(409).json({
