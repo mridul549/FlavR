@@ -43,3 +43,50 @@ module.exports.addCategory = async (req,res) => {
     })
 }
 
+module.exports.updateCategory = (req,res) => {
+    const categoryid = req.query.categoryid
+    const outletid = req.query.outletid
+    const categoryName = req.body.name
+    const iconid = req.body.iconid
+
+    Category.find({
+        $and: [
+            { _id: categoryid },
+            { outlet: outletid }
+        ]
+    })
+    .exec()
+    .then(result => {
+        if(result.length>0) {
+            
+            Category.updateOne({ _id: categoryid }, {
+                $set: {
+                    name: categoryName,
+                    icon: iconid
+                }
+            })
+            .exec()
+            .then(result => {
+                return res.status(200).json({
+                    message: "Category updated successfully",
+                })
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    error: err
+                })
+            })
+        } else {
+            return res.status(404).json({
+                message: "Category not found"
+            })
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}

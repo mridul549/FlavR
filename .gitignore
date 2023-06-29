@@ -4,3 +4,4 @@
 .env
 misc.txt
 flavr-firebase-config.json
+.DS_Store
