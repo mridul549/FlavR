@@ -473,6 +473,7 @@ module.exports.deleteProduct = (req,res) => {
             .then(result => {
                 if(result.length>0) {
                     const imageidOld = result[0].productImage.imageid
+                    const categoryid = result[0].category
 
                     if(imageidOld!=="null" || imageidOld===undefined) {
                         cloudinary.uploader.destroy(imageidOld, (err,result) => {
@@ -519,6 +520,11 @@ module.exports.deleteProduct = (req,res) => {
                                 error: err
                             });
                         }
+                    })
+                    .then(async result => {
+                        Category.updateOne({ _id: categoryid }, {
+                            $pull: { products: productid }
+                        })
                     })
                     .then(result => {
                         return res.status(200).json({
