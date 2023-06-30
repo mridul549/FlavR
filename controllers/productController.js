@@ -232,44 +232,31 @@ module.exports.getProductsByCategory = (req,res) => {
     const outletid = req.query.outletid
 
     if(category==='All'){
-        Product.find({ outlet: outletid })
-        .populate('category')
+        Category.find({ outlet: outletid })
         .populate({
-            path: 'category',
-            select: '_id name icon outlet',
+            path: 'products',
             populate: {
-                path: 'icon',
-                select: 'icon _id'
+                path: 'category',
+                select: '_id name icon outlet',
+                populate: {
+                    path: 'icon',
+                    select: 'icon _id'
+                }
             }
         })
         .exec()
         .then(result => {
-            var categoryMap = new Map()
-
-            for (let i = 0; i < result.length; i++) {
-                const element = result[i];
-                if(categoryMap.has(element.category.name)) {
-                    const array = categoryMap.get(element.category.name)
-                    array.push(result[i])
-                    categoryMap.set(element.category.name, array);
-                } else {
-                    const array = [result[i]]
-                    categoryMap.set(element.category.name, array);
-                }
-            }
-
-            var categoryArray = []
-            categoryMap.forEach((value,key) => {
-                categoryArray.push({
-                    category: key,
-                    products: value
+            const response = {
+                categoryArray: result.map(doc => {
+                    return {
+                        category: doc.name,
+                        categoryid: doc._id,
+                        iconid: doc.icon._id,
+                        products: doc.products
+                    }
                 })
-            })
-
-            return res.status(200).json({
-                categoryArray
-            })
-
+            }
+            return res.status(200).json(response)
         })
         .catch(err => {
             console.log(err);
@@ -308,6 +295,8 @@ module.exports.getProductsByCategory = (req,res) => {
                     categoryArray: [
                         {
                             category: category,
+                            categoryid: result[0].products[0].category._id,
+                            iconid: result[0].products[0].category.icon._id,
                             products: result[0].products
                         }
                     ]
@@ -372,6 +361,8 @@ module.exports.getAllCategories = (req,res) => {
             categories: result.map(doc => {
                 return {
                     category: doc.name,
+                    categoryid: doc._id,
+                    iconid: doc.icon._id,
                     count: {
                         count: doc.products.length,
                         icon: doc.icon
