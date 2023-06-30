@@ -522,9 +522,11 @@ module.exports.deleteProduct = (req,res) => {
                         }
                     })
                     .then(async result => {
-                        Category.updateOne({ _id: categoryid }, {
+                        await Category.updateOne({ _id: categoryid }, {
                             $pull: { products: productid }
                         })
+                            .exec()
+                        return result
                     })
                     .then(result => {
                         return res.status(200).json({
