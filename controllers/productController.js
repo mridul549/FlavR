@@ -122,7 +122,7 @@ function saveProduct (product, categoryid, req, res) {
 module.exports.addProduct = (req,res) => {
     Product.find({
         $and: [
-            { category: req.body.category },
+            { category: req.body.categoryid },
             { productName: req.body.productName },
             { description: req.body.description },
             { price: req.body.price },
