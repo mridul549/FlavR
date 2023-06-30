@@ -363,51 +363,28 @@ module.exports.getSingleProduct = (req,res) => {
 // converting the map to an array of objects and returning it
 module.exports.getAllCategories = (req,res) => {
     const outletid = req.query.outletid
-
-    Product.find({ outlet: outletid })
-    .select('category')
-    .populate('category')
-    .populate({
-        path: 'category',
-        populate: {
-            path: 'icon'
-        }
-    })
+    
+    Category.find({ outlet: outletid })
+    .populate('icon')
     .exec()
     .then(result => {
-        if(result.length>0) {
-            var categoryMap = new Map()
-
-            for (let i = 0; i < result.length; i++) {
-                const element = result[i];
-                if(categoryMap.has(element.category.name)) {
-                    const count = categoryMap.get(element.category.name);
-                    categoryMap.set(element.category.name, { count: count.count + 1, icon: element.category.icon });
-                } else {
-                    categoryMap.set(element.category.name, {count: 1, icon: element.category.icon});
+        const response = {
+            categories: result.map(doc => {
+                return {
+                    category: doc.name,
+                    count: {
+                        count: doc.products.length,
+                        icon: doc.icon
+                    }
                 }
-            }
-    
-            var categoryArray = []
-            categoryMap.forEach((value,key) => {
-                categoryArray.push({
-                    category: key,
-                    count: value
-                })
-            })
-    
-            return res.status(200).json({
-                categories: categoryArray
-            })
-        } else {
-            return res.status(404).json({
-                error: "No categories found"
             })
         }
+
+        return res.status(200).json(response)
     })
     .catch(err => {
         console.log(err);
-        res.status(500).json({
+        return res.status(500).json({
             error: err
         })
     })
