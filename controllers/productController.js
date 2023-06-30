@@ -233,6 +233,7 @@ module.exports.getProductsByCategory = (req,res) => {
 
     if(category==='All'){
         Category.find({ outlet: outletid })
+        .populate('icon')
         .populate({
             path: 'products',
             populate: {
@@ -240,7 +241,7 @@ module.exports.getProductsByCategory = (req,res) => {
                 select: '_id name icon outlet',
                 populate: {
                     path: 'icon',
-                    select: 'icon _id'
+
                 }
             }
         })
@@ -252,6 +253,7 @@ module.exports.getProductsByCategory = (req,res) => {
                         category: doc.name,
                         categoryid: doc._id,
                         iconid: doc.icon._id,
+                        iconurl: doc.icon.icon.url,
                         products: doc.products
                     }
                 })
@@ -297,6 +299,7 @@ module.exports.getProductsByCategory = (req,res) => {
                             category: category,
                             categoryid: result[0].products[0].category._id,
                             iconid: result[0].products[0].category.icon._id,
+                            iconurl: result[0].products[0].category.icon.icon.url,
                             products: result[0].products
                         }
                     ]
