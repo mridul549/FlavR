@@ -277,8 +277,7 @@ module.exports.getProductsByCategory = (req,res) => {
                 { outlet: outletid }
             ]
         })
-        .select('products')
-        .populate('products')
+        .populate('icon')
         .populate({
             path: 'products',
             populate: {
@@ -297,9 +296,9 @@ module.exports.getProductsByCategory = (req,res) => {
                     categoryArray: [
                         {
                             category: category,
-                            categoryid: result[0].products[0].category._id,
-                            iconid: result[0].products[0].category.icon._id,
-                            iconurl: result[0].products[0].category.icon.icon.url,
+                            categoryid: result[0]._id,
+                            iconid: result[0].icon._id,
+                            iconurl: result[0].icon.icon.url,
                             products: result[0].products
                         }
                     ]
