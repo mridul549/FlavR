@@ -15,6 +15,7 @@ router.post('/addProduct', checkAuth, productController.addProduct);
 router.patch('/updateProduct/:productid', checkAuth, productController.updateProduct);
 router.patch('/updateImage', checkAuth, productController.updateProductImage);
 router.patch('/updateVariants', checkAuth, productController.updateVariants)
+router.patch('/instock', checkAuth, productController.instock)
 
 router.delete('/deleteProduct', checkAuth, productController.deleteProduct);
 

@@ -402,7 +402,7 @@ module.exports.updateProduct = (req,res) => {
             } else {
                 variants = JSON.parse(variants)
             }
-            
+
             if(req.files && req.files.productImage) {
                 const file = req.files.productImage
                 const product = await Product.find({ _id: productid })
@@ -739,27 +739,6 @@ module.exports.getAllVariants = (req,res) => {
     })
 }
 
-module.exports.inStock = (req,res) => {
-    const instock   = req.body.instock
-    const productid = req.body.productid
-    
-    Product.updateOne({ _id: productid }, {
-        $set: { inStock: instock }
-    })
-    .exec()
-    .then(result => {
-        return res.status(200).json({
-            message: "In Stock value updated successfully"
-        })
-    })
-    .catch(err => {
-        console.log(err);
-        return res.status(500).json({
-            error: err
-        })
-    })
-}
-
 module.exports.getAllProductsCategoryAccording = (req,res) => {
     const outletid = req.query.outletid
     Product.find({ outlet: outletid })
@@ -791,6 +770,29 @@ module.exports.getAllProductsCategoryAccording = (req,res) => {
             categoryArray
         })
 
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.instock = (req,res) => {
+    const productid = req.body.productid
+    const ownerid = req.userData.ownerid
+    const instock = req.body.instock
+
+    Product.updateOne({ _id: productid }, {
+        $set: { inStock: instock }
+    })
+    .exec()
+    .then(result => {
+        const stringResult = (instock ? "Product marked in stock" : "Product marked out of stock")
+        return res.status(200).json({
+            message: stringResult
+        })
     })
     .catch(err => {
         console.log(err);
