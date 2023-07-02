@@ -389,28 +389,115 @@ module.exports.updateProduct = (req,res) => {
 
     Owner.find({ _id: ownerid })
     .exec()
-    .then(result => {
+    .then(async result => {
         if(result.length>0) {
-            const updateOps = {};
-            for(const ops of req.body.updates) {
-                updateOps[ops.propName] = ops.value
+            const name = req.body.productName
+            const description = req.body.description
+            const price = req.body.price
+            const variants = req.body.variants
+            const veg = req.body.veg
+
+            if(req.files && req.files.productImage) {
+                const file = req.files.productImage
+
+                const product = await Product.find({ _id: productid })
+                if(!product){
+                    return res.status(404).json({
+                        error: "No product found"
+                    })
+                }
+
+                const imageUrl = product[0].productImage.url
+                const imageId = product[0].productImage.imageid
+                if(imageUrl!=="null") {
+                    cloudinary.uploader.destroy(imageId, (err,result) => {
+                        if(err) {
+                            return res.status(500).json({
+                                error: "error in deleting the old image"
+                            })
+                        }
+                    })
+                } else {
+                    cloudinary.uploader.upload(file.tempFilePath, (err, image) => {
+                        if(err) {
+                            return res.status(201).json({
+                                error: "image upload failed"
+                            })
+                        }
+
+                        const imageProp = {
+                            url: image.url,
+                            imageid: image.public_id
+                        }
+
+                        Product.updateOne({ _id: productid }, {
+                            $set: {
+                                productName: name,
+                                description: description,
+                                price: price,
+                                variants: variants,
+                                veg: veg,
+                                productImage: imageProp
+                            }
+                        })
+                        .exec()
+                        .then(result => {
+                            return res.status(200).json({
+                                message: "Product updated successfully"
+                            })
+                        })
+                        .catch(err => {
+                            console.log(err);
+                            return res.status(500).json({
+                                error: err
+                            })
+                        })
+                    })
+                }
+            } else {
+                Product.updateOne({ _id: productid }, {
+                    $set: {
+                        productName: name,
+                        description: description,
+                        price: price,
+                        variants: variants,
+                        veg: veg
+                    }
+                })
+                .exec()
+                .then(result => {
+                    return res.status(200).json({
+                        message: "Product updated successfully"
+                    })
+                })
+                .catch(err => {
+                    console.log(err);
+                    return res.status(500).json({
+                        error: err
+                    })
+                })
             }
-            Product.updateOne({ _id: productid }, {
-                $set: updateOps
-            })
-            .exec()
-            .then(result => {
-                return res.status(200).json({
-                    message: "Product updated successfully",
-                    ACK: result
-                })
-            })
-            .catch(err => {
-                console.log(err);
-                res.status(500).json({
-                    error: err
-                })
-            })
+
+            // const updateOps = {};
+            // for(const ops of req.body.updates) {
+            //     updateOps[ops.propName] = ops.value
+            // }
+            // Product.updateOne({ _id: productid }, {
+            //     $set: updateOps
+            // })
+            // .exec()
+            // .then(result => {
+            //     return res.status(200).json({
+            //         message: "Product updated successfully",
+            //         ACK: result
+            //     })
+            // })
+            // .catch(err => {
+            //     console.log(err);
+            //     res.status(500).json({
+            //         error: err
+            //     })
+            // })
         } else {
             return res.status(404).json({
                 error: "Owner not found"

@@ -295,7 +295,7 @@ getPaymentToken = async (neworder, outletid, user, req, res) => {
 
 module.exports.deleteAll = (req,res) => {
     const userid = req.userData.userid
-    Order.deleteMany({ user: userid })
+    Order.deleteMany({  })
     .exec()
     .then(result => {
         return res.status(200).json({
@@ -610,7 +610,10 @@ module.exports.inCompleteOrders = (req,res) => {
             { status: { $ne: "completed" } }
         ]
     })
-    .populate('products.item', '_id category productName description price veg productImage')
+    .populate({
+        path: 'products.item', 
+        select: '_id category productName description price veg productImage'
+    })
     .exec()
     .then(result => {
         return res.status(200).json({
