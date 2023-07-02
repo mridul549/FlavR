@@ -397,6 +397,12 @@ module.exports.updateProduct = (req,res) => {
             const variants = req.body.variants
             const veg = req.body.veg
 
+            if(variants.length===0 || variants===undefined || variants===null) {
+                variants=[]
+            } else {
+                variants = JSON.parse(variants)
+            }
+
             if(req.files && req.files.productImage) {
                 const file = req.files.productImage
 
