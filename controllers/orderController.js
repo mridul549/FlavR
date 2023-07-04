@@ -231,7 +231,8 @@ module.exports.placeOrder = async (req, res) => {
                         totalPrice: totalAmount,
                         totalQuantity: totalQuantity,
                         instructions: instructions,
-                        products: productArrFirebase
+                        products: productArrFirebase,
+                        createdAt: newOrder.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
                     })
 
                     const payment = await getPaymentToken(newOrder, outletid, result, req, res)
