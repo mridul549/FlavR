@@ -789,7 +789,7 @@ module.exports.instock = (req,res) => {
     })
     .exec()
     .then(result => {
-        const stringResult = (instock ? "Product marked in stock" : "Product marked out of stock")
+        const stringResult = (instock===true ? "Product marked in stock" : "Product marked out of stock")
         return res.status(200).json({
             message: stringResult
         })

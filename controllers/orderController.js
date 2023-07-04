@@ -135,6 +135,7 @@ module.exports.placeOrder = async (req, res) => {
             let totalAmount=0, totalQuantity=0;
             const cart = result[0].cart.products
             const productArr = []
+            const productArrFirebase = []
 
             if(cart.length==0){
                 return res.status(400).json({
@@ -147,10 +148,12 @@ module.exports.placeOrder = async (req, res) => {
                 const element = cart[i];
                 const variant = element.variant
                 let price=0
+                let productName = ''
 
                 try {
                     const product = await Product.findById(element.product);
-
+                    productName=product.productName
+                    
                     if(variant==="default"){
                         price=product.price
                     } else {
@@ -169,6 +172,11 @@ module.exports.placeOrder = async (req, res) => {
     
                 productArr.push({
                     item: element.product,
+                    variant: variant,
+                    quantity: element.quantity
+                })
+                productArrFirebase.push({
+                    productName: productName,
                     variant: variant,
                     quantity: element.quantity
                 })
@@ -218,7 +226,12 @@ module.exports.placeOrder = async (req, res) => {
                     await orderfb.doc(newOrder._id.toString()).set({
                         "orderid": newOrder._id.toString(),
                         status: newOrder.status.toString(),
-                        orderNumber: 0
+                        orderNumber: 0,
+                        outlet: outletid,
+                        totalPrice: totalAmount,
+                        totalQuantity: totalQuantity,
+                        instructions: instructions,
+                        products: productArrFirebase
                     })
 
                     const payment = await getPaymentToken(newOrder, outletid, result, req, res)
