@@ -176,13 +176,13 @@ module.exports.placeOrder = async (req, res) => {
                     quantity: element.quantity
                 })
                 productArrFirebase.push({
-                    productid: element.product,
+                    productid: element.product.toString(),
                     productName: productName,
                     variant: variant,
                     quantity: element.quantity
                 })
             }
-
+            console.log(productArrFirebase);
             if(couponcode!==undefined){
                 try {
                     totalAmount = await addcoupon(req,res,userid,outletid,couponcode,totalAmount)
