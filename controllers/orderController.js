@@ -176,6 +176,7 @@ module.exports.placeOrder = async (req, res) => {
                     quantity: element.quantity
                 })
                 productArrFirebase.push({
+                    productid: element.product,
                     productName: productName,
                     variant: variant,
                     quantity: element.quantity
@@ -556,6 +557,21 @@ module.exports.order_confirm_reject = (req,res) => {
 
                     } else {
                         order.status = "ORDER_REJECTED"
+
+                        const rejectReason = req.body.rejectReason
+                        let rejection = {}
+
+                        if(rejectReason.reason === "Outlet not accepting orders"){
+                            rejection = {
+                                reason: "Outlet not accepting orders"
+                            }
+                        } else if (rejectReason.reason === "One or more items not available"){
+                            rejection = {
+                                reason: "One or more items not available",
+                                products: rejectReason.products
+                            }
+                        }
+                        order.rejectionReason = rejection
 
                         snapshot.forEach((doc) => {
                             doc.ref.update({ status: "ORDER_REJECTED" });

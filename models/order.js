@@ -44,6 +44,26 @@ const orderSchema = mongoose.Schema({
         type: Boolean,
         default: false
     },
+    rejectionReason: {
+        reason: {
+            type: String
+        },
+        products: [
+            {
+                item: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    required: true,
+                    ref: 'Product'
+                },
+                variant: {
+                    type: String
+                },
+                quantity: {
+                    type: Number
+                }
+            }
+        ]
+    },
     instructions: {
         packOrder: {
             type: Boolean,
