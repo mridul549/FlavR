@@ -8,6 +8,7 @@ router.get('/ownerprofile', checkAuth, ownerController.getOwnerProfile);
 
 router.patch('/addOutlet', checkAuth, ownerController.addOutlet);
 router.patch('/updateImage', checkAuth, ownerController.updateImage);
+router.patch('/updateowner', checkAuth, ownerController.updateOwner)
 
 // AUTH routes
 router.post('/signup', ownerController.signup);
