@@ -386,9 +386,9 @@ module.exports.deleteOwner = (req,res) => {
 }
 
 module.exports.getOwnerProfile = (req,res) => {
-    const ownerid = req.userData.ownerid
+    const owneremail = req.body.ownermail
 
-    Owner.find({ _id: ownerid })
+    Owner.find({ email: owneremail })
     .select('_id ownerName email outlets ownerProfilePic')
     .exec()
     .then(result => {
@@ -398,7 +398,7 @@ module.exports.getOwnerProfile = (req,res) => {
             })
         } else {
             return res.status(404).json({
-                error: "Owner not found!"
+                error: "Owner not found"
             })
         }
     })
