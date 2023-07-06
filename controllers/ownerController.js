@@ -351,7 +351,8 @@ module.exports.updateImage = (req,res) => {
                 .exec()
                 .then(docs => {
                     return res.status(200).json({
-                        message: "Image updated successfully"
+                        message: "Image updated successfully",
+                        url: image.url
                     })
                 })
                 .catch(err => {
