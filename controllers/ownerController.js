@@ -277,17 +277,18 @@ module.exports.getOutlets = (req,res) => {
 
 module.exports.updateOwner = (req,res) => {
     const ownerid = req.userData.ownerid
+    const ownername = req.body.ownerName
+    const email = req.body.email
 
     Owner.find({ _id: ownerid })
     .exec()
     .then(result => {
         if(result.length>0) {
-            const updateOps = {};
-            for(const ops of req.body.updates) {
-                updateOps[ops.propName] = ops.value
-            }
             Owner.updateOne({ _id: ownerid }, {
-                $set: updateOps
+                $set: {
+                    ownerName: ownername,
+                    email: email
+                }
             })
             .exec()
             .then(result => {
