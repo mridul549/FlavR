@@ -386,7 +386,7 @@ module.exports.deleteOwner = (req,res) => {
 }
 
 module.exports.getOwnerProfile = (req,res) => {
-    const owneremail = req.body.ownermail
+    const owneremail = req.query.ownermail
 
     Owner.find({ email: owneremail })
     .select('_id ownerName email outlets ownerProfilePic')
