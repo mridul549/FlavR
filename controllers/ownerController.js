@@ -209,10 +209,11 @@ module.exports.resetPassword = (req,res) => {
                         })
                     }
                 })
+            }else {
+                return res.status(401).json({
+                    message: "Old password entered is wrong."
+                })
             }
-            return res.status(401).json({
-                message: "Old password entered is wrong."
-            })
         })
 
     })
