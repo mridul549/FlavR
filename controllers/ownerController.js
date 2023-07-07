@@ -179,7 +179,7 @@ module.exports.resetPassword = (req,res) => {
                 message: "Password is not set for this account."
             })
         }
-        bcrypt.compare(oldPassword, user[0].password, (err, result) => {
+        bcrypt.compare(oldPassword, result[0].password, (err, result) => {
             if(err) {
                 return res.status(500).json({
                     error: err
