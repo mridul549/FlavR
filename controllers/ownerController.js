@@ -163,7 +163,7 @@ module.exports.login = (req,res) => {
 module.exports.resetPassword = (req,res) => {
     const oldPassword = req.body.oldPassword
     const newPassword = req.body.newPassword
-    const ownerid = req.userDate.ownerid
+    const ownerid = req.userData.ownerid
 
     Owner.find({ _id: ownerid })
     .exec()
