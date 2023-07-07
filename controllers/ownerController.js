@@ -160,6 +160,71 @@ module.exports.login = (req,res) => {
     })
 }
 
+module.exports.resetPassword = (req,res) => {
+    const oldPassword = req.body.oldPassword
+    const newPassword = req.body.newPassword
+    const ownerid = req.userDate.ownerid
+
+    Owner.find({ _id: ownerid })
+    .exec()
+    .then(result => {
+        if(result.length<1){
+            return res.status(401).json({
+                message: "Auth Failed- No owner found"
+            })
+        }
+        const authMethod = result[0].authMethod
+        if(authMethod=="google"){
+            return res.status(409).json({
+                message: "Password is not set for this account."
+            })
+        }
+        bcrypt.compare(oldPassword, user[0].password, (err, result) => {
+            if(err) {
+                return res.status(500).json({
+                    error: err
+                })
+            } 
+            if(result) {
+                bcrypt.hash(newPassword, 10, (err, hash) => {
+                    if(err){
+                        return res.status(500).json({
+                            error: err
+                        })
+                    } else {
+                        Owner.updateOne({ _id: ownerid }, {
+                            $set: { password: hash }
+                        })
+                        .exec()
+                        .then(updatePass => {
+                            return res.status(200).json({
+                                message: "Password successfully updated"
+                            })
+                        })
+                        .catch(err => {
+                            console.log(err);
+                            return res.status(500).json({
+                                error: err
+                            })
+                        })
+                    }
+                })
+            }
+            return res.status(401).json({
+                message: "Old password entered is wrong."
+            })
+        })
+
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+
+}
+
 function getTokenForGoogleAuth (user,req,res) {
     const token = jwt.sign({
         email: user.email,
