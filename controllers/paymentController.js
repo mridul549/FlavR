@@ -98,14 +98,14 @@ module.exports.processPayment = (req,res) => {
     const genSignature = verify(ts, req.rawBody)
     if(signature === genSignature){
         res.send('OK')
-        console.log(req.body.data);
         const paymentStatus = req.body.data.payment.payment_status
         const orderid  = req.body.data.order.order_id
+        const orderAmount = req.body.data.order.order_amount
         const userid   = req.body.data.customer_details.customer_id
         const outletid = req.body.data.order.order_tags.outlet_id
         switch (paymentStatus) {
             case "SUCCESS":
-                paymentSuccess(req,res,orderid,userid,outletid)
+                paymentSuccess(req,res,orderid,userid,outletid,orderAmount)
                 break;
             case "FAILED":
                 // paymentFailed_UserDropped(req,res,orderid)
@@ -128,7 +128,7 @@ module.exports.processPayment = (req,res) => {
     * Assign order number using bull- done
     * Add order to outlet and user- done
  */
-async function paymentSuccess (req, res, orderid, userid, outletid) {
+async function paymentSuccess (req, res, orderid, userid, outletid, orderAmount) {
     User.findByIdAndUpdate(userid, {
         $push: { orders: orderid },
         $set: { cart: {} }
@@ -181,7 +181,7 @@ async function paymentSuccess (req, res, orderid, userid, outletid) {
     
                     if(revenueArray.length===0){
                         await Outlet.updateOne({ _id: outletid }, {
-                            $push: { revenues: { date: today, revenue: totalAmount}}
+                            $push: { revenues: { date: today, revenue: orderAmount}}
                         })
                         .exec()
                     } else {
@@ -190,12 +190,12 @@ async function paymentSuccess (req, res, orderid, userid, outletid) {
         
                         if(lastDate.toString() === today.toString()) {
                             await Outlet.updateOne({ _id: outletid }, {
-                                $set: { revenues: { date: today, revenue: lastDateRevenue+totalAmount}}
+                                $set: { revenues: { date: today, revenue: lastDateRevenue+orderAmount}}
                             })
                             .exec()
                         } else {
                             await Outlet.updateOne({ _id: outletid }, {
-                                $push: { revenues: { date: today, revenue: totalAmount}}
+                                $push: { revenues: { date: today, revenue: orderAmount}}
                             })
                             .exec()
                         }
