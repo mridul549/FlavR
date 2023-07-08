@@ -194,7 +194,26 @@ const outletSchema = mongoose.Schema({
             type: Boolean,
             default: true
         }
-    }
+    },
+    revenues: [
+        {
+            date: {
+                type: Date,
+                get: function (date) {
+                    return date.toISOString().split('T')[0]; // Get the date in YYYY-MM-DD format
+                },
+                set: function (dateString) {
+                    const [year, month, day] = dateString.split('-');
+                    return new Date(year, month - 1, day); // Subtract 1 from month as it is 0-based index
+                }
+            },
+            revenue: {
+                type: Number,
+                default: 0
+            }
+
+        }
+    ]
 }, {
     timestamps: true
 })
