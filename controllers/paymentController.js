@@ -163,6 +163,52 @@ async function paymentSuccess (req, res, orderid, userid, outletid) {
                     doc.ref.update({ status: "PAYMENT_RECIEVED" });
                 });
             }
+            return result
+        })
+        .catch(err => {
+            console.log(err);
+            return res.status(500).json({
+                error: err
+            })
+        })
+    })
+    .then(async result => {
+        // for analytics
+        // for analytics
+
+        let today = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+        today = new Date(today).toISOString().split('T')[0];
+        const formattedDateString = today + 'T00:00:00.000Z';
+        const dateObject = new Date(formattedDateString);
+        Outlet.find({ _id: outletid })
+        .exec()
+        .then(async result => {
+            if(result.length>0){
+                const revenueArray = result[0].revenues
+
+                if(revenueArray.length===0){
+                    await Outlet.updateOne({ _id: outletid }, {
+                        $push: { revenues: { date: today, revenue: totalAmount}}
+                    })
+                    .exec()
+                }
+
+                const lastDate = revenueArray[revenueArray.length-1].date
+                const lastDateRevenue = revenueArray[revenueArray.length-1].revenue
+
+                if(lastDate.toString() === dateObject.toString()) {
+                    await Outlet.updateOne({ _id: outletid }, {
+                        $set: { revenues: { date: today, revenue: lastDateRevenue+totalAmount}}
+                    })
+                    .exec()
+                } else {
+                    await Outlet.updateOne({ _id: outletid }, {
+                        $push: { revenues: { date: today, revenue: totalAmount}}
+                    })
+                    .exec()
+                }
+
+            } 
         })
         .catch(err => {
             console.log(err);
