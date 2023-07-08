@@ -174,12 +174,16 @@ async function paymentSuccess (req, res, orderid, userid, outletid) {
     })
     .then(async result => {
         // for analytics
-        // for analytics
 
-        let today = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-        today = new Date(today).toISOString().split('T')[0];
-        const formattedDateString = today + 'T00:00:00.000Z';
-        const dateObject = new Date(formattedDateString);
+        const dateObject = new Date();
+
+        const year = dateObject.getFullYear();
+        const month = (dateObject.getMonth() + 1).toString().padStart(2, '0');
+        const day = dateObject.getDate().toString().padStart(2, '0');
+
+        const formattedDate = `${year}-${month}-${day}`;
+        const today = new Date(formattedDate)
+
         Outlet.find({ _id: outletid })
         .exec()
         .then(async result => {
