@@ -163,7 +163,7 @@ async function paymentSuccess (req, res, orderid, userid, outletid) {
                     doc.ref.update({ status: "PAYMENT_RECIEVED" });
                 });
             }
-
+            console.log("hi");
             const dateObject = new Date();
 
             const year = dateObject.getFullYear();
