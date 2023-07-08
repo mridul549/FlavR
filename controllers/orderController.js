@@ -5,6 +5,7 @@ const Outlet     = require('../models/outlet');
 const Owner      = require('../models/owner');
 const User       = require('../models/user');
 const Coupon     = require('../models/coupon');
+const Chart      = require('../models/chart')
 const axios      = require('axios');
 const Queue      = require('bull');
 const firebase   = require('../config/firebase')
@@ -242,10 +243,11 @@ module.exports.placeOrder = async (req, res) => {
                         totalQuantity: totalQuantity,
                         instructions: instructions,
                         products: productArrFirebase,
-                        createdAt: newOrder.createdAt.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' }).replace(/am|pm/gi, (match) => match.toUpperCase())
+                        createdAt: newOrder.createdAt.toLocaleTimeString('en-IN', { 
+                            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' 
+                        }).replace(/am|pm/gi, (match) => match.toUpperCase())
                     })
-
-
+                    
                 } catch (error) {
                     console.log(error);
                     return res.status(500).json({

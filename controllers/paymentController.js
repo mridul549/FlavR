@@ -164,52 +164,6 @@ async function paymentSuccess (req, res, orderid, userid, outletid, orderAmount)
                 });
             }
 
-            const dateObject = new Date();
-
-            const year = dateObject.getFullYear();
-            const month = (dateObject.getMonth() + 1).toString().padStart(2, '0');
-            const day = dateObject.getDate().toString().padStart(2, '0');
-    
-            const formattedDate = `${year}-${month}-${day}`;
-            const today = new Date(formattedDate)
-            
-            Outlet.find({ _id: outletid })
-            .exec()
-            .then(async result => {
-                if(result.length>0){
-                    const revenueArray = result[0].revenues
-    
-                    if(revenueArray.length===0){
-                        await Outlet.updateOne({ _id: outletid }, {
-                            $push: { revenues: { date: today, revenue: orderAmount}}
-                        })
-                        .exec()
-                    } else {
-                        const lastDate = revenueArray[revenueArray.length-1].date
-                        const lastDateRevenue = revenueArray[revenueArray.length-1].revenue
-        
-                        if(lastDate.toString() === today.toString()) {
-                            await Outlet.updateOne({ _id: outletid }, {
-                                $set: { revenues: { date: today, revenue: lastDateRevenue+orderAmount}}
-                            })
-                            .exec()
-                        } else {
-                            await Outlet.updateOne({ _id: outletid }, {
-                                $push: { revenues: { date: today, revenue: orderAmount}}
-                            })
-                            .exec()
-                        }
-                    }
-                } 
-            })
-            .catch(err => {
-                console.log(err);
-                return res.status(500).json({
-                    error: err
-                })
-            })
-
-            return result
         })
         .catch(err => {
             console.log(err);
