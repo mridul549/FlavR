@@ -308,7 +308,10 @@ module.exports.getOutlets = (req,res) => {
     const ownerid = req.userData.ownerid
 
     Owner.find({ _id: ownerid })
-    .populate('outlets')
+    .populate({
+        path: 'outlets',
+        select: '_id outletName address menu outletImage currentOrderNumber daysOpen timings'
+    })
     .exec()
     .then(result => {
         if(result){
