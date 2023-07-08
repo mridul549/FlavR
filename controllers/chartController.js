@@ -6,7 +6,7 @@ const Owner = require("../models/owner");
 const User = require("../models/user");
 
 module.exports.testing = (req, res) => {
-    const outletid = req.body.outletid;
+    const outletid = req.query.outletid;
     const monthIn = 7
     const yearIn = 2023
 
