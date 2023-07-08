@@ -3,6 +3,8 @@ const express          = require('express');
 const checkAuth        = require('../middlewares/check-auth');
 const router           = express.Router();
 
+router.use('/chart', require('./chart'))
+
 // GET Methods
 router.get('/getMenuSize', checkAuth, outletController.getMenuSize)
 router.get('/getOutlet', checkAuth, outletController.getOutlet)

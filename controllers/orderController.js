@@ -182,7 +182,7 @@ module.exports.placeOrder = async (req, res) => {
                     quantity: element.quantity
                 })
             }
-            console.log(productArrFirebase);
+
             if(couponcode!==undefined){
                 try {
                     totalAmount = await addcoupon(req,res,userid,outletid,couponcode,totalAmount)
@@ -217,6 +217,15 @@ module.exports.placeOrder = async (req, res) => {
             // Generate cashfree token and send to the frontend SDK
             .then(async newOrder => {
                 try {
+                    const payment = await getPaymentToken(newOrder, outletid, result, req, res)
+                    res.status(201).json({
+                        message: "Order added to the database and cashfree token successfully generated",
+                        cf_order_id: payment.data.cf_order_id,
+                        order_id: newOrder._id,
+                        payment_session_id: payment.data.payment_session_id,
+                        order_status: payment.data.order_status
+                    })
+
                     if(couponcode!=undefined){
                         await Order.updateOne({ _id: newOrder._id }, {
                             $set: { coupon: couponcode }
@@ -236,14 +245,48 @@ module.exports.placeOrder = async (req, res) => {
                         createdAt: newOrder.createdAt.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' }).replace(/am|pm/gi, (match) => match.toUpperCase())
                     })
 
-                    const payment = await getPaymentToken(newOrder, outletid, result, req, res)
-                    return res.status(201).json({
-                        message: "Order added to the database and cashfree token successfully generated",
-                        cf_order_id: payment.data.cf_order_id,
-                        order_id: newOrder._id,
-                        payment_session_id: payment.data.payment_session_id,
-                        order_status: payment.data.order_status
+                    // for analytics
+                    const today = new Date().toISOString().split('T')[0];
+                    const formattedDateString = today + 'T00:00:00.000Z';
+                    const dateObject = new Date(formattedDateString);
+                    Outlet.find({ _id: outletid })
+                    .exec()
+                    .then(async result => {
+                        if(result.length>0){
+                            const revenueArray = result[0].revenues
+                            if(revenueArray.length===0){
+                                await Outlet.updateOne({ _id: outletid }, {
+                                    $push: { revenues: { date: today, revenue: totalAmount}}
+                                })
+                                .exec()
+                            }
+
+                            const lastDate = revenueArray[revenueArray.length-1].date
+                            const lastDateRevenue = revenueArray[revenueArray.length-1].revenue
+
+                            if(lastDate.toString() === dateObject.toString()) {
+                                await Outlet.updateOne({ _id: outletid }, {
+                                    $set: { revenues: { date: today, revenue: lastDateRevenue+totalAmount}}
+                                })
+                                .exec()
+                            } else {
+                                await Outlet.updateOne({ _id: outletid }, {
+                                    $push: { revenues: { date: today, revenue: totalAmount}}
+                                })
+                                .exec()
+                            }
+
+                        } 
                     })
+                    .catch(err => {
+                        console.log(err);
+                        return res.status(500).json({
+                            error: err
+                        })
+                    })
+
+                    
+
                 } catch (error) {
                     console.log(error);
                     return res.status(500).json({
