@@ -200,7 +200,7 @@ async function paymentSuccess (req, res, orderid, userid, outletid) {
                 const lastDate = revenueArray[revenueArray.length-1].date
                 const lastDateRevenue = revenueArray[revenueArray.length-1].revenue
 
-                if(lastDate.toString() === dateObject.toString()) {
+                if(lastDate.toString() === today.toString()) {
                     await Outlet.updateOne({ _id: outletid }, {
                         $set: { revenues: { date: today, revenue: lastDateRevenue+totalAmount}}
                     })
