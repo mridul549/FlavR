@@ -98,7 +98,7 @@ module.exports.processPayment = (req,res) => {
     const genSignature = verify(ts, req.rawBody)
     if(signature === genSignature){
         res.send('OK')
-        
+        console.log(req.body.data);
         const paymentStatus = req.body.data.payment.payment_status
         const orderid  = req.body.data.order.order_id
         const userid   = req.body.data.customer_details.customer_id
@@ -172,7 +172,7 @@ async function paymentSuccess (req, res, orderid, userid, outletid) {
     
             const formattedDate = `${year}-${month}-${day}`;
             const today = new Date(formattedDate)
-    
+            
             Outlet.find({ _id: outletid })
             .exec()
             .then(async result => {
