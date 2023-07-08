@@ -5,7 +5,6 @@ const Outlet     = require('../models/outlet');
 const Owner      = require('../models/owner');
 const User       = require('../models/user');
 const Coupon     = require('../models/coupon');
-const Chart      = require('../models/chart')
 const axios      = require('axios');
 const Queue      = require('bull');
 const firebase   = require('../config/firebase')
