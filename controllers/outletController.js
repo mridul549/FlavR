@@ -33,7 +33,6 @@ module.exports.getAllOutletsByCity = (req,res) => {
 
 module.exports.getAllOutlets = (req,res) => {
     Outlet.find({})
-    .select('_id outletName address menu outletImage currentOrderNumber daysOpen timings')
     .exec()
     .then(result => {
         return res.status(200).json({
@@ -52,7 +51,6 @@ module.exports.getOutlet = (req,res) => {
     const outletid = req.query.outletid
 
     Outlet.find({ _id: outletid })
-    .select('_id outletName address menu outletImage currentOrderNumber daysOpen timings')
     .exec()
     .then(result => {
         return res.status(200).json({

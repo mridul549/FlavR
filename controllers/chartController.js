@@ -23,39 +23,32 @@ module.exports.testing = (req, res) => {
             $match: {
                 outlet: new mongoose.Types.ObjectId(outletid),
                 status: "COMPLETED",
-            }
-        },
-        {
-            $unwind: "$products",
-        },
-        {
-            $lookup: {
-                from: "products",
-                localField: "products.item",
-                foreignField: "_id",
-                as: "products.item"
-            }
-        },
-        {
-            $unwind: "$products.item"
-        },
-        {
-            $project: {
-                "products.item.productName": 1
+                createdAt: {
+                    $gte: new Date(yearIn, monthIn-1, 1),
+                    $lt: new Date(yearIn, monthIn)
+                }
             }
         },
         {
             $group: {
-                _id: "$products.item.productName",
-                count: { $sum: 1 }
+                _id: {
+                    $dateToString: { format: "%d", date: "$createdAt" }
+                },
+                totalPrice: { $sum: "$totalPrice"}
+            }
+        },
+        {
+            $sort: {
+                _id: 1
             }
         }
-        
     ])
     .exec()
     .then(result => {
         return res.status(200).json({
-            result
+            result: result,
+            xLabel: "Date",
+            yLabel: "Revenue generated"
         })
     })
     .catch(err => {
@@ -65,48 +58,196 @@ module.exports.testing = (req, res) => {
         })
     })
     
-    
-    
-    // const currentYear = new Date().getFullYear();
-    // const currentMonth = new Date().getMonth() + 1;
-    // Order.aggregate([
-    //     {
-    //         $match: {
-    //             outlet: new mongoose.Types.ObjectId(outletid),
-    //             createdAt: {
-    //                 $gte: new Date(currentYear, currentMonth - 1, 1),
-    //                 $lt: new Date(currentYear, currentMonth, 1),
-    //             },
-    //         },
-    //     },
-    //     {
-    //         $unwind: "$products",
-    //     },
-    //     {
-    //         $group: {
-    //             _id: "$products.item",
-    //             count: { $sum: 1 },
-    //         },
-    //     },
-    //     {
-    //         $lookup: {
-    //             from: "Product",
-    //             localField: "_id",
-    //             foreignField: "_id",
-    //             as: "productDetails",
-    //         },
-    //     },
-    //     {
-    //         $project: {
-    //             item: { $arrayElemAt: ["$productDetails.productName", 0] },
-    //             count: 1,
-    //             _id: 0,
-    //         },
-    //     },
-    // ]);
-
-    
 };
+
+module.exports.getRevenueByDay = (req,res) => {
+    const outletid = req.query.outletid;
+    const monthIn = req.query.month
+    const yearIn = req.query.year
+
+    Order.aggregate([
+        {
+            $match: {
+                outlet: new mongoose.Types.ObjectId(outletid),
+                status: "COMPLETED",
+                createdAt: {
+                    $gte: new Date(yearIn, monthIn-1, 1),
+                    $lt: new Date(yearIn, monthIn)
+                }
+            }
+        },
+        {
+            $group: {
+                _id: {
+                    $dateToString: { format: "%d", date: "$createdAt" }
+                },
+                totalPrice: { $sum: "$totalPrice"}
+            }
+        },
+        {
+            $sort: {
+                _id: 1
+            }
+        }
+    ])
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            result: result,
+            xLabel: "Date",
+            yLabel: "Revenue generated"
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.getRevenueByMonth = (req,res) => {
+    const outletid = req.query.outletid;
+    const yearIn = req.query.year
+
+    Order.aggregate([
+        {
+            $match: {
+                outlet: new mongoose.Types.ObjectId(outletid),
+                status: "COMPLETED",
+                createdAt: {
+                    $gte: new Date(yearIn, 0, 1),
+                    $lt: new Date(yearIn+1, 0, 1)
+                }
+            }
+        },
+        {
+            $group: {
+                _id: {
+                    $dateToString: { format: "%m", date: "$createdAt" }
+                },
+                totalPrice: { $sum: "$totalPrice"}
+            }
+        },
+        {
+            $sort: {
+                _id: 1
+            }
+        }
+    ])
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            result: result,
+            xLabel: "Month",
+            yLabel: "Revenue generated"
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.getRevenueByYear = (req,res) => {
+    const outletid = req.query.outletid;
+
+    const dateObject = new Date();
+    const year = dateObject.getFullYear();
+    const month = (dateObject.getMonth() + 1).toString().padStart(2, '0');
+    const day = dateObject.getDate().toString().padStart(2, '0');
+
+    const formattedDate = `${year}-${month}-${day}`;
+    const today = new Date(formattedDate)
+
+    Order.aggregate([
+        {
+            $match: {
+                outlet: new mongoose.Types.ObjectId(outletid),
+                status: "COMPLETED",
+                createdAt: {
+                    $gte: new Date(today.getFullYear()-10, 0, 1),
+                    $lt: new Date(today.getFullYear()+1, 0, 1)
+                }
+            }
+        },
+        {
+            $group: {
+                _id: {
+                    $dateToString: { format: "%Y", date: "$createdAt" }
+                },
+                totalPrice: { $sum: "$totalPrice"}
+            }
+        },
+        {
+            $sort: {
+                _id: 1
+            }
+        }
+    ])
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            result: result,
+            xLabel: "Year",
+            yLabel: "Revenue generated"
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.compareOwnerOutlets = (req,res) => {
+    const ownerid = req.userData.ownerid
+
+    Outlet.aggregate([
+        {
+            $match: {
+                owner: new mongoose.Types.ObjectId(ownerid)
+            }
+        },
+        {
+            $lookup: {
+                from: 'orders',
+                localField: '_id',
+                foreignField: 'outlet',
+                as: 'orders'
+            }
+        },
+        {
+            $unwind: '$orders'
+        },
+        {
+            $match: {
+                "orders.status": "COMPLETED"
+            }
+        },
+        {
+            $group: {
+                _id: '$outletName',
+                totalPrice: { $sum: '$orders.totalPrice' }
+            }
+        }
+    ])
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            result: result
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
 
 /**
     ###########  Get revenue by month ###########
