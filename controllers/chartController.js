@@ -203,8 +203,17 @@ module.exports.getRevenueByYear = (req,res) => {
     })
 }
 
-module.exports.compareOwnerOutlets = (req,res) => {
+// make sure to pass extra 2 in date
+module.exports.compareOutletsByDay = (req,res) => {
     const ownerid = req.userData.ownerid
+    const date = req.query.date
+    const monthIn = req.query.month
+    const yearIn = req.query.year
+    
+    const gtd = new Date(yearIn, monthIn - 1, date-1)
+    gtd.setUTCHours(0,0,0,0)
+    const ltd = new Date(yearIn, monthIn - 1, date)
+    ltd.setUTCHours(0,0,0,0)
 
     Outlet.aggregate([
         {
@@ -225,12 +234,19 @@ module.exports.compareOwnerOutlets = (req,res) => {
         },
         {
             $match: {
-                "orders.status": "COMPLETED"
+                "orders.status": "COMPLETED",
+                "orders.createdAt": {
+                    $gte: gtd,
+                    $lt: ltd
+                }
             }
         },
         {
             $group: {
-                _id: '$outletName',
+                _id: {
+                    outlet: '$outletName',
+                    date: { $dateToString: { format: "%m-%d", date: "$orders.createdAt" }}
+                },
                 totalPrice: { $sum: '$orders.totalPrice' }
             }
         }
@@ -249,7 +265,321 @@ module.exports.compareOwnerOutlets = (req,res) => {
     })
 }
 
+module.exports.compareOutletsByMonth = (req,res) => {
+    const ownerid = req.userData.ownerid
+    const monthIn = req.query.month
+    const yearIn = req.query.year
+
+    Outlet.aggregate([
+        {
+            $match: {
+                owner: new mongoose.Types.ObjectId(ownerid)
+            }
+        },
+        {
+            $lookup: {
+                from: 'orders',
+                localField: '_id',
+                foreignField: 'outlet',
+                as: 'orders'
+            }
+        },
+        {
+            $unwind: '$orders'
+        },
+        {
+            $match: {
+                "orders.status": "COMPLETED",
+                "orders.createdAt": {
+                    $gte: new Date(yearIn, monthIn - 1, 1),
+                    $lt: new Date(yearIn, monthIn, 1)
+                }
+            }
+        },
+        {
+            $group: {
+                _id: {
+                    outlet: '$outletName',
+                    date: { $dateToString: { format: "%m", date: "$orders.createdAt" }}
+                },
+                totalPrice: { $sum: '$orders.totalPrice' }
+            }
+        }
+    ])
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            result: result
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.compareOutletsByYear = (req,res) => {
+    const ownerid = req.userData.ownerid
+    const yearIn = req.query.year
+
+    Outlet.aggregate([
+        {
+            $match: {
+                owner: new mongoose.Types.ObjectId(ownerid)
+            }
+        },
+        {
+            $lookup: {
+                from: 'orders',
+                localField: '_id',
+                foreignField: 'outlet',
+                as: 'orders'
+            }
+        },
+        {
+            $unwind: '$orders'
+        },
+        {
+            $match: {
+                "orders.status": "COMPLETED",
+                "orders.createdAt": {
+                    $gte: new Date(yearIn, 0, 1),
+                    $lt: new Date(yearIn+1, 0, 1)
+                }
+            }
+        },
+        {
+            $group: {
+                _id: {
+                    outlet: '$outletName',
+                    date: { $dateToString: { format: "%Y", date: "$orders.createdAt" }}
+                },
+                totalPrice: { $sum: '$orders.totalPrice' }
+            }
+        }
+    ])
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            result: result
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.productCountByDay = (req,res) => {
+    const outletid = req.query.outletid
+    const date = req.query.date
+    const monthIn = req.query.month
+    const yearIn = req.query.year
+    
+    const gtd = new Date(yearIn, monthIn - 1, date-1)
+    gtd.setUTCHours(0,0,0,0)
+    const ltd = new Date(yearIn, monthIn - 1, date)
+    ltd.setUTCHours(0,0,0,0)
+
+    Order.aggregate([
+        {
+            $match: {
+                outlet: new mongoose.Types.ObjectId(outletid),
+                status: "COMPLETED",
+                createdAt: {
+                    $gte: gtd,
+                    $lt: ltd
+                }
+            }
+        },
+        {
+            $unwind: "$products",
+        },
+        {
+            $lookup: {
+                from: "products",
+                localField: "products.item",
+                foreignField: "_id",
+                as: "products.item"
+            }
+        },
+        {
+            $unwind: "$products.item"
+        },
+        {
+            $project: {
+                "products.item.productName": 1
+            }
+        },
+        {
+            $group: {
+                _id: "$products.item.productName",
+                count: { $sum: 1 }
+            }
+        }
+        
+    ])
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            result: result
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+
+}
+
+module.exports.productCountByMonth = (req,res) => {
+    const outletid = req.query.outletid
+    const monthIn = req.query.month
+    const yearIn = req.query.year
+    
+    Order.aggregate([
+        {
+            $match: {
+                outlet: new mongoose.Types.ObjectId(outletid),
+                status: "COMPLETED",
+                createdAt: {
+                    $gte: new Date(yearIn, monthIn - 1, 1),
+                    $lt: new Date(yearIn, monthIn, 1)
+                }
+            }
+        },
+        {
+            $unwind: "$products",
+        },
+        {
+            $lookup: {
+                from: "products",
+                localField: "products.item",
+                foreignField: "_id",
+                as: "products.item"
+            }
+        },
+        {
+            $unwind: "$products.item"
+        },
+        {
+            $project: {
+                "products.item.productName": 1
+            }
+        },
+        {
+            $group: {
+                _id: "$products.item.productName",
+                count: { $sum: 1 }
+            }
+        }
+        
+    ])
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            result: result
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+
+}
+
+module.exports.productCountByYear = (req,res) => {
+    const outletid = req.query.outletid
+    const yearIn = req.query.year
+ 
+    Order.aggregate([
+        {
+            $match: {
+                outlet: new mongoose.Types.ObjectId(outletid),
+                status: "COMPLETED",
+                createdAt: {
+                    $gte: new Date(yearIn, 0, 1),
+                    $lt: new Date(yearIn+1, 0, 1)
+                }
+            }
+        },
+        {
+            $unwind: "$products",
+        },
+        {
+            $lookup: {
+                from: "products",
+                localField: "products.item",
+                foreignField: "_id",
+                as: "products.item"
+            }
+        },
+        {
+            $unwind: "$products.item"
+        },
+        {
+            $project: {
+                "products.item.productName": 1
+            }
+        },
+        {
+            $group: {
+                _id: "$products.item.productName",
+                count: { $sum: 1 }
+            }
+        }
+        
+    ])
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            result: result
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+
+}
+
+
+
+
+
 /**
+    
+    {
+            $match: {
+                "orders.status": "COMPLETED",
+                "orders.createdAt": {
+                    $gte: new Date(yearIn, monthIn-1, 1),
+                    $lt: new Date(yearIn, monthIn)
+                }
+            }
+        },
+        {
+            $group: {
+                // _id: {
+                //     outlet: '$outletName',
+                //     $dateToString: { format: "%Y-%m-%d", date: "orders.createdAt" }
+                // },
+                // totalPrice: { $sum: '$orders.totalPrice' }
+                _id: null,
+                array: { $push: "$$ROOT"}
+            }
+        }
+
     ###########  Get revenue by month ###########
     
     const outletid = req.body.outletid;
