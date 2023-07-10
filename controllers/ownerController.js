@@ -308,6 +308,7 @@ module.exports.getOutlets = (req,res) => {
     const ownerid = req.userData.ownerid
 
     Owner.find({ _id: ownerid })
+    .populate('outlets')
     .exec()
     .then(result => {
         if(result){
