@@ -9,9 +9,9 @@ Upon confirmation by the outlet, an order number is assigned, and users are noti
 
 On the other hand, the owner app provides outlet owners with powerful tools to efficiently manage their operations. Owners can view and process incoming orders, keeping track of order details, delivery preferences, and customer information. The app also facilitates seamless communication with users, enabling owners to provide updates or address any concerns regarding the order.
 
-To further enhance outlet management, a dedicated website using React.js has been developed specifically for owners. This website serves as a comprehensive outlet management system, allowing owners to perform CRUD operations on their menu and outlet(s), and monitor the incoming orders. It also provides the owner with various analytics about their outlet, like revenue generated, comparison of outlets, and ordering frequency. The website also provides a user-friendly interface and can be easily accessed from larger screens, making it ideal for use in the outlet's kitchen.
+To further enhance outlet management, a dedicated website using React.js has been developed specifically for owners. This website serves as a comprehensive outlet management system, allowing owners to perform CRUD operations on their menu and outlet(s), and monitor the incoming orders. It also provides the owner with various analytics about their outlet like revenue generated, various outlets comparison and products ordering frequency. The website also provides a user-friendly interface and can be easily accessed from larger screens, making it ideal for use in the outlet's kitchen.
 
-The backend of the project is built using Node.js, Express, MongoDB, Redis, and Firebase. These technologies ensure efficient data management, real-time notifications, and seamless integration between the user app, owner app, and website.
+The backend of the project is built using Node.js, Express, MongoDB, Redis, and Firebase. These technologies ensure efficient data management, real-time notifications, and seamless integration between the user app, owner app, and the website.
 
 Overall, this project revolutionizes the food ordering experience by providing a convenient and streamlined solution for users while empowering outlet owners with efficient management tools. It enhances customer satisfaction, reduces waiting times, and increases operational efficiency for food outlets.
 
@@ -19,9 +19,9 @@ Overall, this project revolutionizes the food ordering experience by providing a
 ## Key Features
 
 - User-Friendly Ordering
-- Real-time management of orders by the outlet
+- Real time management of orders by the outlet
 - Secure Payment Gateway
-- Cross-platform functionality
+- Cross platform functionality
 - Various Analytics tools available
 - User app, Owner app, and Website work together in sync
 
@@ -32,19 +32,19 @@ Overall, this project revolutionizes the food ordering experience by providing a
 
 **User and Owner App:** Flutter, Firebase, and Bloc.
 
-**Server:** NodeJS, Express, MongoDB, Redis, and Firebase.
+**Server:** NodeJS, Express, MongoDB, Redis and Firebase.
 
 
 # Description of the Apps
 
-This section describes in detail the working of the User app, the owner app, and the Website (All three of these are still in the development phase, so there might be some bugs).
+This section decribes in detail the working of the User app, the owner app and the Website (All three of these are still in developement phase, so there might be some bugs).
 
-### The User app
+## The User app
 
-### The Owner app
+## The Owner app
 
-### The Website
-The website developed as part of the food ordering project is a comprehensive outlet management system for owners. Built using **React.js**, the website offers a user-friendly interface and a range of features that facilitate efficient management of the outlet's operations.
+## The Website
+The website developed as part of the food ordering project serves as a comprehensive outlet management system for owners. Built using **React.js**, the website offers a user-friendly interface and a range of features that facilitate efficient management of the outlet's operations.
 
 #### Key features 
 
@@ -60,8 +60,41 @@ The website developed as part of the food ordering project is a comprehensive ou
 
 #### Demo
 
-* CRUD operations for the menu
+* Menu
+    * Add a product
+        
+    * Update a product
+
+    * Delete a product
+
 * CRUD operations for the outlet
+    * Add an outlet
+
+    * Get all outlets
+
+    * Update an outlet
+
+    * Delete an outlet
+    
 * Handling of incoming orders
+    * Contains three sections
+        * **Pending Confirmation:** Once a new order arrives, it will come in this section, the owner would first have to accept an order or reject it selecting the proper reason.
+        * **Active Orders:** Once an order is accepted, it is brought to this section along the assignment of the order number. 
+        * **Ready Orders:** This section contains orders that are marked as prepared and are ready for pickup.
+    * The entire order handling process works in real time with notifications being sent to the user at each stage automatically.
+
 * Analytics Dashboard
+    * The analytics section provides an owner with **three** important informations.
+        * **Revenue Generated:** This lets the owner know how much revenue was generated by an outlet on a given date, month or year.
+        * **Outlets comparison:** This lets the owner compare multiple outlets based on revenue generated on a given day, month or year.
+        * **Products comparison:** This lets the owner compare the performance of the various products of the outlet based on their quantity ordered on given day, month or year.
+
+
+
+
+
+
+
+
+
 
