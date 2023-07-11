@@ -66,12 +66,13 @@ Check repo [here](https://github.com/mridul549/ownerweb)
 * Menu
     * Add a product
 
-        * Adding the first ever product 
+        * Adding the first-ever product 
             * Add a **new** category
               ![Add category- Final](https://github.com/mridul549/FlavR-Backend/assets/94969636/1760a9c8-72cc-4b27-a21e-5123c13a7a30)
 
             * All the products belonging to this category can be added here.
-            * 
+              ![Screen Recording 2023-07-11 at 6 55 08 PM](https://github.com/mridul549/FlavR-Backend/assets/94969636/ba4c0806-609b-4ac7-b665-701ed5838abb)
+              
         * Adding products in already existing category
             * Click on the edit icon next to a category
             * New products can be added here
