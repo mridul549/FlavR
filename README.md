@@ -83,9 +83,12 @@ Check repo [here](https://github.com/mridul549/ownerweb)
         * Select the category of which's product you want to update
         * Find the product and click on the edit icon of the same.
         * You can edit the product now
+         ![Update Product](https://github.com/mridul549/FlavR-Backend/assets/94969636/a9457c9f-7c2a-42cf-be19-54436bf37371)
 
     * Delete a product
         * Follow the same steps as the update method but instead of clicking on the edit button, you can click on the delete button.
+          ![Delete Product](https://github.com/mridul549/FlavR-Backend/assets/94969636/6aaad2d9-0d2c-40b2-ba04-e5d98a3d656f)
+
 
 * CRUD operations for the outlet
     * Add an outlet
