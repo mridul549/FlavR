@@ -75,6 +75,8 @@ Check repo [here](https://github.com/mridul549/ownerweb)
               
         * Adding products in already existing category
             * Click on the edit icon next to a category
+              ![AddProductByEdit](https://github.com/mridul549/FlavR-Backend/assets/94969636/cb10d2cb-9569-415b-af90-79dd2bb49cf1)
+
             * New products can be added here
 
     * Update a product
