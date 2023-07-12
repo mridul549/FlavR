@@ -258,3 +258,13 @@ Please adhere to this project's `code of conduct`.
 
 #### Q- How does the Analytics Dashboard work?
 **A-** We are using **MongoDB's Aggregation Pipeline** queries to calculate the revenues and the product comparison statistics.
+
+## Launching
+
+Our app is scheduled to be launched at Lovely Professional University (LPU), where it will be utilized by the Nescafe Food outlet. This real-world deployment will enable us to thoroughly test the app and gather valuable feedback, facilitating further enhancements and scalability for future expansion to additional outlets.
+
+
+## License
+
+[MIT License](https://github.com/mridul549/FlavR-Backend/blob/9ba7614c00254c560dd75abfaaf9cc2dae21c5a0/LICENSE)
+
