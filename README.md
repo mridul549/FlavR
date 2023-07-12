@@ -125,3 +125,136 @@ Check the repo [here](https://github.com/mridul549/ownerweb)
           
           <img width="1048" alt="Screenshot 2023-07-11 at 11 15 56 PM" src="https://github.com/mridul549/FlavR-Backend/assets/94969636/4cde9aca-33fc-40b6-8c91-1dea0abae86d">
 
+## Run Locally
+
+To run Locally, go to the respective **repos** of the apps or the website, and follow the steps mentioned there.
+
+* **Website:** https://github.com/mridul549/ownerweb
+* **User App:** https://github.com/sanyam12/FlavR
+* **Owner App:** https://github.com/sanyam12/FlavR
+
+For the **server**, follow the below mentioned steps:
+
+* Clone the project
+
+```bash
+  git clone https://github.com/mridul549/FlavR-Backend
+```
+
+* Go to the project directory
+
+```bash
+  cd FlavR-Backend
+```
+
+* Install dependencies
+
+```bash
+  npm install
+```
+
+* Create a new file named **.env** in the root directory, and add the following secrets there.
+
+```bash
+    MONGOOSE_CONNECTION_STRING = <Enter the value>
+
+    CLOUDINARY_CLOUD_NAME = <Enter the value>
+    CLOUDINARY_API_KEY = <Enter the value>
+    CLOUDINARY_API_SECRET = <Enter the value>
+
+    TOKEN_SECRET = <Enter the value>
+
+    REDIS_HOST = <Enter the value>
+    REDIS_PORT = <Enter the value>
+    REDIS_PASSWORD = <Enter the value>
+    REDIS_USERNAME = <Enter the value>
+    REDIS_URI = <Enter the value>
+
+    CF_APP_ID = <Enter the value>
+    CF_API_KEY = <Enter the value>
+
+    GOOGLE_CLIENT_ID = <Enter the value>
+    GOOGLE_CLIENT_SECRET = <Enter the value>
+    GOOGLE_REDIRECT_URI = <Enter the value>
+    GOOGLE_REFRESH_TOKEN = <Enter the value>
+
+    FB_API_KEY = <Enter the value>
+    FB_AUTH_DOMAIN = <Enter the value>
+    FB_PROJECT_ID = <Enter the value>
+    FB_STORAGE_BUCKET = <Enter the value>
+    FB_MESSAGING_SENDER_ID = <Enter the value>
+    FB_APP_ID = <Enter the value>
+    FB_MEASUREMENT_ID = <Enter the value>
+```
+
+To setup the environment variables, see `contributing.md`.
+
+* Start the server
+
+```bash
+  npm start
+```
+
+* The server should be up and running on **PORT 3001**.
+
+
+## Documentation
+
+The Documentation of the REST-API can be found [here](https://documenter.getpostman.com/view/21883208/2s93m4ZPc1). This Documentation was created with the help of **Postman**.
+
+
+
+## Contributing
+
+Contributions are always welcome!
+
+See `contributing.md` for ways to get started.
+
+Please adhere to this project's `code of conduct`.
+
+### Current Contributors
+
+| Developed                                | Contributors             |
+|------------------------------------------|--------------------------|
+| The User and the Owner app using Flutter | @sanyam12 and @Akshi-ta  |
+| The Website using ReactJS                | @mridul549 and @chahat30 |
+| The Server using Nodejs                  | @mridul549               |
+
+
+## FAQ
+
+#### Q- In the user app, when multiple people place orders simultaneously, how does the system allocate unique order numbers to ensure accurate tracking and management of each order?
+
+**A-** To handle concurrent order placements, we have implemented a queue-based system that assigns order numbers to incoming orders in a sequential manner. By using queues, we ensure that each order is processed one by one, eliminating any potential race conditions that may arise when multiple people place orders simultaneously. This was done with the help of [Bull](https://www.npmjs.com/package/bull) package and **Redis**.
+
+
+#### Q- What service are we using to host the REST API?
+
+**A-** For hosting the REST API, we have opted for Amazon Web Services (AWS) EC2 instances, leveraging their reliable infrastructure to ensure seamless deployment and scalability of the application.
+
+#### Q- How does the authentication process work?
+**A-** We are the **JSON Web Tokens (JWT)** to log in a user into the application or the Website. The token is stored securely in the browser or the app and expires after 30 days.
+
+#### Q- How is a user email verified at the time of Signing Up?
+**A-** To verify user emails during Sign Up, the project utilizes the Gmail API or Google OAuth2 for sending email verification messages. When a user registers using their email address, the system integrates with the Gmail API or leverages Google OAuth2 to send a verification email to the provided address.
+
+#### Q- What is the need of using three different databases?
+**A-** We are using the different databases for the following use cases:
+* **MongoDB-** MongoDB serves as the central data repository for the food ordering project, storing information about outlets, products, orders, users, and owners. It enables efficient data retrieval, storage, and management, ensuring smooth operations.
+
+* **Redis-** Redis is currently being used for two main tasks:
+    * **Order queue:** The entire order queue is stored in Redis.
+    * **Mail queue:** The version of Gmail API we are using to send OTP mails to users has a rate limiter of sending not more than 100 mails/second. To ensure this condition never arises, we are using a mail queue with concurrency set to 80, which means at a time only 80 verification emails can be sent.
+    * In the future we are planning to implement **caching** using Redis to reduce API response times even further.
+
+* **Firebase-** We are using Firebase to enable real-time communication between the **server**, Apps, and the website. Real-time communication is mainly required for **Order handling**. At the various stages of the order handling process, real-time notifications are sent to the apps and the website to update their UI accordingly.
+
+#### Q- Which payment gateway are we using and how do refunds work?
+**A-** We are currently using the sandbox version of the [**Cashfree**](https://www.cashfree.com/) Payment gateway. The refunds are handled in the following ways:
+
+* If an order is rejected by the outlet, the user is given the option to claim a **coupon** for the same order amount which can be used immediately at the same outlet again (coupon be used only at the outlet from where the order was rejected) only once.
+
+* Or ask for a **refund** which is credited back to the original payment method of the user in T+7 days.
+
+#### Q- How does the Analytics Dashboard work?
+**A-** We are using **MongoDB's Aggregation Pipeline** queries to calculate the revenues and the product comparison statistics.
