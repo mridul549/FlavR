@@ -2,8 +2,6 @@
 # ![flavr (1)](https://github.com/mridul549/FlavR-Backend/assets/94969636/98f80461-cf23-4e8b-b6d2-3a6a435c434e)
 
 
-
-
 This food ordering project is a comprehensive solution that facilitates a seamless ordering process for users while providing efficient management tools for outlet owners. The project consists of two distinct apps developed using Flutter: a user app and an owner app.
 
 The user app allows customers to conveniently browse and select food items from local food outlets. Once the order is placed, users are seamlessly redirected to a secure payment gateway to complete the transaction. This ensures a smooth and secure payment process. After successful payment, the order details are automatically forwarded to the respective outlet for confirmation.
@@ -94,11 +92,12 @@ Check the repo [here](https://github.com/mridul549/ownerweb)
             ![Delete Product](https://github.com/mridul549/FlavR-Backend/assets/94969636/e1ce635d-22f8-40dc-83fc-5a98617aba77)
 
 
-
 * CRUD operations for the outlet
-    * Add an outlet
-
     * Get all outlets
+      ![Get all outlets](https://github.com/mridul549/FlavR-Backend/assets/94969636/07d98367-7c01-4e6c-b817-7ee3d1718f59)
+
+    * Add an outlet
+      ![Add outlet](https://github.com/mridul549/FlavR-Backend/assets/94969636/8b30040d-3481-443a-8aa5-f8c9c9dec222)
 
     * Update an outlet
 
