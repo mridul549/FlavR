@@ -122,7 +122,7 @@ module.exports.addOutlet = (req,res) => {
                         activeOrders: [],
                         completedOrders: [],
                         timings: timings,
-                        daysOpen: daysOpen,
+                        daysOpen: daysOpen.daysOpen,
                         outletImage: {
                             url: image.url,
                             imageid: image.public_id,
@@ -140,7 +140,7 @@ module.exports.addOutlet = (req,res) => {
                 activeOrders: [],
                 completedOrders: [],
                 timings: timings,
-                daysOpen: daysOpen,
+                daysOpen: daysOpen.daysOpen,
                 outletImage: {
                     url: "null",
                     imageid: "null",
