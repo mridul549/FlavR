@@ -137,13 +137,13 @@ For the **server**, follow the below mentioned steps:
 * Clone the project
 
 ```bash
-  git clone https://github.com/mridul549/FlavR-Backend
+  git clone https://github.com/mridul549/FlavR
 ```
 
 * Go to the project directory
 
 ```bash
-  cd FlavR-Backend
+  cd FlavR
 ```
 
 * Install dependencies
