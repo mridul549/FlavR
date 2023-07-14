@@ -315,7 +315,7 @@ module.exports.updateOutlet = (req,res) => {
                                 outletName: outletName,
                                 address: address,
                                 timings: timings,
-                                daysOpen: daysOpen,
+                                daysOpen: daysOpen.daysOpen,
                                 outletImage: imageProp
                             }
                         })
@@ -338,7 +338,7 @@ module.exports.updateOutlet = (req,res) => {
                             outletName: outletName,
                             address: address,
                             timings: timings,
-                            daysOpen: daysOpen,
+                            daysOpen: daysOpen.daysOpen,
                         }
                     })
                     .exec()
