@@ -255,28 +255,106 @@ module.exports.updateOutlet = (req,res) => {
 
     Outlet.find({ _id: outletid })
     .exec()
-    .then(result => {
+    .then(async result => {
         if(result.length>0) {
             if(result[0].owner==ownerid){
-                const updateOps = {};
-                for(const ops of req.body.updates) {
-                    updateOps[ops.propName] = ops.value
+                const outletName = req.body.outletName
+                const address = JSON.parse(req.body.address)
+                let timings  = req.body.timings
+                let daysOpen = req.body.daysOpen
+
+                if(timings==undefined){
+                    timings={}
+                } else {
+                    timings=JSON.parse(timings)
                 }
-                Outlet.updateOne({ _id: outletid }, {
-                    $set: updateOps
-                })
-                .exec()
-                .then(result => {
-                    return res.status(200).json({
-                        message: "Outlet Updated successfully",
+
+                if(daysOpen==undefined){
+                    daysOpen={}
+                } else {
+                    daysOpen=JSON.parse(daysOpen)
+                }
+
+                if(req.files && req.files.outletImage) {
+                    const file = req.files.outletImage
+                    const outlet = await Outlet.find({ _id: outletid })
+
+                    if(!outlet) {
+                        return res.status(404).json({
+                            error: "No outlet found"
+                        })
+                    }
+
+                    const imageUrl = outlet[0].outletImage.url
+                    const imageId = outlet[0].outletImage.imageid
+
+                    if(imageUrl!=="null") {
+
+                        cloudinary.uploader.destroy(imageId, (err,result) => {
+                            if(err) {
+                                return res.status(500).json({
+                                    error: "error in deleting the old image"
+                                })
+                            }
+                        })
+    
+                    } 
+                    cloudinary.uploader.upload(file.tempFilePath, (err, image) => {
+                        if(err) {
+                            return res.status(201).json({
+                                error: "image upload failed"
+                            })
+                        }
+                        const imageProp = {
+                            url: image.url,
+                            imageid: image.public_id
+                        }
+    
+                        Outlet.updateOne({ _id: outletid }, {
+                            $set: {
+                                outletName: outletName,
+                                address: address,
+                                timings: timings,
+                                daysOpen: daysOpen,
+                                outletImage: imageProp
+                            }
+                        })
+                        .exec()
+                        .then(result => {
+                            return res.status(200).json({
+                                message: "Outlet updated successfully"
+                            })
+                        })
+                        .catch(err => {
+                            console.log(err);
+                            return res.status(500).json({
+                                error: "Error in updating outlet"
+                            })
+                        })
                     })
-                })
-                .catch(err => {
-                    console.log(err);
-                    res.status(500).json({
-                        error: err
+                } else {
+                    Outlet.updateOne({ _id: outletid }, {
+                        $set: {
+                            outletName: outletName,
+                            address: address,
+                            timings: timings,
+                            daysOpen: daysOpen,
+                        }
                     })
-                })
+                    .exec()
+                    .then(result => {
+                        return res.status(200).json({
+                            message: "Outlet updated successfully"
+                        })
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        return res.status(500).json({
+                            error: "Error in updating outlet"
+                        })
+                    })
+                }
+                
             } else {
                 return res.status(401).json({
                     error: "Unauthorised access"
