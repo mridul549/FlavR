@@ -640,7 +640,7 @@ module.exports.inCompleteOrders = (req,res) => {
     Order.find({
         $and: [
             { user: userid },
-            { status: { $ne: "completed" } }
+            { status: { $ne: "COMPLETED" } }
         ]
     })
     .populate({
