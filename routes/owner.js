@@ -14,6 +14,7 @@ router.patch('/resetpassword', checkAuth, ownerController.resetPassword)
 // AUTH routes
 router.post('/signup', ownerController.signup);
 router.post('/login', ownerController.login);
+router.post('/googleAuth', ownerController.google_Login_Signup)
 router.get('/getnewtoken', checkAuth, ownerController.getNewToken)
 
 module.exports = router;
