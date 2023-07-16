@@ -109,6 +109,9 @@ Check the repo [here](https://github.com/mridul549/ownerweb)
         * **Active Orders:** Once an order is accepted, it is brought to this section along with the assignment of the order number. 
         * **Ready Orders:** This section contains orders that are marked as prepared and ready for pickup.
     * The entire order handling process works in real time with notifications being sent to the user at each stage automatically.
+   
+   https://github.com/mridul549/FlavR/assets/94969636/86c910b9-6038-44fa-a042-0f943e07313c
+
 
 * Analytics Dashboard
     * The analytics section provides an owner with **three** important pieces of information.
