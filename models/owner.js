@@ -14,7 +14,6 @@ const ownerSchema = mongoose.Schema({
     },
     password: {
         type: String,
-        required: true
     },
     authMethod: {
         type: String,
