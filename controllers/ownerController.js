@@ -269,7 +269,15 @@ module.exports.google_Login_Signup = (req,res) => {
             })
         } else {
             // Log the Owner in
-            getTokenForGoogleAuth(result[0],req,res)
+            const authMethod = result[0].authMethod
+            if(authMethod==='regular'){
+                return res.status(400).json({
+                    message: "Please use normal login"
+                })
+            }
+            else {
+                getTokenForGoogleAuth(result[0],req,res)
+            }
         }
     })
     .catch(err => {
