@@ -257,6 +257,7 @@ module.exports.google_Login_Signup = (req,res) => {
                 ownerProfilePic: {
                     url: req.body.profileUrl
                 },
+                verification: true,
                 authMethod: "google"
             })
             owner
