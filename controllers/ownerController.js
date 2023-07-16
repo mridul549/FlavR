@@ -254,6 +254,9 @@ module.exports.google_Login_Signup = (req,res) => {
                 _id: new mongoose.Types.ObjectId,
                 ownerName: req.body.ownerName,
                 email: req.body.email,
+                ownerProfilePic: {
+                    url: req.body.profileUrl
+                },
                 authMethod: "google"
             })
             owner
