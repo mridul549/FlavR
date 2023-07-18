@@ -42,8 +42,6 @@ This section describes in detail the working of the User app, the owner app, and
 
 ## The User app
 
-## The Owner app
-
 ## The Website
 The website developed as part of the food ordering project serves as a comprehensive outlet management system for owners. Built using **React.js**, the website offers a user-friendly interface and a range of features that facilitate efficient management of the outlet's operations.
 
