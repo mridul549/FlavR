@@ -855,25 +855,30 @@ module.exports.getRecommendedProducts = (req,res) => {
         
     ])
     .exec()
-    .then(result => {
+    .then(async result => {
 
         const array = []
 
-        result.map((product) => {
+        for (let i = 0; i < result.length; i++) {
+            const product = result[i];
+            
+            const category = await Category.find({ _id: product.product[0].category})
+            console.log(category);
             const object = {
                 count: product.count,
                 _id: product._id,
-                category: product.product[0].category,
+                category: category[0],
                 productName: product.product[0].productName,
                 description: product.product[0].description,
                 price: product.product[0].price,
                 veg: product.product[0].veg,
                 productImage: product.product[0].productImage,
                 variants: product.product[0].variants,
-                inStock: product.product[0].inStock
+                inStock: product.product[0].inStock,
+                outlet: product.product[0].outlet
             }
             array.push(object)
-        })
+        }
 
         return res.status(200).json({
             products: array.splice(0,10)
