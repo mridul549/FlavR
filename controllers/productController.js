@@ -805,7 +805,6 @@ module.exports.instock = (req,res) => {
 
 module.exports.getRecommendedProducts = (req,res) => {
     const outletid = req.query.outletid
-    const monthIn = new Date().getMonth()+1
     const yearIn = new Date().getFullYear()
     
     Order.aggregate([
@@ -814,8 +813,8 @@ module.exports.getRecommendedProducts = (req,res) => {
                 outlet: new mongoose.Types.ObjectId(outletid),
                 status: "COMPLETED",
                 createdAt: {
-                    $gte: new Date(yearIn, monthIn - 1, 1),
-                    $lt: new Date(yearIn, monthIn, 1)
+                    $gte: new Date(yearIn, 0, 1),
+                    $lt: new Date(yearIn+1, 0, 1)
                 }
             }
         },
