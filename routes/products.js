@@ -9,6 +9,7 @@ router.get('/getSingleProduct', productController.getSingleProduct); // U
 router.get('/getAllCategories', productController.getAllCategories); // U
 router.get('/getVariants', productController.getAllVariants)
 router.get('/getAllProdsAllCats', productController.getAllProductsCategoryAccording)
+router.get('/recommended', productController.getRecommendedProducts)
 
 router.post('/addProduct', checkAuth, productController.addProduct);
 

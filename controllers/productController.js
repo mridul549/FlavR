@@ -5,6 +5,7 @@ const Outlet                = require('../models/outlet');
 const Category              = require('../models/category')
 const cloudinary            = require('cloudinary').v2;
 const redis                 = require('redis');
+const Order                 = require('../models/order')
 
 cloudinary.config({ 
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
@@ -792,6 +793,77 @@ module.exports.instock = (req,res) => {
         const stringResult = (instock===true ? "Product marked in stock" : "Product marked out of stock")
         return res.status(200).json({
             message: stringResult
+        })
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.getRecommendedProducts = (req,res) => {
+    const outletid = req.query.outletid
+    const monthIn = new Date().getMonth()+1
+    const yearIn = new Date().getFullYear()
+    
+    Order.aggregate([
+        {
+            $match: {
+                outlet: new mongoose.Types.ObjectId(outletid),
+                status: "COMPLETED",
+                createdAt: {
+                    $gte: new Date(yearIn, monthIn - 1, 1),
+                    $lt: new Date(yearIn, monthIn, 1)
+                }
+            }
+        },
+        {
+            $unwind: "$products",
+        },
+        {
+            $lookup: {
+                from: "products",
+                localField: "products.item",
+                foreignField: "_id",
+                as: "products.item"
+            }
+        },
+        {
+            $unwind: "$products.item"
+        },
+        {
+            $project: {
+                "products.item._id": 1,
+                "products.item.veg": 1
+            }
+        },
+        {
+            $group: {
+                _id: "$products.item._id",
+                count: { $sum: 1 }
+            }
+        },
+        {
+            $sort: {
+                count: -1
+            }
+        },
+        {
+            $lookup: {
+                from: "products",
+                localField: "_id",
+                foreignField: "_id",
+                as: "product"
+            }
+        }
+        
+    ])
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            products: result.splice(0,10)
         })
     })
     .catch(err => {
