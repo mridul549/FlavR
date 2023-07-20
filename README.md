@@ -41,6 +41,29 @@ Overall, this project revolutionizes the food ordering experience by providing a
 This section describes in detail the working of the User app, the owner app, and the Website (All three of these are still in development phase, so there might be some bugs).
 
 ## The User app
+The user app can be used by the users to place orders on the food outlet of their choice. The App is developed using Flutter and Bloc Technology.
+
+#### Links
+
+* Repo https://github.com/sanyam12/FlavR
+* APK Link 
+
+#### Key Features
+
+* **User Registration and Authentication:** Seamless registration process and secure user authentication to create and access personal accounts.
+* **Browse Menus:** Users can easily browse and explore the menus of local food outlets, displaying various food items and their details.
+* **Place Orders:** Conveniently place food orders from selected outlets, customizing quantities and preferences.
+* **Secure Payments:** Integrated payment gateway for safe and hassle-free transactions while placing orders.
+* **Order Tracking:** Real-time updates on order status, including confirmation, preparation, and delivery progress.
+* **Order History:** Access to previous order details, making it easy for users to reorder their favorite items.
+* **Notifications:** Automatic notifications to keep users informed about order updates.
+
+#### Demo
+
+* Selecting the outlet
+* Placing an order
+* Real-time order updates
+* Order History
 
 ## The Website
 The website developed as part of the food ordering project serves as a comprehensive outlet management system for owners. Built using **React.js**, the website offers a user-friendly interface and a range of features that facilitate efficient management of the outlet's operations.
