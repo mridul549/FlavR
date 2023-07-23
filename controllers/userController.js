@@ -192,6 +192,10 @@ module.exports.google_Login_Signup = (req,res) => {
                 _id: new mongoose.Types.ObjectId,
                 userName: req.body.userName,
                 email: req.body.email,
+                ownerProfilePic: {
+                    url: req.body.profileUrl
+                },
+                verification: true,
                 authMethod: "google"
             })
             user
@@ -207,6 +211,12 @@ module.exports.google_Login_Signup = (req,res) => {
             })
         } else {
             // Log the user in
+            const authMethod = result[0].authMethod
+            if(authMethod==='regular'){
+                return res.status(400).json({
+                    message: "Please use normal login"
+                })
+            }
             getTokenForGoogleAuth(result[0],req,res)
         }
     })

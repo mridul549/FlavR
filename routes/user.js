@@ -7,6 +7,7 @@ const checkAuth       = require('../middlewares/check-auth')
 router.get('/getnewtoken', checkAuth, userController.getNewToken)
 router.post('/signup', userController.signup);
 router.post('/login', userController.login);
+router.post('/googleAuth', userController.google_Login_Signup)
 
 // GET methods
 router.get('/getCartItems', checkAuth, userController.getCartItems);

@@ -90,3 +90,29 @@ module.exports.updateCategory = (req,res) => {
         })
     })
 }
+
+module.exports.getCategory = (req,res) => {
+    const categoryid = req.query.categoryid
+
+    Category.find({ _id: categoryid })
+    .populate('icon')
+    .populate('products')
+    .exec()
+    .then(result => {
+        if(result.length>0){
+            return res.status(200).json({
+                category: result[0]
+            })
+        } else {
+            return res.status(404).json({
+                message: "category not found"
+            })
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
