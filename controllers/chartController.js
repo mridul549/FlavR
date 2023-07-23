@@ -209,7 +209,6 @@ module.exports.compareOutletsByDay = (req,res) => {
     const date = req.query.date
     const monthIn = req.query.month
     const yearIn = req.query.year
-    const outletid = req.body.outletid
     
     const gtd = new Date(yearIn, monthIn - 1, date-1)
     gtd.setUTCHours(0,0,0,0)
@@ -219,7 +218,6 @@ module.exports.compareOutletsByDay = (req,res) => {
     Outlet.aggregate([
         {
             $match: {
-                _id: new mongoose.Types.ObjectId(outletid),
                 owner: new mongoose.Types.ObjectId(ownerid)
             }
         },
@@ -271,13 +269,10 @@ module.exports.compareOutletsByMonth = (req,res) => {
     const ownerid = req.userData.ownerid
     const monthIn = req.query.month
     const yearIn = req.query.year
-    const outletid = req.body.outletid
-
 
     Outlet.aggregate([
         {
             $match: {
-                _id: new mongoose.Types.ObjectId(outletid),
                 owner: new mongoose.Types.ObjectId(ownerid)
             }
         },
@@ -328,12 +323,10 @@ module.exports.compareOutletsByMonth = (req,res) => {
 module.exports.compareOutletsByYear = (req,res) => {
     const ownerid = req.userData.ownerid
     const yearIn = req.query.year
-    const outletid = req.body.outletid
 
     Outlet.aggregate([
         {
             $match: {
-                _id: new mongoose.Types.ObjectId(outletid),
                 owner: new mongoose.Types.ObjectId(ownerid)
             }
         },
