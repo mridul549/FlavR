@@ -47,7 +47,7 @@ module.exports.signup = (req,res) => {
     
                 if(!verification){
                     return res.status(409).json({
-                        message: "Email already exits, please complete verification."
+                        message: "Email already exits, log in and complete verfication"
                     })
                 } 
                 return res.status(409).json({
@@ -283,6 +283,26 @@ module.exports.google_Login_Signup = (req,res) => {
                 getTokenForGoogleAuth(result[0],req,res)
             }
         }
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
+}
+
+module.exports.verifyOwner = (req,res) => {
+    const email = req.body.email
+
+    Owner.updateOne({ email: email }, {
+        $set: { verification: true }
+    })
+    .exec()
+    .then(result => {
+        return res.status(200).json({
+            message: "Owner verified"
+        })
     })
     .catch(err => {
         console.log(err);
