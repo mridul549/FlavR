@@ -138,7 +138,7 @@ module.exports.sendPasswordResetMail = (req,res) => {
                 expiresIn: "1m"
             })
 
-            const url = `http://localhost:3000/resetpassword?id=${id}&token=${token}`
+            const url = `https://flavr.onrender.com/resetpassword?id=${id}&token=${token}`
 
             await sendPasswordResetMailHelper(req,res,email,url)
 
