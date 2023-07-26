@@ -135,7 +135,7 @@ module.exports.sendPasswordResetMail = (req,res) => {
                 email: email,
                 ownerid: id,
             }, process.env.TOKEN_SECRET, {
-                expiresIn: "1m"
+                expiresIn: "15m"
             })
 
             const url = `https://flavr.onrender.com/resetpassword?id=${id}&token=${token}`
