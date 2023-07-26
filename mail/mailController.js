@@ -9,6 +9,8 @@ const Owner      = require('../models/owner')
 const Maintainer = require('../models/maintainer')
 const path       = require('path')
 const Queue      = require('bull');
+const jwt        = require('jsonwebtoken');
+const bcrypt     = require('bcrypt');
 
 const mailQueue = new Queue('mailQueue', {
     redis: {
@@ -28,6 +30,7 @@ const oAuth2Client = new google.auth.OAuth2(
 oAuth2Client.setCredentials({ refresh_token: process.env.GOOGLE_REFRESH_TOKEN })
 
 const template = fs.readFileSync(path.join(__dirname, 'template.ejs'), 'utf8')
+const resetTemplate = fs.readFileSync(path.join(__dirname, 'passwordResetTemplate.ejs'), 'utf8')
 
 /**
  * Process to send and verify otp
@@ -78,6 +81,79 @@ async function generateOTP (key,role) {
         console.log(error);
         throw error
     }
+}
+
+async function sendPasswordResetMailHelper (req, res, key, url) {
+    const renderedHTML = ejs.render(resetTemplate, { resetLink: url })
+
+    try {
+        const accessToken = await oAuth2Client.getAccessToken();
+
+        const transport = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                type: 'OAuth2',
+                user: 'mridulverma478@gmail.com',
+                clientId: process.env.GOOGLE_CLIENT_ID,
+                clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+                refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+                accessToken: accessToken
+            }
+        })
+
+        const mailOptions = {
+            from: 'FlavR <mridulverma478@gmail.com>',
+            to: key,
+            subject: `FlavR Password Reset Mail`,
+            html: renderedHTML
+        }
+
+        res.status(200).json({
+            message: "Mail sent successfully to reset password"
+        })
+
+        const result = await transport.sendMail(mailOptions)
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Internal server error"
+        })
+    }
+}
+
+module.exports.sendPasswordResetMail = (req,res) => {
+    const email = req.body.email
+
+    Owner.find({ email: email })
+    .exec()
+    .then(async result => {
+        if(result.length>0) {
+            const id = result[0]._id
+
+            const token = jwt.sign({
+                email: email,
+                ownerid: id,
+            }, process.env.TOKEN_SECRET, {
+                expiresIn: "1m"
+            })
+
+            const url = `http://localhost:3000/resetpassword?id=${id}&token=${token}`
+
+            await sendPasswordResetMailHelper(req,res,email,url)
+
+        } else {
+            return res.status(404).json({
+                message: "Email doesn't exist"
+            })
+        }
+    })
+    .catch(err => {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    })
 }
 
 module.exports.sendMail = async (key,role) => {
