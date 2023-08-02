@@ -661,3 +661,103 @@ module.exports.inCompleteOrders = (req,res) => {
         })
     })
 }
+
+module.exports.orderHistoryCompleted = async (req,res) => {
+    const outletid = req.query.outletid
+    const date = req.query.date
+    const monthIn = req.query.month
+    const yearIn = req.query.year
+    
+    const gtd = new Date(yearIn, monthIn - 1, date-1)
+    gtd.setUTCHours(0,0,0,0)
+    const ltd = new Date(yearIn, monthIn - 1, date)
+    ltd.setUTCHours(0,0,0,0)
+
+    try {
+        const orders = await Order.aggregate([
+            {
+                $match: {
+                    outlet: new mongoose.Types.ObjectId(outletid),
+                    status: "COMPLETED",
+                    createdAt: {
+                        $gte: gtd,
+                        $lt: ltd
+                    }
+                }
+            },
+            {
+                $unwind: "$products"
+            },
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: 'products.item',
+                    foreignField: '_id',
+                    as: 'productDetail'
+                }
+            },
+            {
+                $addFields: {
+                    "productDetail": { $arrayElemAt: ["$productDetail", 0] },
+                    "products.productId": { $arrayElemAt: ["$productDetail._id", 0] },
+                    "products.productName": { $arrayElemAt: ["$productDetail.productName", 0] },
+                }
+            },
+            {
+                $project: {
+                    "productDetail": 0,
+                    "products.item": 0,
+                    "products._id": 0,
+                    "products.readyToDeliver": 0
+                }
+            },
+            {
+                $group: {
+                    _id: "$_id",
+                    root: { $first: "$$ROOT" },
+                    products: { $push: "$products" }
+                }
+            },
+            {
+                $replaceRoot: {
+                    newRoot: {
+                        $mergeObjects: ["$root", "$$ROOT"]
+                    }
+                }
+            },
+            {
+                $project: {
+                    root: 0
+                }
+            },
+            {
+                $sort: {
+                    orderNumber: 1
+                }
+            }
+        ])    
+
+        orders.forEach(order => {
+            const createdAt = new Date(order.createdAt);
+            let hours = createdAt.getHours();
+            const minutes = String(createdAt.getMinutes()).padStart(2, '0');
+            const seconds = String(createdAt.getSeconds()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            const formattedTime = `${String(hours).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
+            order.createdAt = formattedTime;
+        });
+
+        return res.status(200).json({
+            count: orders.length,
+            result: orders
+        })
+
+    } catch (error) {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        })
+    }
+}
