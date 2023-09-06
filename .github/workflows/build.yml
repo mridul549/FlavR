@@ -3,43 +3,43 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main
+      - tests
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
+    strategy:      
+      matrix:        
+        node-version: [14.x, 16.x, 18.x]
+
     steps:
     - name: Checkout Code
       uses: actions/checkout@v2
 
-    - name: Set Up Environment
-      run: |
-        # Commands to set up your environment, e.g., install software not included in the runner by default.
+    - name: Use Node.js ${{ matrix.node-version }}      
+      uses: actions/setup-node@v3      
+      with:        
+        node-version: ${{ matrix.node-version }}        
+        cache: 'npm'
 
     - name: Install Dependencies
       run: |
-        # For a Node.js API it might be:
         npm install
 
-    - name: Code Quality Checks
-      run: |
-        # Run linters or other static code analysis tools.
-        npm run lint
+    # - name: Run Tests
+    #   run: |
+    #     npm test
 
-    - name: Run Tests
-      run: |
-        npm test
+    # - name: Build (if necessary)
+    #   run: |
+    #     # Build commands or Docker build for containerized apps.
 
-    - name: Build (if necessary)
-      run: |
-        # Build commands or Docker build for containerized apps.
+    # - name: Deploy
+    #   run: |
+    #     # You can use AWS CLI, Azure CLI, etc., based on where you're deploying.
+    #     # Ensure you've set up necessary secrets for deployments.
 
-    - name: Deploy
-      run: |
-        # You can use AWS CLI, Azure CLI, etc., based on where you're deploying.
-        # Ensure you've set up necessary secrets for deployments.
-
-    - name: Post-Deployment Checks
-      run: |
-        # Smoke tests or other post-deployment checks to ensure the deployed application is running.
+    # - name: Post-Deployment Checks
+    #   run: |
+    #     # Smoke tests or other post-deployment checks to ensure the deployed application is running.

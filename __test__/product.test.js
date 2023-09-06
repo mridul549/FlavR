@@ -1,6 +1,5 @@
-const productController = require('../controllers/productController')
-const Product = require('../models/product')
-const cloudinary = require('cloudinary').v2;
+const productController = require("../controllers/productController")
+const Product = require("../models/product")
 jest.mock('../models/product')
 
 describe('Get products', () => { 
