@@ -4,14 +4,12 @@
 name: awsdeploy
 
 on:
-  workflow_run:
-    workflows: ["ci-pipeline"]
-    types:
-      - completed
+  push:
+    branches:
+      - tests
 
 jobs:
   build:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     runs-on: self-hosted
     strategy:
