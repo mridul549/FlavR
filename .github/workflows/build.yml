@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: ci-pipeline
 
 on:
   push:
@@ -29,6 +29,21 @@ jobs:
     - name: Run Tests
       run: |
         npm test
+
+    # - name: Setup AWS CLI
+    #   uses: aws-actions/configure-aws-credentials@v1
+    #   with:
+    #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #     aws-region: eu-north-1  
+
+    # - name: SSH and Pull Changes in EC2
+    #   run: |
+    #     # Install SSH client (might be already available in the runner)
+    #     sudo apt-get install openssh-client
+
+    #     # SSH into the EC2 instance and pull changes
+    #     ssh -o StrictHostKeyChecking=no -i /path/to/your/private_key.pem ec2-user@13.49.67.132 "cd workspace/OrderApp/ && git pull"
 
     # - name: Build (if necessary)
     #   run: |
