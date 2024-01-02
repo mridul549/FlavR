@@ -72,6 +72,10 @@ The website developed as part of the food ordering project serves as a comprehen
 * Repo https://github.com/mridul549/ownerweb
 * Website live at https://flavr.onrender.com/
 
+#### Testing Credentials
+Email- mridulverma478@gmail.com
+Password- Mridul_549
+
 #### Key features 
 
 * **Outlet Menu Management:** The website enables owners to perform CRUD operations on the menu. They can easily add, update, and delete food items, ensuring that the menu is always up to date and reflects the available options.
