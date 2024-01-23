@@ -121,7 +121,7 @@ module.exports.login = (req,res) => {
             })
         }
         const authMethod = user[0].authMethod
-        if(authMethod=="google"){
+        if(authMethod==="google"){
             return res.status(409).json({
                 message: "Password is not set for this account. Login using some other method."
             })
