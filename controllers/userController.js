@@ -377,12 +377,29 @@ module.exports.updateQuantity = async (req,res) => {
                 error: "User not found"
             })
         }
-    
-        const cartItem = user.cart.find(item => item.product.toString() === productid && item.variant === variant);
+
+        const cartItem = user.cart.products.find(item => item.product.toString() === productid && item.variant === variant);
         if (!cartItem) {
-            return res.status(404).json({
-                error: "Cart item not found"
-            })
+            // check if the product exists in the database
+            const product = await Product.findById(productid);
+            if (!product) {
+                return res.status(404).json({
+                    error: "Product not found"
+                })
+            }
+            
+            // If item is not found in the cart, add it
+            user.cart.products.push({
+                product: productid,
+                variant: variant,
+                quantity: quantity
+            });
+
+            await user.save();
+
+            return res.status(200).json({
+                message: "Item added to cart"
+            });
         }
     
         if (quantity === 0) {
