@@ -387,7 +387,7 @@ module.exports.updateQuantity = async (req,res) => {
                     error: "Product not found"
                 })
             }
-            
+
             // If item is not found in the cart, add it
             user.cart.products.push({
                 product: productid,
@@ -403,7 +403,7 @@ module.exports.updateQuantity = async (req,res) => {
         }
     
         if (quantity === 0) {
-            user.cart.pull(cartItem);
+            user.cart.products.pull(cartItem);
             await user.save();
             return res.status(200).json({
                 message: "Item removed from cart"
