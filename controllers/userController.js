@@ -377,8 +377,8 @@ module.exports.updateQuantity = async (req,res) => {
                 error: "User not found"
             })
         }
-    
-        const cartItem = user.cart.find(item => item.product.toString() === productid && item.variant === variant);
+
+        const cartItem = user.cart.products.find(item => item.product.toString() === productid && item.variant === variant);
         if (!cartItem) {
             return res.status(404).json({
                 error: "Cart item not found"
