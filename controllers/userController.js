@@ -3,6 +3,7 @@ const User       = require('../models/user');
 const bcrypt     = require('bcrypt');
 const jwt        = require('jsonwebtoken');
 const Product    = require('../models/product')
+const Outlet     = require('../models/outlet')
 const cloudinary = require('cloudinary').v2;
 const Queue      = require('bull');
 
@@ -369,6 +370,7 @@ module.exports.updateQuantity = async (req,res) => {
     const variant   = req.body.variant
     const quantity  = req.body.quantity
     const userid    = req.userData.userid
+    const outletid  = req.body.outletid
 
     try {
         const user = await User.findById(userid);
@@ -378,6 +380,22 @@ module.exports.updateQuantity = async (req,res) => {
             })
         }
 
+        if(user.cart.outlet && user.cart.outlet.toString() !== outletid) {
+            return res.status(400).json({
+                message: "Cart items do not belong to this outlet"
+            })
+        }
+
+        if(!user.cart.outlet) {
+            const outlet = await Outlet.findById(outletid);
+            if (!outlet) {
+                return res.status(404).json({
+                    message: "Outlet not found"
+                })
+            }
+            user.cart.outlet = outletid
+        }
+
         const cartItem = user.cart.products.find(item => item.product.toString() === productid && item.variant === variant);
         if (!cartItem) {
             // check if the product exists in the database
@@ -385,6 +403,12 @@ module.exports.updateQuantity = async (req,res) => {
             if (!product) {
                 return res.status(404).json({
                     error: "Product not found"
+                })
+            }
+
+            if(product.outlet.toString() !== outletid) {
+                return res.status(400).json({
+                    message: "Product does not belong to this outlet"
                 })
             }
 
