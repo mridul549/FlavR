@@ -23,6 +23,7 @@ router.patch('/updateQuantity', checkAuth, userController.updateQuantity);
 router.patch('/clearCart', checkAuth, userController.clearCart);
 router.patch('/removeProductCart', checkAuth, userController.removeProductCart);
 router.patch('/updateImage', checkAuth, userController.updateImage);
+router.patch('/updatefcm', checkAuth, userController.updateFcmToken)
 
 // DELETE methods
 
