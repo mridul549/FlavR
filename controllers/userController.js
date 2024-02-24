@@ -627,3 +627,35 @@ module.exports.updateUser = (req,res) => {
         })
     })
 }
+
+module.exports.updateFcmToken = (req,res) => {
+    const userid = req.userData.userid
+    const fcmToken = req.body.fcmToken
+
+    User.find({ _id: userid })
+    .exec()
+    .then(result => {
+        if(result.length>0) {
+            User.updateOne({ _id: userid }, {
+                $set: { fcmToken: fcmToken }
+            })
+            .exec()
+            .then(result => {
+                return res.status(200).json({
+                    message: "FCM Token updated successfully"
+                })
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    error: err
+                })
+            })
+        } else {
+            return res.status(404).json({
+                error: "User not found"
+            })
+        }
+    })
+
+}

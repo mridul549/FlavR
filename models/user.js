@@ -66,7 +66,10 @@ const userSchema = mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Coupon'
         }
-    ]
+    ],
+    fcm_token: {
+        type: String
+    }
 }, {
     timestamps: true
 })

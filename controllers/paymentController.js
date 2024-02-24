@@ -9,6 +9,7 @@ const crypto     = require('crypto');
 const Queue      = require('bull');
 const firebase    = require('../config/firebase')
 const orderfb    = firebase.collection('Order')
+const { getMessaging } = require('firebase-admin/messaging');
 
 const orderQueue = new Queue('orderQueue', {
     redis: {
@@ -171,6 +172,20 @@ async function paymentSuccess (req, res, orderid, userid, outletid, orderAmount)
                 error: err
             })
         })
+    })
+    .then(async result => {
+        const user = await User.find({ _id: userid })
+        const fcm_token = user[0].fcm_token
+
+        const message = {
+            data: {
+                title: "Order Recieved",
+                body: `We have successfully recieved your order. It is being processed and will be delivered soon.`,
+            },
+            token: fcm_token
+        }
+
+        await getMessaging().send(message)
     })
     .catch(err => {
         console.log(err);
