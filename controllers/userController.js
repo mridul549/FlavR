@@ -630,14 +630,14 @@ module.exports.updateUser = (req,res) => {
 
 module.exports.updateFcmToken = (req,res) => {
     const userid = req.userData.userid
-    const fcmToken = req.body.fcmToken
+    const fcmToken = req.body.fcm_token
 
     User.find({ _id: userid })
     .exec()
     .then(result => {
         if(result.length>0) {
-            User.updateOne({ _id: userid }, {
-                $set: { fcmToken: fcmToken }
+            User.findOneAndUpdate({ _id: userid }, {
+                $set: { fcm_token: fcmToken }
             })
             .exec()
             .then(result => {

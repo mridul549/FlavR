@@ -10,6 +10,7 @@ const Queue      = require('bull');
 const firebase    = require('../config/firebase')
 const orderfb    = firebase.collection('Order')
 const { getMessaging } = require('firebase-admin/messaging');
+const axios = require('axios')
 
 const orderQueue = new Queue('orderQueue', {
     redis: {
@@ -87,6 +88,32 @@ function verify(ts, rawBody){
     const secretKey = process.env.CF_API_KEY;
     let genSignature = crypto.createHmac('sha256',secretKey).update(body).digest("base64");
     return genSignature
+}
+
+module.exports.verifyOrder = async (req,res) => {
+    const orderid = req.params.orderid
+
+    try {
+        const order = await axios({
+            method: 'GET',
+            url: `https://sandbox.cashfree.com/pg/orders/${orderid}`,
+            headers: {
+                "x-client-id": process.env.CF_APP_ID,
+                "x-client-secret": process.env.CF_API_KEY,
+                "x-api-version": "2022-01-01"
+            }
+        })
+    
+        return res.status(200).json({
+            message: order.data
+        })
+        
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            error: error
+        })
+    }
 }
 
 module.exports.processPayment = (req,res) => {
