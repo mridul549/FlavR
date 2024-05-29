@@ -33,7 +33,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 
 // Require bull queue processor for orders
 require('./queue/index')
-
+require('./mail/mailController')
 // implementing CORS security mechanism
 app.use((req,res,next) => {
     res.header("Access-Control-Allow-Origin", "*");
@@ -50,6 +50,6 @@ app.use((req,res,next) => {
 
 app.use('/', require('./routes/home'));
 
-app.listen(process.env.PORT || 3001, () => {
+app.listen(process.env.PORT || 3002, () => {
     console.log(`Server started`);
 })
