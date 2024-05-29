@@ -22,6 +22,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: | 
-        # testing the npm ci cmd
-        npm ci
+    - run: npm ci
+    - run: npm install
+    - run: sudo pm2 restart flavr-backend
+
