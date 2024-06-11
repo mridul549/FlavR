@@ -35,6 +35,8 @@ Overall, this project revolutionizes the food ordering experience by providing a
 
 **Server:** NodeJS, Express, MongoDB, Redis and Firebase.
 
+## System Design
+![Flavr](https://github.com/mridul549/FlavR/assets/94969636/fa4d6a84-d1db-48a4-9555-6cfe0e31144a)
 
 # Description of the Apps
 
