@@ -25,5 +25,6 @@ router.patch('/removeProductCart', checkAuth, userController.removeProductCart);
 router.patch('/updateImage', checkAuth, userController.updateImage);
 
 // DELETE methods
+router.delete('/delete', checkAuth, userController.deleteUser);
 
 module.exports = router;
